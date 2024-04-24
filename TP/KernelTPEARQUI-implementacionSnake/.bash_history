@@ -8,3 +8,4 @@ make clean all
 make clean all
 make clean all
 exit
+exit
