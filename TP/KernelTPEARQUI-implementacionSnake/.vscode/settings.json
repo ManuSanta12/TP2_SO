@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "naiveconsole.h": "c",
+        "sys_calls.h": "c",
+        "usr_stdlib.h": "c",
+        "colores.h": "c"
+    }
+}

@@ -1,0 +1,72 @@
+Manual de Usuario - TPE Arquitectura de computadoras
+Introducción
+
+Este manual de usuario tiene como objetivo proporcionarte una guía para interactuar con el proyecto Arquitectura de computadoras. A continuación, se describen los comandos disponibles y cómo utilizarlos para aprovechar al máximo las funcionalidades del sistema.
+Comandos Disponibles
+Comando "help"
+
+    Descripción: Muestra una lista de todos los comandos disponibles junto con una breve descripción de cada uno.
+
+    Uso: Escribe "help" y presiona la tecla "Enter" para ver la lista de comandos disponibles.
+
+Comando "time"
+
+    Descripción: Muestra la hora actual en pantalla.
+
+    Uso: Escribe "time" y presiona la tecla "Enter" para visualizar la hora actual en la pantalla.
+
+Comando "clear"
+
+    Descripción: Limpia la pantalla, eliminando cualquier texto o contenido previo.
+
+    Uso: Escribe "clear" y presiona la tecla "Enter" para limpiar la pantalla.
+
+Comando "snake"
+
+    Descripción: Inicia el juego Snake, un juego clásico en el que controlas una serpiente.
+
+    Uso: Escribe "snake" seguido de un número (1 o 2) que representa la cantidad de jugadores y presiona la tecla "Enter" para comenzar el juego.
+
+Comando "inforeg"
+
+    Descripción: Imprime los valores de los registros del sistema.
+
+    Uso: Escribe "inforeg" y presiona la tecla "Enter" para ver los valores de los registros del sistema.
+
+Comando "zerodiv"
+
+    Descripción: Realiza una prueba de excepción de división por cero.
+
+    Uso: Escribe "zerodiv" y presiona la tecla "Enter" para ejecutar la prueba de excepción.
+
+Comando "invopcode"
+
+    Descripción: Realiza una prueba de código de operación inválido.
+
+    Uso: Escribe "invopcode" y presiona la tecla "Enter" para ejecutar la prueba de código de operación inválido.
+
+Comando "sizeplus"
+
+    Descripción: Aumenta el tamaño de la letra en la pantalla.
+
+    Uso: Escribe "sizeplus" y presiona la tecla "Enter" para aumentar el tamaño de la letra.
+
+Comando "sizeminus"
+
+    Descripción: Disminuye el tamaño de la letra en la pantalla.
+
+    Uso: Escribe "sizeminus" y presiona la tecla "Enter" para reducir el tamaño de la letra.
+
+Ejemplos de Uso
+
+    Para ver la hora actual en pantalla, escribe "time" y presiona "Enter".
+    Para iniciar el juego Snake para un jugador, escribe "snake 1" y presiona "Enter".
+    Para limpiar la pantalla, escribe "clear" y presiona "Enter".
+    Para aumentar el tamaño de la letra en la pantalla, escribe "sizeplus" y presiona "Enter".
+
+Notas Importantes
+
+    Asegúrate de ingresar los comandos de manera precisa.
+    El comando "help" es útil para obtener información sobre los comandos disponibles en cualquier momento.
+    Algunos comandos requieren parámetros específicos, como el número de jugadores para el juego "Snake". ej: "snake 1" "snake 2"
+
