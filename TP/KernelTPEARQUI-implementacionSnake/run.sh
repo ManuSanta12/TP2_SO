@@ -7,6 +7,7 @@ if [ "$(uname)" = "Darwin" ]; then
 else
     audio="alsa"
 fi
-qemu-system-x86_64 -hda Image/x64BareBonesImage.qcow2 -m 512 -audio driver=$audio,model=ac97,id=audio0 --rtc base=localtime
+qemu-system-x86_64 -hda Image/x64BareBonesImage.qcow2 -m 512 --rtc base=localtime
+#-audio driver=$audio,model=ac97,id=audio0 
 
 
