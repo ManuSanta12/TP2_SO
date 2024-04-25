@@ -55,5 +55,7 @@ void startBeep(uint32_t frequnce);
 
 void stopBeep();
 
+void memory_manager(uint64_t memoryManager);
+
 
 #endif

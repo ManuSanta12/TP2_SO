@@ -7,14 +7,14 @@
 #include "shell.h"
 
 #define MAX_BUFFER 254
-#define MAX_COMMANDS 10
+#define MAX_COMMANDS 11
 
 char line[MAX_BUFFER+1] = {0}; //asi me aseguro que al menos va haber un cero
 char parameter[MAX_BUFFER+1] = {0};
 char command[MAX_BUFFER+1] = {0};
 int linePos = 0;
 char lastc;
-const char * commands[] = {"undefined","help","time","clear","snake","inforeg","zerodiv","invopcode","sizeplus","sizeminus"};
+const char * commands[] = {"undefined","help","time","clear","snake","inforeg","zerodiv","invopcode","sizeplus","sizeminus","memoryManager"};
 
 void showCommands(){
 	prints("\n-time-               muestra la hora actual en pantalla",MAX_BUFFER);
@@ -25,6 +25,7 @@ void showCommands(){
 	prints("\n-invopcode-          testeo codigo de operacion invalido",MAX_BUFFER);
 	prints("\n-sizeplus-           aumenta el tamanio de letra",MAX_BUFFER);
 	prints("\n-sizeminus-          disminuye el tamanio de letra",MAX_BUFFER);
+	prints("\n-memoryManager-      memoryManager",MAX_BUFFER);
 	printc('\n');
 }
 
@@ -41,10 +42,10 @@ static void cmd_zeroDiv();
 static void cmd_invOpcode();
 static void cmd_charsizeplus();
 static void cmd_charsizeminus();
+static void cmd_memory_manager();
 
 
-static void (*commands_ptr[MAX_COMMANDS])() = {cmd_undefined, cmd_help, cmd_time, cmd_clear, cmd_snake, cmd_inforeg, cmd_zeroDiv,cmd_invOpcode,
-											   cmd_charsizeplus,cmd_charsizeminus};
+static void (*commands_ptr[MAX_COMMANDS])() = {cmd_undefined, cmd_help, cmd_time, cmd_clear, cmd_snake, cmd_inforeg, cmd_zeroDiv,cmd_invOpcode,cmd_charsizeplus,cmd_charsizeminus, cmd_memory_manager};
 
 
 void shell (){
@@ -167,6 +168,14 @@ static void cmd_charsizeplus(){
 
 static void cmd_charsizeminus(){
 	decreaseScale();
+}
+
+static void cmd_memory_manager(){
+	char memoryManager[50];
+	memoryManager = memory_manager((uint64_t)memoryManager);
+	prints("\nHOLA",5);
+	prints(memoryManager, 50);
+	prints("\n", 1);
 }
 
 

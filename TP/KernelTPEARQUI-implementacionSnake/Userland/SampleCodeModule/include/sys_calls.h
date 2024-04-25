@@ -43,4 +43,6 @@ uint64_t sys_playSound(uint32_t frequence);
 
 uint64_t sys_mute();
 
+uint64_t sys_mem(uint64_t memoryManager);
+
 #endif
