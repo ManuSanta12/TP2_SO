@@ -171,11 +171,11 @@ static void cmd_charsizeminus(){
 }
 
 static void cmd_memory_manager(){
-	char memoryManager[50];
-	memoryManager = memory_manager((uint64_t)memoryManager);
-	prints("\nHOLA",5);
-	prints(memoryManager, 50);
+	char * memoryManager = "";
+	//memoryManager = 
+	memory_manager_usr((uint32_t)memoryManager);
 	prints("\n", 1);
+	prints(memoryManager, 50);
 }
 
 

@@ -104,8 +104,9 @@ sys_mute:
     mov rax, 0x0E
     int 80h
     ret
-
 sys_mem:
+    ;por lo menos aca entra
+    ;call sys_pixelPlus
     mov rax, 0x0F
     int 80h
     ret

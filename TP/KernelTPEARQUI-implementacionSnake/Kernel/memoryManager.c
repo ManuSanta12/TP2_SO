@@ -1,4 +1,8 @@
 #include "memoryManager.h"
+#include <stdint.h>
+#include "videoDriver.h"
+#include "time.h"
+
 
 char *my_memory;
 char *current;
@@ -23,5 +27,9 @@ void * memory_manager(char * buffer){
     if (!ptr) *ptr = 0; //revisar aca que imprima mensaje de error
     *ptr = '5';
     buffer[0] = *ptr;
+   /* dv_prints("\n",WHITE, BLACK);
+    dv_prints(buffer,WHITE, BLACK);
+    dv_prints("\n",WHITE, BLACK);
+    buffer[0] = 'f';*/
     return buffer;
 }

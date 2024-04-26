@@ -240,7 +240,7 @@ void stopBeep(){
 	sys_mute();
 }
 
-char * memory_manager(uint64_t memoryManager){
-	return (char *)sys_mem(memoryManager);
+char * memory_manager_usr(uint64_t memoryManager){
+	sys_mem(memoryManager);
 }
 

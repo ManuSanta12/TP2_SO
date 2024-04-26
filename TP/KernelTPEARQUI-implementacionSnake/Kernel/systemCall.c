@@ -19,7 +19,7 @@ extern Color BLACK;
 
 int size = 0;
 
-#define SYS_CALLS_QTY 15
+#define SYS_CALLS_QTY 16
 
 //llena buff con el caracter leido del teclado
 static uint64_t sys_read(uint64_t fd, char * buff){
@@ -110,7 +110,7 @@ static uint64_t sys_mute(){
     return 1;
 }
 
-static uint64_t sys_mem(uint64_t buffer){
+static uint64_t sys_mem(uint64_t buffer){ 
     return memory_manager((char *)buffer);
 }
 
