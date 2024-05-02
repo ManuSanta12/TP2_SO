@@ -1,9 +1,13 @@
 #ifndef MEMORYMANAGER_H
 #define MEMORYMANAGER_H
 
-#define MEM_SIZE 1024
-#define NULL ((void*)0)
+#include <defs.h>
+#include <stdint.h>
+#include <unistd.h>
 
-void * memory_manager(char * buffer);
+void create_memory(size_t size);
+void *memory_manager_malloc(size_t nbytes);
+void free_memory_manager(void *ap);
+MemoryInfo *mem_info();
 
 #endif
