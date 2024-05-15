@@ -48,3 +48,10 @@ void * memcpy(void * destination, const void * source, uint64_t length)
 
 	return destination;
 }
+
+unsigned int log(uint64_t n, int base) {
+	unsigned int count = 0;
+	while (n /= base)
+		count++;
+	return count;
+}
