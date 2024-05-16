@@ -6,10 +6,6 @@
 #define LEVELS 32
 #define MIN_IDX 5 // MemoryBlock size
 
-static BlockADT removeBlockFromList(BlockADT blocks[], BlockADT to_remove);
-static BlockADT createMemoryBlock(void *ptrToAllocate, uint8_t pos,BlockADT *next);
-static BlockADT merge(BlockADT block,BlockADT buddy);
-
 typedef struct buddyBlockCDT {
   uint8_t pos;           // position in blocks array
   uint8_t used;         // Used or not
@@ -17,7 +13,7 @@ typedef struct buddyBlockCDT {
   struct buddyBlockCDT *next; // Pointer to next block
 } BuddyBlock;
 
-typedef BuddyBlock*BlockADT;
+typedef BuddyBlock* BlockADT;
 
 typedef struct MemoryManagerCDT {
 	size_t total_size;
@@ -29,6 +25,11 @@ typedef struct MemoryManagerCDT {
 
 typedef MemoryManagerCDT * MemoryManagerADT;
 
+static BlockADT removeBlockFromList(BlockADT blocks[], BlockADT to_remove);
+static BlockADT createMemoryBlock(void *ptrToAllocate, uint8_t pos,BlockADT next);
+static BlockADT merge(BlockADT block,BlockADT buddy);
+static void split(uint8_t pos);
+
 MemoryManagerADT mem;
 
 void create_memory(size_t size) {
@@ -37,7 +38,7 @@ void create_memory(size_t size) {
     for (int i = 0; i < LEVELS; i++)
 		mem->blocks[i] = NULL;
 
-    mem->firstAddress = START_ADDRESS
+    mem->firstAddress = (void*) START_ADDRESS;
     mem->memory_info.blocksUsed=0;
     mem->memory_info.freeMemory=size;
     mem->memory_info.occupiedMemory=0;
@@ -108,7 +109,7 @@ MemoryInfo *mem_info(){
 
 static void split(uint8_t pos) {
 	BlockADT block = mem->blocks[pos];
-	removeMemoryBlock(mem->blocks, block);
+	removeBlockFromList(mem->blocks, block);
 	BlockADT buddyBlock =
 		(BlockADT) ((void *) block + (1L << pos));
 	createMemoryBlock((void *) buddyBlock, pos, mem->blocks[pos - 1]);
@@ -141,7 +142,7 @@ static BlockADT createMemoryBlock(void *ptrToAllocate, uint8_t pos,BlockADT next
 } 
 
 static BlockADT merge(BlockADT block,BlockADT buddy) {
-	removeMemoryBlock(mem->blocks, buddy);
+	removeBlockFromList(mem->blocks, buddy);
 	BlockADT leftBlock = block < buddy ? block : buddy;
 	leftBlock->pos++;
 	return leftBlock;
