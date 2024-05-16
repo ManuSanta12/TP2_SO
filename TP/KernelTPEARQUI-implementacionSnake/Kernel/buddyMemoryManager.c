@@ -53,11 +53,11 @@ void *memory_manager_malloc(size_t nbytes){
     uint8_t blockPos = log(nbytes+sizeof(BuddyBlock),2); //En que posición del array va a estar el bloque.
     blockPos = blockPos < MIN_IDX - 1 ? MIN_IDX - 1 : blockPos;
 
-    if(blockPos>=mem->maxPos)
-        return NULL; //me pidieron mas memoria de la disponible
+    if(blockPos>=mem->maxPos){
+        return NULL; 
+    }
     
-    
-	if (mem->blocks[blockPos] == NULL) {
+	if(mem->blocks[blockPos] == NULL) {
 		uint8_t closestPos = 0;
 		for (uint8_t i = blockPos + 1; i < mem->maxPos && !closestPos; i++)
 			if (mem->blocks[i] != NULL)
