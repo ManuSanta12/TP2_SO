@@ -17,7 +17,7 @@ GLOBAL hasInforeg
 
 EXTERN timer_handler
 EXTERN keyboard_handler
-EXTERN syscall_handler
+EXTERN syscallDispatcher
 EXTERN exception_handler
 EXTERN dv_newline
 
@@ -220,7 +220,7 @@ exception_invalidOpCode:
 interrupt_syscall:
 	mov rcx, r10
 	mov r9, rax
-	call syscall_handler
+	call	syscallDispatcher
 	iretq
 
 

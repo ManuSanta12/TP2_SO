@@ -14,7 +14,7 @@ char parameter[MAX_BUFFER+1] = {0};
 char command[MAX_BUFFER+1] = {0};
 int linePos = 0;
 char lastc;
-const char * commands[] = {"undefined","help","time","clear","snake","inforeg","zerodiv","invopcode","sizeplus","sizeminus","memoryManager"};
+const char * commands[] = {"undefined","help","time","clear","snake","inforeg","zerodiv","invopcode","sizeplus","sizeminus","mem"};
 
 void showCommands(){
 	prints("\n-time-               muestra la hora actual en pantalla",MAX_BUFFER);
@@ -25,7 +25,7 @@ void showCommands(){
 	prints("\n-invopcode-          testeo codigo de operacion invalido",MAX_BUFFER);
 	prints("\n-sizeplus-           aumenta el tamanio de letra",MAX_BUFFER);
 	prints("\n-sizeminus-          disminuye el tamanio de letra",MAX_BUFFER);
-	prints("\n-memoryManager-      memoryManager",MAX_BUFFER);
+	prints("\n-mem-      		   muestra la informacion de la memory manager actual",MAX_BUFFER);
 	printc('\n');
 }
 
@@ -172,10 +172,7 @@ static void cmd_charsizeminus(){
 
 static void cmd_memory_manager(){
 	char * memoryManager = "";
-	//memoryManager = 
-	memory_manager_usr((uint32_t)memoryManager);
-	prints("\n", 1);
-	prints(memoryManager, 50);
+	prints("\n pepepeppepep \n", MAX_BUFFER);
 }
 
 

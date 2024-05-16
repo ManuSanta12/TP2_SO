@@ -8,7 +8,8 @@
 #include <moduleLoader.h>
 #include <naiveConsole.h>
 #include <stdint.h>
-#include <string.h>
+#include <scheduler.h>
+
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -17,7 +18,6 @@ extern uint8_t bss;
 extern uint8_t endOfKernelBinary;
 extern uint8_t endOfKernel;
 
-extern void _hlt();
 
 static const uint64_t PageSize = 0x1000;
 
@@ -48,14 +48,13 @@ void *initializeKernelBinary() {
 }
 
 int main() {
-  load_idt();
-
-  create_memory(0x2000000 - 0x1000000);
-
-  clearScanCode();
-  ((EntryPoint)sampleCodeModuleAddress)();
-
-  while (1)
-    _hlt();
-  return 0;
+	_cli();
+	ncClear();
+	load_idt();
+	create_memory(0x2000000 - 0x1000000);
+	createScheduler();
+	new_process((uint64_t) sampleCodeModuleAddress, 0, NULL);
+	_sti();
+	_hlt();
+	return 0;
 }
