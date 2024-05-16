@@ -48,13 +48,14 @@ void *initializeKernelBinary() {
 }
 
 int main() {
-	_cli();
-	ncClear();
-	load_idt();
-	create_memory(0x2000000 - 0x1000000);
-	createScheduler();
-	new_process((uint64_t) sampleCodeModuleAddress, 0, NULL);
-	_sti();
-	_hlt();
-	return 0;
+  load_idt();
+
+  create_memory(0x2000000 - 0x1000000);
+
+  clearScanCode();
+  ((EntryPoint)sampleCodeModuleAddress)();
+
+  while (1)
+    _hlt();
+  return 0;
 }

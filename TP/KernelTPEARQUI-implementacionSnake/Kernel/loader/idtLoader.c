@@ -2,6 +2,7 @@
 #include "idtLoader.h"
 #include "defs.h"
 #include "interrupts.h"
+#include <syscalls.h>
 
 #pragma pack(push)		/* Push de la alineación actual */
 #pragma pack (1) 		/* Alinear las siguiente estructuras a 1 byte */
@@ -41,7 +42,8 @@ void load_idt() {
   setup_IDT_entry (0x20, (uint64_t)&interrupt_timerTick); //timer tick -> time.c
 
   //Interrupciones de Software
-  setup_IDT_entry (0x80, (uint64_t)&interrupt_syscall); //syscalls -> syscall
+  // setup_IDT_entry (0x80, (uint64_t)&interrupt_syscall); //syscalls -> syscall
+  setup_IDT_entry (0x80, (uint64_t)&_syscallHandler);
 
   //Excepciones
   setup_IDT_entry (0x00, (uint64_t)&exception_divideByZero);

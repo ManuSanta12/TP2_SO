@@ -12,6 +12,9 @@
         "stdint.h": "c",
         "lib.h": "c",
         "sound.h": "c",
-        "videodriver.h": "c"
+        "videodriver.h": "c",
+        "systemcalls.h": "c",
+        "irqdispatcher.h": "c",
+        "syscall_dispatcher.h": "c"
     }
 }
