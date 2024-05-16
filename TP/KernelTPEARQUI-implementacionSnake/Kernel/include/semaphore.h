@@ -18,6 +18,7 @@
     }
 
     void sem_wait(sem_t sem){
+        //asi hace bussy waiting, encontrar mejor solución
         while(sem.value == 0);
         sem.value--;
     }
