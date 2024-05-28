@@ -1,15 +1,16 @@
-#ifndef SEMAPHORE_H_
-#define SEMAPHORE_H_
+#ifndef _SEMAPHORE_H_
+#define _SEMAPHORE_H_
 
-    typedef struct sem_t{
-        char * name;
-        int value;
-    }sem_t;
+#include <stdint.h>
+#include <stddef.h>
 
-    sem_t sem_init(char * name, int value);
 
-    void sem_post(sem_t sem);
+typedef struct semManagerCDT *semManagerADT;
 
-    void sem_wait(sem_t sem);
+int8_t sem_init(char * name, int value);
+
+void sem_post(char * name);
+
+void sem_wait(char * name);
 
 #endif
