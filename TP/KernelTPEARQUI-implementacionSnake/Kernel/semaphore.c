@@ -6,10 +6,11 @@
 typedef struct {
         char * name;
         int value;
+        int mutex; //mutex para evitar que dos procesos modifiquen el mismo semaforo al mismo tiempo.
 }sem_t;
 
 typedef struct semManagerCDT {
-	sem_t *semaphores[MAX_SEMAPHORES];//guarda todos los semaforos indexados por id
+	sem_t *semaphores[MAX_SEMAPHORES];//Array con los semaforos que se hayan creado
     int8_t lastId;
 } semManagerCDT;
 
@@ -47,8 +48,10 @@ void sem_post(char * name){
     //Si no existe un semaforo con ese nombre retorna -1, sino 0
     for(int i=0;semManager->semaphores[i]!=NULL;i++){
         if(strcmp(name, semManager->semaphores[i]->name)==0){
+            wait_mutex(i);
             semManager->semaphores[i]->value++;
             return 0;
+            post_mutex(i);
         }
     }
     return -1;
@@ -58,9 +61,21 @@ void sem_wait(char * name){
     for(int i=0;semManager->semaphores[i]!=NULL;i++){
         if(strcmp(name, semManager->semaphores[i]->name)==0){
             while(semManager->semaphores[i]->value==0);
+            wait_mutex(i);
             semManager->semaphores[i]->value--;
             return 0;
+            post_mutex(i);  
         }
     }
     return -1;
+}
+
+void wait_mutex(int id){
+    while(semManager->semaphores[id]->mutex==0);
+    return;
+}
+
+void post_mutex(int id){
+    semManager->semaphores[id]->mutex++;
+    return;
 }

@@ -13,4 +13,8 @@ void sem_post(char * name);
 
 void sem_wait(char * name);
 
+void wait_mutex(int id);
+
+void post_mutex(int id);
+
 #endif
