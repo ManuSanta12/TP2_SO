@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-
+//incluir scheduler
 
 typedef struct semManagerCDT *semManagerADT;
 

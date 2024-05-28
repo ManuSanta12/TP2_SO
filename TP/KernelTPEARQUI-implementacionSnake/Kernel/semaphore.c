@@ -60,7 +60,9 @@ void sem_post(char * name){
 void sem_wait(char * name){
     for(int i=0;semManager->semaphores[i]!=NULL;i++){
         if(strcmp(name, semManager->semaphores[i]->name)==0){
-            while(semManager->semaphores[i]->value==0);
+            while(semManager->semaphores[i]->value==0){
+                //yieldProcess():
+            }
             wait_mutex(i);
             semManager->semaphores[i]->value--;
             return 0;
@@ -71,7 +73,9 @@ void sem_wait(char * name){
 }
 
 void wait_mutex(int id){
-    while(semManager->semaphores[id]->mutex==0);
+    while(semManager->semaphores[id]->mutex==0){
+        //yieldProcess()
+    }
     return;
 }
 
