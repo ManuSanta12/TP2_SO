@@ -40,64 +40,66 @@ static MemoryInfo *sys_memInfo();
 static void *sys_memMalloc(uint64_t size);
 static void sys_memFree(uint64_t ap);
 
-uint64_t syscall_dispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rax, uint64_t *registers)
-{
-  switch (rax)
-  {
-  case 0:
-    return sys_read(rdi, (char *)rsi);
-    break;
-  case 1:
-    return sys_write(rdi, (char)rsi);
-    break;
-  case 2:
-    return sys_getHours();
-    break;
-  case 3:
-    return sys_getMinutes();
-    break;
-  case 4:
-    return sys_getSeconds();
-    break;
-  case 5:
-    return sys_getScrHeight();
-    break;
-  case 6:
-    return sys_getScrWidth();
-    break;
-  case 7:
-    sys_fillRect(rdi, rsi, rdx, registers[0], (Color *)registers[1]);
-    break;
-  case 8:
-    sys_wait(rdi);
-    break;
-  case 9:
-    return sys_inforeg((uint64_t *)rdi);
-    break;
-  case 10:
-    return sys_pixelPlus();
-    break;
-  case 11:
-    return sys_pixelMinus();
-    break;
-  case 12:
-    return sys_playSound((uint32_t)rdi);
-    break;
-  case 13:
-    return sys_mute();
-    break;
-  case 14:
-    return (uint64_t)sys_memInfo();
-    break;
-  case 15:
-    return (uint64_t)sys_memMalloc(rdi);
-    break;
-  case 16:
-    sys_memFree(rdi);
-    break;
-  }
-  return 0;
-}
+// los void los pongo sino me tira warning
+
+// uint64_t syscall_dispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rax, uint64_t *registers)
+// {
+//   switch (rax)
+//   {
+//   case 0:
+//     return sys_read(rdi, (char *)rsi);
+//     break;
+//   case 1:
+//     return sys_write(rdi, (char)rsi);
+//     break;
+//   case 2:
+//     return sys_getHours();
+//     break;
+//   case 3:
+//     return sys_getMinutes();
+//     break;
+//   case 4:
+//     return sys_getSeconds();
+//     break;
+//   case 5:
+//     return sys_getScrHeight();
+//     break;
+//   case 6:
+//     return sys_getScrWidth();
+//     break;
+//   case 7:
+//     sys_fillRect(rdi, rsi, rdx, registers[0], (Color *)registers[1]);
+//     break;
+//   case 8:
+//     sys_wait(rdi);
+//     break;
+//   case 9:
+//     return sys_inforeg((uint64_t *)rdi);
+//     break;
+//   case 10:
+//     return sys_pixelPlus();
+//     break;
+//   case 11:
+//     return sys_pixelMinus();
+//     break;
+//   case 12:
+//     return sys_playSound((uint32_t)rdi);
+//     break;
+//   case 13:
+//     return sys_mute();
+//     break;
+//   case 14:
+//     return (uint64_t)sys_memInfo();
+//     break;
+//   case 15:
+//     return (uint64_t)sys_memMalloc(rdi);
+//     break;
+//   case 16:
+//     sys_memFree(rdi);
+//     break;
+//   }
+//   return 0;
+// }
 
 // llena buff con el caracter leido del teclado
 static uint64_t sys_read(uint64_t fd, char *buff)
@@ -157,6 +159,7 @@ static void sys_wait(int ms)
 
 static uint64_t sys_inforeg(uint64_t registers[17])
 {
+
   if (hasInforeg)
   {
     for (uint8_t i = 0; i < 17; i++)
@@ -201,3 +204,23 @@ static void *sys_memMalloc(uint64_t size)
 }
 
 static void sys_memFree(uint64_t ap) { free_memory_manager((void *)ap); }
+
+static uint64_t (*syscall_handlers[])(uint64_t, uint64_t, uint64_t, uint64_t,
+                                      uint64_t) = {
+    (void *)sys_read,         (void *)sys_write,       (void *)sys_clear,
+    (void *)sys_getHours,     (void *)sys_getMinutes,  (void *)sys_getSeconds,
+    (void *)sys_getScrHeight, (void *)sys_getScrWidth, (void *)sys_fillRect,
+    (void *)sys_wait,         (void *)sys_inforeg,     (void *)sys_pixelPlus,
+    (void *)sys_pixelMinus,   (void *)sys_playSound,   (void *)sys_mute,
+    (void *)sys_memInfo,      (void *)sys_memMalloc,   (void *)sys_memFree};
+
+// Devuelve la syscall correspondiente
+//                                rdi           rsi           rdx rd10 r8 r9
+uint64_t syscall_dispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t r10,
+                         uint64_t r8, uint64_t rax) {
+  if (rax < SYS_CALLS_QTY && syscall_handlers[rax] != 0) {
+    return syscall_handlers[rax](rdi, rsi, rdx, r10, r8);
+  }
+
+  return 0;
+}

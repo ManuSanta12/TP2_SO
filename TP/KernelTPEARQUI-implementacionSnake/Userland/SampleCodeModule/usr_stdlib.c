@@ -206,8 +206,6 @@ void inforeg(){
         else
             prints("   ",100);
         }
-
-
     } else {
 		prints("\nTodavia no hay un snapshot de los registros, presione SHIFT + S para sacar una foto\n",100);
 	}

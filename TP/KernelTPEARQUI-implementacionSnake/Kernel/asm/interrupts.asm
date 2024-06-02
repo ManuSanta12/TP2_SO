@@ -7,6 +7,9 @@ GLOBAL _hlt
 
 GLOBAL interrupt_keyboard
 GLOBAL interrupt_timerTick
+GLOBAL interrupt_syscall
+EXTERN syscall_dispatcher
+
 GLOBAL exception_divideByZero
 GLOBAL exception_invalidOpCode
 
@@ -230,10 +233,11 @@ exception_invalidOpCode:
 	mov rsi, regdata_exc
 	call exception_handler
 
-
-
-
-
+interrupt_syscall:
+	mov rcx, r10
+	mov r9, rax
+	call syscall_dispatcher
+	iretq
 
 
 haltcpu:
