@@ -12,4 +12,7 @@ uint64_t getSeconds();
 uint64_t getMinutes();
 uint64_t getHours();
 
+unsigned int strlen(const char *str);
+char * strcpy(const char * str);
+
 #endif

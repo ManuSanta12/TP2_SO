@@ -7,17 +7,21 @@ GLOBAL _hlt
 
 GLOBAL interrupt_keyboard
 GLOBAL interrupt_timerTick
+GLOBAL interrupt_syscall
+EXTERN syscall_dispatcher
+
 GLOBAL exception_divideByZero
 GLOBAL exception_invalidOpCode
-GLOBAL interrupt_syscall
 
 GLOBAL regdata_exc
 GLOBAL inforeg
 GLOBAL hasInforeg
 
+EXTERN irqDispatcher
+EXTERN contextSwitch
+
 EXTERN timer_handler
 EXTERN keyboard_handler
-EXTERN syscall_handler
 EXTERN exception_handler
 EXTERN dv_newline
 
@@ -92,6 +96,21 @@ SECTION .text
 
 	mov rax, [rsp+8] ; We get the value of RFLAGS the same way (it is pushed when an interrupt occurs).
 	mov [regdata_exc+136], rax ;17
+%endmacro
+
+%macro irqHandlerMaster 1
+	pushState
+
+	mov rdi, %1 ; pasaje de parametro
+	mov rsi, rsp	; pointer a backup registros
+	call irqDispatcher
+
+	; signal pic EOI (End of Interrupt)
+	mov al, 20h
+	out 20h, al
+
+	popState
+	iretq
 %endmacro
 
 _hlt:
@@ -214,16 +233,11 @@ exception_invalidOpCode:
 	mov rsi, regdata_exc
 	call exception_handler
 
-
-; syscalls params:	RDI	RSI	RDX	R10	R8	R9
-; C 	params   :	RDI RSI RDX RCX R8  R9
 interrupt_syscall:
 	mov rcx, r10
 	mov r9, rax
-	call syscall_handler
+	call syscall_dispatcher
 	iretq
-
-
 
 
 haltcpu:
