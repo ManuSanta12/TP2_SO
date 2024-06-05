@@ -12,7 +12,7 @@ int8_t sem_init(char * name, int value);
 
 void sem_post(char * name);
 
-void sem_wait(char * name);
+void sem_wait(char * name,int pid);
 
 void wait_mutex(int id);
 
