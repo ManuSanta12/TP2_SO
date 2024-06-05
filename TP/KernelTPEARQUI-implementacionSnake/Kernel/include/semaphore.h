@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "memoryManager.h"
+#include "lib.h"
 //incluir scheduler
 
 typedef struct semManagerCDT *semManagerADT;

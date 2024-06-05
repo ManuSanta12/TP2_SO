@@ -5,7 +5,7 @@
 
 typedef struct pidNode{
     int pid;
-    pidNode * next;
+    struct pidNode * next;
 }pidNode;
 
 typedef struct {
@@ -14,11 +14,11 @@ typedef struct {
         int mutex; //mutex para evitar que dos procesos modifiquen el mismo semaforo al mismo tiempo.
         pidNode * first;
         pidNode * last;
-}sem_t;
+}semaphore_t;
 
 
 typedef struct semManagerCDT {
-	sem_t *semaphores[MAX_SEMAPHORES];//Array con los semaforos que se hayan creado
+	semaphore_t *semaphores[MAX_SEMAPHORES];//Array con los semaforos que se hayan creado
     int8_t lastId;
 } semManagerCDT;
 
@@ -44,7 +44,7 @@ int8_t sem_init(char * name, int value){
         }
     }
 
-    sem_t* new_sem;
+    semaphore_t* new_sem;
     new_sem->name = name;
     new_sem->value = value;
     
@@ -68,7 +68,7 @@ void sem_post(char * name){
 }
 
 void sem_wait(char * name, int pid){
-    sem_t* s;
+    semaphore_t* s;
     for(int i=0;s=semManager->semaphores[i]!=NULL;i++){
         if(strcmp(name, s->name)==0){
             if(s->value==0){
@@ -99,11 +99,11 @@ void post_mutex(int id){
     return;
 }
 
-int peek_pid(sem_t * sem){
+int peek_pid(semaphore_t * sem){
     return sem->first->pid;
 }
 
-void queue_pid(sem_t*sem, int pid){
+void queue_pid(semaphore_t*sem, int pid){
     pidNode * new = memory_manager_malloc(sizeof(pidNode));
     new->pid=pid;
     new->next = sem->first;
@@ -113,11 +113,11 @@ void queue_pid(sem_t*sem, int pid){
     }
 }
 
-int dequeue_pid(sem_t*sem){
+int dequeue_pid(semaphore_t*sem){
     if(sem->first==NULL){
         return -1; //No había ningun pid en la cola
     }
-    sem_t * aux = sem->first;
+    semaphore_t * aux = sem->first;
     int pidToReturn = sem->first->pid;
     sem->first=sem->first->next;
     free_memory_manager(aux);
