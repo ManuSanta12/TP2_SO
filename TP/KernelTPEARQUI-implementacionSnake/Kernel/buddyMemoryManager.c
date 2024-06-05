@@ -1,3 +1,5 @@
+#ifdef BUDDY
+
 #include <memoryManager.h>
 #include <lib.h>
 
@@ -147,3 +149,5 @@ static BlockADT merge(BlockADT block,BlockADT buddy) {
 	leftBlock->pos++;
 	return leftBlock;
 }
+
+#endif

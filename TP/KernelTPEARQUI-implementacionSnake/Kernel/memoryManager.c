@@ -1,3 +1,5 @@
+#ifdef LINEAR
+
 #include <memoryManager.h>
 
 #define MEMORY_MANAGMENT_NAME "Size allocation"
@@ -93,3 +95,5 @@ MemoryInfo *mem_info() {
   info->blocksUsed = memoryBlockCount;
   return info;
 }
+
+#endif
