@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <colores.h>
+#include <stddef.h>
 
 /* Prints a char in screen */
 void printc (char c);
@@ -57,5 +58,13 @@ void stopBeep();
 
 void memory_manager_usr(uint64_t memoryManager);
 
+typedef struct memoryInfo
+{
+    char *memoryAlgorithmName;
+    size_t freeMemory;
+    size_t occupiedMemory;
+    size_t totalMemory;
+    unsigned int blocksUsed;
+} MemoryInfo;
 
 #endif

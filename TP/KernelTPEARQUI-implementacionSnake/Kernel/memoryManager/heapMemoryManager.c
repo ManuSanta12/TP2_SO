@@ -2,7 +2,7 @@
 
 #include <memoryManager.h>
 
-#define MEMORY_MANAGMENT_NAME "Size allocation"
+#define MEMORY_MANAGMENT_NAME "Size allocator"
 
 typedef struct blockCDT {
   size_t size;           // Number of bytes allocated

@@ -1,6 +1,8 @@
 #include <sys_calls.h>
 #include <stdio.h>
 #include <exc_test.h>
+#include "./include/usr_stdlib.h"
+
 
 #define STDIN 0
 #define STDOUT 1
@@ -238,5 +240,11 @@ void stopBeep(){
 	sys_mute();
 }
 
+void print_meminfo(){
+	MemoryInfo* mem = sys_memInfo();
+	printc('\n');
+	prints("Using: ",100);
+	prints(mem->memoryAlgorithmName,100);
+}
 
 

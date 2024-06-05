@@ -15,6 +15,8 @@ GLOBAL sys_pixelPlus
 GLOBAL sys_playSound
 GLOBAL sys_mute
 GLOBAL sys_mem
+GLOBAL sys_memInfo
+
 section .text
 
 ; Pasaje de parametros en C:
@@ -104,9 +106,8 @@ sys_mute:
     mov rax, 0x0E
     int 80h
     ret
-sys_mem:
-    ;por lo menos aca entra
-    ;call sys_pixelPlus
+sys_memInfo:
     mov rax, 0x0F
     int 80h
     ret
+

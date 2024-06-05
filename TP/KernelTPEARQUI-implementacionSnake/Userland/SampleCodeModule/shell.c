@@ -172,7 +172,7 @@ static void cmd_charsizeminus(){
 
 static void cmd_memory_manager(){
 	char * memoryManager = "";
-	prints("\n pepepeppepep \n", MAX_BUFFER);
+	print_meminfo();	
 }
 
 

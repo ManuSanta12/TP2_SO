@@ -1,4 +1,4 @@
-#ifdef BUDDY
+#ifdef BUDDY_MM
 
 #include <memoryManager.h>
 #include <lib.h>
@@ -44,7 +44,7 @@ void create_memory(size_t size) {
     mem->memoryInfo.blocksUsed=0;
     mem->memoryInfo.freeMemory=size;
     mem->memoryInfo.occupiedMemory=0;
-    mem->memoryInfo.memoryAlgorithmName="Buddy manager";
+    mem->memoryInfo.memoryAlgorithmName="Buddy alocator";
     mem->memoryInfo.totalMemory=size;
 
     mem->blocks[mem->maxPos - 1] =
