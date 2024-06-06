@@ -245,6 +245,23 @@ void print_meminfo(){
 	printc('\n');
 	prints("Using: ",100);
 	prints(mem->memoryAlgorithmName,100);
+	printc('\n');
+	prints("Memory size: ", 100);
+	printDec(mem->totalMemory);
+	printc('\n');
+	prints("free memory: ", 100);
+	printDec(mem->freeMemory);
+	printc('\n');
+	prints("Ocupied memory: ", 100);
+	printDec(mem->occupiedMemory);
+}
+
+void * mm_malloc(uint64_t size){
+	return sys_memMalloc(size);
+}
+
+void mm_free(uint64_t ap){
+	sys_memFree(ap);
 }
 
 

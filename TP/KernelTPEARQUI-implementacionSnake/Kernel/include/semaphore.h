@@ -9,14 +9,14 @@
 
 typedef struct semManagerCDT *semManagerADT;
 
-int8_t sem_init(char * name, int value);
+int8_t sem_init(char *name, int value);
 
-void sem_post(char * name);
+uint8_t sem_post(char *name);
 
-void sem_wait(char * name,int pid);
+uint8_t sem_wait(char *name, int pid);
 
 void wait_mutex(int id);
 
 void post_mutex(int id);
 
-#endif
+#endif // _SEMAPHORE_H_

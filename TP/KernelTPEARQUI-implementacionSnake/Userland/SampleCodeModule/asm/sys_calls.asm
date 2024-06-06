@@ -16,6 +16,8 @@ GLOBAL sys_playSound
 GLOBAL sys_mute
 GLOBAL sys_mem
 GLOBAL sys_memInfo
+GLOBAL sys_memMalloc
+GLOBAL sys_memFree
 
 section .text
 
@@ -111,3 +113,12 @@ sys_memInfo:
     int 80h
     ret
 
+sys_memMalloc:
+    mov rax, 0x10
+    int 80h
+    ret
+
+sys_memFree
+    mov rax, 0x11
+    int 80h
+    ret

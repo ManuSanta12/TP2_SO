@@ -58,6 +58,12 @@ void stopBeep();
 
 void memory_manager_usr(uint64_t memoryManager);
 
+void* mm_malloc(uint64_t size);
+
+void mm_free(uint64_t ap);
+
+void print_meminfo();
+
 typedef struct memoryInfo
 {
     char *memoryAlgorithmName;

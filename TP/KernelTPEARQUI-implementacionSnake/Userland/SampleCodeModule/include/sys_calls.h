@@ -47,4 +47,8 @@ uint64_t sys_mem(uint64_t memoryManager);
 
 MemoryInfo *sys_memInfo();
 
-#endif
+void* sys_memMalloc(uint64_t size);
+
+void sys_memFree(uint64_t ap);
+
+#endif  
