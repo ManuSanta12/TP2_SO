@@ -5,6 +5,7 @@
 #include "videoDriver.h"
 #include <time.h>
 #include <syscall_dispatcher.h>
+#include <semaphore.h>
 
 #define STDIN 0
 #define STDOUT 1
@@ -20,7 +21,7 @@ extern Color BLACK;
 
 int size = 0;
 
-#define SYS_CALLS_QTY 16
+#define SYS_CALLS_QTY 19
 
 static uint64_t sys_read(uint64_t fd, char *buff);
 static uint64_t sys_write(uint64_t fd, char buffer);
@@ -39,6 +40,9 @@ static uint64_t sys_mute();
 static MemoryInfo *sys_memInfo();
 static void *sys_memMalloc(uint64_t size);
 static void sys_memFree(uint64_t ap);
+static uint8_t sys_semOpen(char*name,int value);
+static uint8_t sys_semPost(char* name);
+static uint8_t sys_semWait(char* name,int pid);
 
 // los void los pongo sino me tira warning
 
@@ -205,6 +209,18 @@ static void *sys_memMalloc(uint64_t size)
 
 static void sys_memFree(uint64_t ap) { free_memory_manager((void *)ap); }
 
+static uint8_t sys_semOpen(char*name,int value){
+  return sem_init(name,value);
+}
+
+static uint8_t sys_semPost(char* name){
+  return sem_post(name);
+}
+
+static uint8_t sys_semWait(char* name,int pid){
+  return sem_wait(name, pid);
+}
+
 static uint64_t (*syscall_handlers[])(uint64_t, uint64_t, uint64_t, uint64_t,
                                       uint64_t) = {
     (void *)sys_read,         (void *)sys_write,       (void *)sys_clear,
@@ -212,7 +228,8 @@ static uint64_t (*syscall_handlers[])(uint64_t, uint64_t, uint64_t, uint64_t,
     (void *)sys_getScrHeight, (void *)sys_getScrWidth, (void *)sys_fillRect,
     (void *)sys_wait,         (void *)sys_inforeg,     (void *)sys_pixelPlus,
     (void *)sys_pixelMinus,   (void *)sys_playSound,   (void *)sys_mute,
-    (void *)sys_memInfo,      (void *)sys_memMalloc,   (void *)sys_memFree};
+    (void *)sys_memInfo,      (void *)sys_memMalloc,   (void *)sys_memFree, 
+    (void*)sys_semOpen,       (void*)sys_semPost,      (void*)sys_semWait};
 
 // Devuelve la syscall correspondiente
 //                                rdi           rsi           rdx rd10 r8 r9

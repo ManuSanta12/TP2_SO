@@ -51,4 +51,11 @@ void* sys_memMalloc(uint64_t size);
 
 void sys_memFree(uint64_t ap);
 
+uint8_t sys_semOpen(char*name);
+
+uint8_t sys_semPost(char*name);
+
+uint8_t sys_semWait(char*name, int pid);
+
+
 #endif  

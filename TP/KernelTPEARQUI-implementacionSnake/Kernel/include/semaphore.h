@@ -9,7 +9,7 @@
 
 typedef struct semManagerCDT *semManagerADT;
 
-int8_t sem_init(char *name, int value);
+uint8_t sem_init(char *name, int value);
 
 uint8_t sem_post(char *name);
 

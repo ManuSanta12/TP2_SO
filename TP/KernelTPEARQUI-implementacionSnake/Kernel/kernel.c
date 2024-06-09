@@ -9,7 +9,7 @@
 #include <naiveConsole.h>
 #include <stdint.h>
 #include <scheduler.h>
-
+#include <semaphore.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -55,6 +55,7 @@ int main() {
   clearScanCode();
   ((EntryPoint)sampleCodeModuleAddress)();
 	createScheduler();
+  create_sem_manager();
 	new_process((uint64_t)sampleCodeModuleAddress, 0, NULL);
 	_sti();
 	_hlt();

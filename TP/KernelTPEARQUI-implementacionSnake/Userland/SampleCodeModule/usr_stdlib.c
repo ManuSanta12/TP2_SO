@@ -264,4 +264,14 @@ void mm_free(uint64_t ap){
 	sys_memFree(ap);
 }
 
+uint8_t sem_init(char*name){
+	return sys_semOpen(name);
+}
 
+uint8_t sem_post(char*name){
+	return sys_semPost(name);
+}
+
+uint8_t sem_wait(char*name, int pid){
+	return sys_semWait(name, pid);
+}

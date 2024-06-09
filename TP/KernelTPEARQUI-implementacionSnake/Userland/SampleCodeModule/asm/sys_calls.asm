@@ -18,6 +18,9 @@ GLOBAL sys_mem
 GLOBAL sys_memInfo
 GLOBAL sys_memMalloc
 GLOBAL sys_memFree
+GLOBAL sys_semOpen
+GLOBAL sys_semPost
+GLOBAL sys_semWait
 
 section .text
 
@@ -118,7 +121,20 @@ sys_memMalloc:
     int 80h
     ret
 
-sys_memFree
+sys_memFree:
     mov rax, 0x11
+    int 80h
+    ret
+
+sys_semOpen:
+    mov rax, 0x12
+    int 80h
+    ret
+sys_semPost:
+    mov rax, 0x13
+    int 80h
+    ret
+sys_semWait:
+    mov rax, 0x14
     int 80h
     ret

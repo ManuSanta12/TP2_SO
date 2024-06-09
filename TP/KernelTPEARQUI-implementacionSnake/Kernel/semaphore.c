@@ -67,7 +67,7 @@ uint8_t create_sem_manager() {
         semManager->semaphores[i] = NULL;
 }
 
-int8_t sem_init(char *name, int value) {
+uint8_t sem_init(char *name, int value) {
     // Los semaforos se acceden por nombre, no puede haber dos con el mismo nombre.
     // retorna -1 si no lo pudo crear, 0 si pudo.
     if (semManager->lastId > MAX_SEMAPHORES) {
