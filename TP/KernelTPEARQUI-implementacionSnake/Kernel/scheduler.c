@@ -528,3 +528,4 @@ processInfo *getProccessesInfo()
     current->next = NULL;
     return first;
 }
+

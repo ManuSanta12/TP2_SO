@@ -265,7 +265,7 @@ void mm_free(uint64_t ap){
 }
 
 uint8_t sem_init(char*name){
-	return sys_semOpen(name);
+	return sys_semInit(name);
 }
 
 uint8_t sem_post(char*name){
@@ -278,4 +278,8 @@ uint8_t sem_wait(char*name, int pid){
 
 int new_process(uint64_t rip, int argc, char *argv[]){
 	return sys_newProcess(rip, argc, argv);
+}
+
+uint64_t get_pid(){
+	return sys_getPid();
 }

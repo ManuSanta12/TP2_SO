@@ -18,10 +18,11 @@ GLOBAL sys_mem
 GLOBAL sys_memInfo
 GLOBAL sys_memMalloc
 GLOBAL sys_memFree
-GLOBAL sys_semOpen
+GLOBAL sys_semInit
 GLOBAL sys_semPost
 GLOBAL sys_semWait
 GLOBAL sys_newProcess
+GLOBAL sys_getPid
 
 section .text
 
@@ -127,7 +128,7 @@ sys_memFree:
     int 80h
     ret
 
-sys_semOpen:
+sys_semInit:
     mov rax, 0x12
     int 80h
     ret
@@ -141,5 +142,9 @@ sys_semWait:
     ret
 sys_newProcess:
     mov rax, 0x15
+    int 80h
+    ret
+sys_getPid:
+    mov rax, 0x16
     int 80h
     ret
