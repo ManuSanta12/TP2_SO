@@ -1,4 +1,5 @@
 #include "./include/semaphore.h"
+#include <scheduler.h>
 
 #define MAX_SEMAPHORES 10
 
@@ -49,7 +50,7 @@ int dequeue_pid(semaphore_t *sem) {
 
 void wait_mutex(int id) {
     while (semManager->semaphores[id]->mutex == 0) {
-        // yieldProcess()
+        yieldProcess();
     }
     return;
 }
@@ -110,7 +111,7 @@ uint8_t sem_wait(char *name, int pid) {
                 queue_pid(s, pid);
             }
             while (s->value == 0 && peek_pid(s) != pid) {
-                // yieldProcess():
+                yieldProcess();
             }
             wait_mutex(i);
             s->value--;

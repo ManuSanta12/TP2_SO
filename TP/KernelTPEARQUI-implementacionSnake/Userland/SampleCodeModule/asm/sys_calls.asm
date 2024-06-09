@@ -21,6 +21,7 @@ GLOBAL sys_memFree
 GLOBAL sys_semOpen
 GLOBAL sys_semPost
 GLOBAL sys_semWait
+GLOBAL sys_newProcess
 
 section .text
 
@@ -136,5 +137,9 @@ sys_semPost:
     ret
 sys_semWait:
     mov rax, 0x14
+    int 80h
+    ret
+sys_newProcess:
+    mov rax, 0x15
     int 80h
     ret

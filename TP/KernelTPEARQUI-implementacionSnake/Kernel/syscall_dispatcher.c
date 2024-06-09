@@ -6,6 +6,7 @@
 #include <time.h>
 #include <syscall_dispatcher.h>
 #include <semaphore.h>
+#include <scheduler.h>
 
 #define STDIN 0
 #define STDOUT 1
@@ -21,7 +22,7 @@ extern Color BLACK;
 
 int size = 0;
 
-#define SYS_CALLS_QTY 19
+#define SYS_CALLS_QTY 20
 
 static uint64_t sys_read(uint64_t fd, char *buff);
 static uint64_t sys_write(uint64_t fd, char buffer);
@@ -43,67 +44,10 @@ static void sys_memFree(uint64_t ap);
 static uint8_t sys_semOpen(char*name,int value);
 static uint8_t sys_semPost(char* name);
 static uint8_t sys_semWait(char* name,int pid);
+static pid_t sys_newProcess(uint64_t rip, int argc, char *argv[]);
 
 // los void los pongo sino me tira warning
 
-// uint64_t syscall_dispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rax, uint64_t *registers)
-// {
-//   switch (rax)
-//   {
-//   case 0:
-//     return sys_read(rdi, (char *)rsi);
-//     break;
-//   case 1:
-//     return sys_write(rdi, (char)rsi);
-//     break;
-//   case 2:
-//     return sys_getHours();
-//     break;
-//   case 3:
-//     return sys_getMinutes();
-//     break;
-//   case 4:
-//     return sys_getSeconds();
-//     break;
-//   case 5:
-//     return sys_getScrHeight();
-//     break;
-//   case 6:
-//     return sys_getScrWidth();
-//     break;
-//   case 7:
-//     sys_fillRect(rdi, rsi, rdx, registers[0], (Color *)registers[1]);
-//     break;
-//   case 8:
-//     sys_wait(rdi);
-//     break;
-//   case 9:
-//     return sys_inforeg((uint64_t *)rdi);
-//     break;
-//   case 10:
-//     return sys_pixelPlus();
-//     break;
-//   case 11:
-//     return sys_pixelMinus();
-//     break;
-//   case 12:
-//     return sys_playSound((uint32_t)rdi);
-//     break;
-//   case 13:
-//     return sys_mute();
-//     break;
-//   case 14:
-//     return (uint64_t)sys_memInfo();
-//     break;
-//   case 15:
-//     return (uint64_t)sys_memMalloc(rdi);
-//     break;
-//   case 16:
-//     sys_memFree(rdi);
-//     break;
-//   }
-//   return 0;
-// }
 
 // llena buff con el caracter leido del teclado
 static uint64_t sys_read(uint64_t fd, char *buff)
@@ -221,6 +165,10 @@ static uint8_t sys_semWait(char* name,int pid){
   return sem_wait(name, pid);
 }
 
+static pid_t sys_newProcess(uint64_t rip, int argc, char *argv[]){
+  return new_process(rip, argc, argv);
+}
+
 static uint64_t (*syscall_handlers[])(uint64_t, uint64_t, uint64_t, uint64_t,
                                       uint64_t) = {
     (void *)sys_read,         (void *)sys_write,       (void *)sys_clear,
@@ -229,7 +177,8 @@ static uint64_t (*syscall_handlers[])(uint64_t, uint64_t, uint64_t, uint64_t,
     (void *)sys_wait,         (void *)sys_inforeg,     (void *)sys_pixelPlus,
     (void *)sys_pixelMinus,   (void *)sys_playSound,   (void *)sys_mute,
     (void *)sys_memInfo,      (void *)sys_memMalloc,   (void *)sys_memFree, 
-    (void*)sys_semOpen,       (void*)sys_semPost,      (void*)sys_semWait};
+    (void*)sys_semOpen,       (void*)sys_semPost,      (void*)sys_semWait,
+    (void*)sys_newProcess};
 
 // Devuelve la syscall correspondiente
 //                                rdi           rsi           rdx rd10 r8 r9

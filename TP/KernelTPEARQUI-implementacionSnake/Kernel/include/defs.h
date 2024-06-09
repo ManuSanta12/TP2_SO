@@ -29,6 +29,7 @@
 
 
 typedef int pid_t;
+
 typedef struct blockednode {
     pid_t pid;
     struct blockednode *next;
