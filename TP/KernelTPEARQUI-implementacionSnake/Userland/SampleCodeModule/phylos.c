@@ -121,6 +121,9 @@ int run_phylos() {
     prints("soy add phylo",100);
     printc('\n');
     sem_wait(MUTEX_SEM_NAME, get_pid());
+    printc('\n');
+    prints("Antes del post",100);
+    printc('\n');
     char philo_number_buffer[MAX_PHYLO_NUMBER] = {0};
     if (sem_init(phylo_sem(index), 0) == -1)
         return -1;
@@ -131,9 +134,6 @@ int run_phylos() {
     if (phylos_pids[index] != -1)
         phylos_qty++;
     show_phylos();
-    printc('\n');
-    prints("Antes del post",100);
-    printc('\n');
     sem_post(MUTEX_SEM_NAME);
     printc('\n');
     prints("Despues del post",100);

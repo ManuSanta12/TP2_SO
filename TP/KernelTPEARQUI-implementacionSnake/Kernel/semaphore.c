@@ -95,7 +95,7 @@ uint8_t sem_init(char *name, int value) {
     }
     new_sem->name = strcpy(name);
     new_sem->value = value;
-
+    new_sem->mutex=1;
     semManager->semaphores[semManager->lastId] = new_sem;
     semManager->lastId++;
 
