@@ -27,9 +27,9 @@ void showCommands(){
 	prints("\n-invopcode-          testeo codigo de operacion invalido",MAX_BUFFER);
 	prints("\n-sizeplus-           aumenta el tamanio de letra",MAX_BUFFER);
 	prints("\n-sizeminus-          disminuye el tamanio de letra",MAX_BUFFER);
-	prints("\n-mem-      		   muestra la informacion de la memory manager actual",MAX_BUFFER);
-	prints("\n-memtest-			   corre un programa de testeo para el memory manager",MAX_BUFFER);
-	prints("\n-phylos-			   corre filosofos",MAX_BUFFER);
+	prints("\n-mem-                muestra la informacion de la memory manager actual",MAX_BUFFER);
+	prints("\n-memtest-            corre un programa de testeo para el memory manager",MAX_BUFFER);
+	prints("\n-phylos-             corre filosofos",MAX_BUFFER);
 	printc('\n');
 }
 

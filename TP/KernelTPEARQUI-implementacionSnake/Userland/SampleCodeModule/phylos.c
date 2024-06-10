@@ -67,9 +67,9 @@ int run_phylos() {
   
 
     char command = '\0';
-    while (1) {
-         printc('\n');
-        prints("Me metí al while",100);
+    while ((command = getChar())!= QUIT) {
+        //printc('\n');
+       // prints("Me metí al while",100);
         switch (command) {
             case REMOVE:
                 if (phylos_qty > MIN_QTY) {
@@ -79,6 +79,9 @@ int run_phylos() {
                 }
                 break;
             case ADD:
+                printc('\n');
+                prints("Agregando filosofo...",100);
+                printc('\n');
                 if (phylos_qty < MAX_QTY) {
                     if (add_phylo(phylos_qty) == -1)
                         prints("\nNo se pudo agregar un filosofo\n", MAX_BUFFER);
@@ -100,15 +103,17 @@ int run_phylos() {
 }
 
  void show_phylos() {
+    
     if (phylos_line) {
         clear_scr();
     }
     const static char letters[] = {' ', 'E', '.', '.'};
     uint8_t present_phylos = 0;
+
     for (int i = 0; i < phylos_qty; i++) {
         if (letters[phylos_states[i]] != ' ') {
             present_phylos = 1;
-            prints(letters[phylos_states[i]],100);
+            printc(letters[phylos_states[i]]);
         }
     }
     if (present_phylos) {
@@ -117,27 +122,19 @@ int run_phylos() {
 }
 
  uint8_t add_phylo(int index) {
-    printc('\n');
-    prints("soy add phylo",100);
-    printc('\n');
     sem_wait(MUTEX_SEM_NAME, get_pid());
-    printc('\n');
-    prints("Antes del post",100);
-    printc('\n');
     char philo_number_buffer[MAX_PHYLO_NUMBER] = {0};
     if (sem_init(phylo_sem(index), 0) == -1)
         return -1;
     itoa(index, philo_number_buffer, 10);
     char *params[] = {"philosopher", philo_number_buffer, NULL};
     int16_t file_descriptors[] = {DEV_NULL, STDOUT, STDERR};
-    // phylos_pids[index] = createProcessWithFds(&phylo, params, "philosopher", 4, file_descriptors);
+    phylos_pids[index] = new_process(&phylo, 3,params);
     if (phylos_pids[index] != -1)
+        prints("hola",11);
         phylos_qty++;
     show_phylos();
     sem_post(MUTEX_SEM_NAME);
-    printc('\n');
-    prints("Despues del post",100);
-    printc('\n');
     return -1 * !(phylos_pids[index] + 1);
 }
 
