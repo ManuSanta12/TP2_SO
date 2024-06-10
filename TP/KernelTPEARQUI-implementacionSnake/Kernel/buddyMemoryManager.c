@@ -1,4 +1,4 @@
-#ifdef BUDDY_MM
+#ifndef BUDDY_MM
 
 #include <memoryManager.h>
 #include <lib.h>
@@ -7,6 +7,7 @@
 #define USED 1
 #define LEVELS 32
 #define MIN_IDX 5 // MemoryBlock size
+#define MEMORY_MANAGER_ADDRESS 0x50000	
 
 typedef struct buddyBlockCDT {
   uint8_t pos;           // position in blocks array
@@ -22,7 +23,9 @@ typedef struct MemoryManagerCDT {
     uint8_t maxPos; //Max allocable position in block array
     void *firstAddress;
 	BlockADT blocks[LEVELS];
-	MemoryInfo memoryInfo;
+    size_t usedMem;
+    size_t blockCount;
+    size_t freeMem
 } MemoryManagerCDT;
 
 typedef MemoryManagerCDT * MemoryManagerADT;
@@ -35,17 +38,16 @@ static void split(uint8_t pos);
 MemoryManagerADT mem;
 
 void create_memory(size_t size) {
+    mem = (MemoryManagerADT)START_ADDRESS;
     mem->totalSize=size;
     mem->maxPos=log(size,2);
     for (int i = 0; i < LEVELS; i++)
 		mem->blocks[i] = NULL;
 
-    mem->firstAddress = (void*) START_ADDRESS;
-    mem->memoryInfo.blocksUsed=0;
-    mem->memoryInfo.freeMemory=size;
-    mem->memoryInfo.occupiedMemory=0;
-    mem->memoryInfo.memoryAlgorithmName="Buddy alocator";
-    mem->memoryInfo.totalMemory=size;
+    mem->firstAddress = (void*) START_ADDRESS+(sizeof(MemoryManagerCDT)+1);
+    mem->blockCount=0;
+    mem->freeMem=size;
+    mem->usedMem=0;
 
     mem->blocks[mem->maxPos - 1] =
 		create_memory_block(mem, mem->maxPos, NULL);
@@ -72,9 +74,9 @@ void *memory_manager_malloc(size_t nbytes){
 
         BlockADT block = mem->blocks[blockPos];
         size_t blockSize = 1L << block->pos;
-        mem->memoryInfo.occupiedMemory += blockSize;
-        mem->memoryInfo.freeMemory -= blockSize;
-        mem->memoryInfo.blocksUsed++;
+        mem->usedMem += blockSize;
+        mem->freeMem -= blockSize;
+        mem->blockCount++;
 
         void *allocation = (void *) block + sizeof(BuddyBlock);
 	    return (void *) allocation;
@@ -89,9 +91,9 @@ void free_memory_manager(void *ap){
         return;
     
     uint64_t blockSize = 1L << block->pos;
-    mem->memoryInfo.blocksUsed--;
-    mem->memoryInfo.freeMemory += blockSize;
-    mem->memoryInfo.occupiedMemory -= blockSize;
+    mem->blockCount--;
+    mem->freeMem += blockSize;
+    mem->usedMem -= blockSize;
 
     uint64_t relativePosition = (uint64_t) ((void *) block - mem->firstAddress);
 	BlockADT buddyBlock = (BlockADT) ((uint64_t) mem->firstAddress + (((uint64_t) relativePosition) ^ (1L << block->pos)));
@@ -106,7 +108,16 @@ void free_memory_manager(void *ap){
 }
 
 MemoryInfo *mem_info(){
-    return &mem->memoryInfo;
+    MemoryInfo * info = memory_manager_malloc(sizeof(MemoryInfo));
+    if(info==NULL){
+        return NULL;
+    }
+    info->memoryAlgorithmName = "Buddy manager";
+    info->totalMemory = mem->totalSize;
+    info->occupiedMemory = mem->usedMem;
+    info->blocksUsed = mem->blockCount;
+    info->freeMemory = mem->freeMem;
+    
 }
 
 static void split(uint8_t pos) {

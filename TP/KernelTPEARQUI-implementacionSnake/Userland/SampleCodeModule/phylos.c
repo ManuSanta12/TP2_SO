@@ -3,7 +3,10 @@
 #include <stdio.h>
 #include <usr_stdlib.h>
 #include <sys_calls.h>
-
+int run_phylos(){
+    prints("dummy",10);
+}
+/*
 #define MAX_QTY 32
 #define MIN_QTY 3
 #define MAX_PHYLO_NUMBER 3
@@ -176,4 +179,4 @@ int run_phylos() {
 }
  int right(int i){
     return (i + 1) % phylos_qty;
-}
+}*/
