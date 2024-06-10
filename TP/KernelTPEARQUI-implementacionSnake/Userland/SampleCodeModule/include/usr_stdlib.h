@@ -72,6 +72,13 @@ uint8_t sem_wait(char*name, int pid);
 
 uint8_t sem_close(char*name);
 
+uint64_t get_pid();
+
+char* itoa(int num, char* str, int base);
+
+int atoi(const char* str);
+
+
 typedef struct memoryInfo
 {
     char *memoryAlgorithmName;

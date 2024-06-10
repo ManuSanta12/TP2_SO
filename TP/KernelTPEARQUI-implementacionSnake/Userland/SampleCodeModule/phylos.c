@@ -10,6 +10,11 @@
 #define MAX_BUFFER 254
 #define MUTEX_SEM_NAME "phylos"
 
+#define DEV_NULL -1
+#define STDIN 0
+#define STDOUT 1
+#define STDERR 2
+
 #define EAT 3
 #define THINK 2
 
@@ -18,7 +23,7 @@
 #define REMOVE 'r'
 #define CLEAR 'c'
 
-static const char *phylos_names[] = {
+static char *phylos_names[] = {
 	"Godio", "Gleiser", "Aquili", "Mogni",
     "Garberoglio","Noni", "Meola", "Valles", "Fernandez",
 	"Oviedo", "Poggi", "Deiana", "Vega",
@@ -75,7 +80,7 @@ int run_phylos() {
     for (int i = phylos_qty - 1; i >= 0; i--) {
         remove_phylo(i);
     }
-    // sem_close(MUTEX_SEM_NAME);
+    sem_close(MUTEX_SEM_NAME);
     return 0;
 }
 
@@ -97,9 +102,9 @@ int run_phylos() {
 }
 
  uint8_t add_phylo(int index) {
-    sem_wait(MUTEX_SEM_NAME,get_pid());
+    sem_wait(MUTEX_SEM_NAME, get_pid());
     char philo_number_buffer[MAX_PHYLO_NUMBER] = {0};
-    if (semInit(phylo_sem(index), 0) == -1)
+    if (sem_init(phylo_sem(index), 0) == -1)
         return -1;
     itoa(index, philo_number_buffer, 10);
     char *params[] = {"philosopher", philo_number_buffer, NULL};
@@ -113,7 +118,7 @@ int run_phylos() {
 }
 
  uint8_t remove_phylo(int index) {
-    sem_wait(MUTEX_SEM_NAME, ger_pid());
+    sem_wait(MUTEX_SEM_NAME, get_pid());
     while (phylos_states[left(index)] == EATING && phylos_states[right(index)] == EATING) { 
         sem_post(MUTEX_SEM_NAME);
         sem_wait(phylo_sem(index),get_pid());
@@ -135,20 +140,20 @@ int run_phylos() {
     int i = atoi(argv[1]);
     phylos_states[i] = THINKING;
     while (1) {
-        sleep(THINK);
+        sleep_time(THINK);
         take_fork(i);
-        sleep(EAT);
+        sleep_time(EAT);
         put_fork(i);
     }
     return 0;
 }
 
  void take_fork(int i) {
-    sem_wait(MUTEX_SEM_NAME,get_pid());
+    sem_wait(MUTEX_SEM_NAME, get_pid());
     phylos_states[i] = HUNGRY;
     test(i);
     sem_post(MUTEX_SEM_NAME);
-    sem_wait(phylo_sem(i),get_pid());
+    sem_wait(phylo_sem(i), get_pid());
 }
 
  void put_fork(int i) {
@@ -168,7 +173,7 @@ int run_phylos() {
     }
 }
 
- char* phylo_sem(int i){
+ char * phylo_sem(int i){
     return phylos_names[i];
 }
  int left(int i){
