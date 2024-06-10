@@ -277,6 +277,10 @@ uint8_t sem_wait(char*name, int pid){
 	return sys_semWait(name, pid);
 }
 
+uint8_t sem_close(char*name){
+	return sys_semClose(name);
+}
+
 int new_process(uint64_t rip, int argc, char *argv[]){
 	return sys_newProcess(rip, argc, argv);
 }

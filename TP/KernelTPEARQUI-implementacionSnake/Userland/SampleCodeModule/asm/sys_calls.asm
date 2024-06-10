@@ -23,6 +23,7 @@ GLOBAL sys_semPost
 GLOBAL sys_semWait
 GLOBAL sys_newProcess
 GLOBAL sys_getPid
+GLOBAL sys_semClose
 
 section .text
 
@@ -146,5 +147,10 @@ sys_newProcess:
     ret
 sys_getPid:
     mov rax, 0x16
+    int 80h
+    ret
+
+sys_semClose:
+    mov rax, 0x17
     int 80h
     ret

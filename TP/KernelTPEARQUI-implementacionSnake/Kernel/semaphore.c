@@ -80,7 +80,7 @@ uint8_t sem_init(char *name, int value) {
         }
     }
 
-    semaphore_t *new_sem;
+    semaphore_t *new_sem = memory_manager_malloc(sizeof(semaphore_t));
     new_sem->name = name;
     new_sem->value = value;
 
@@ -123,3 +123,17 @@ uint8_t sem_wait(char *name, int pid) {
     return -1;
 }
 
+uint8_t sem_close(char* name){
+     for (int i = 0; semManager->semaphores[i] != NULL; i++) {
+        if (strcmp(name, semManager->semaphores[i]->name) == 0) {
+            free_memory_manager(semManager->semaphores[i]);
+            int j;
+            for (j = i; semManager->semaphores[j + 1] != NULL; j++) {
+                semManager->semaphores[j] = semManager->semaphores[j + 1];
+            }
+            semManager->semaphores[j] = NULL;
+            semManager->lastId--;
+            return 0;
+        }
+    }
+}

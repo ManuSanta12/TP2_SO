@@ -19,4 +19,5 @@ void wait_mutex(int id);
 
 void post_mutex(int id);
 
+uint8_t sem_close(char*name);
 #endif // _SEMAPHORE_H_

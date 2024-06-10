@@ -22,7 +22,7 @@ extern Color BLACK;
 
 int size = 0;
 
-#define SYS_CALLS_QTY 21
+#define SYS_CALLS_QTY 22
 
 static uint64_t sys_read(uint64_t fd, char *buff);
 static uint64_t sys_write(uint64_t fd, char buffer);
@@ -44,6 +44,7 @@ static void sys_memFree(uint64_t ap);
 static uint8_t sys_semInit(char*name,int value);
 static uint8_t sys_semPost(char* name);
 static uint8_t sys_semWait(char* name,int pid);
+static uint8_t sys_semClose(char* name);
 static pid_t sys_newProcess(uint64_t rip, int argc, char *argv[]);
 static uint64_t sys_getPid();
 // los void los pongo sino me tira warning
@@ -165,6 +166,10 @@ static uint8_t sys_semWait(char* name,int pid){
   return sem_wait(name, pid);
 }
 
+static uint8_t sys_semClose(char* name){
+  return sem_close(name);
+}
+
 static pid_t sys_newProcess(uint64_t rip, int argc, char *argv[]){
   return new_process(rip, argc, argv);
 }
@@ -182,7 +187,7 @@ static uint64_t (*syscall_handlers[])(uint64_t, uint64_t, uint64_t, uint64_t,
     (void *)sys_pixelMinus,   (void *)sys_playSound,   (void *)sys_mute,
     (void *)sys_memInfo,      (void *)sys_memMalloc,   (void *)sys_memFree, 
     (void*)sys_semInit,       (void*)sys_semPost,      (void*)sys_semWait,
-    (void*)sys_newProcess, (void*)sys_getPid};
+    (void*)sys_newProcess, (void*)sys_getPid, (void*)sys_semClose};
 
 // Devuelve la syscall correspondiente
 //                                rdi           rsi           rdx rd10 r8 r9
