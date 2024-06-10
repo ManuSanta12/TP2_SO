@@ -254,14 +254,15 @@ void print_meminfo(){
 	printc('\n');
 	prints("Ocupied memory: ", 100);
 	printDec(mem->occupiedMemory);
+	sys_memFree((void *)mem);
 }
 
 void * mm_malloc(uint64_t size){
 	return sys_memMalloc(size);
 }
 
-void mm_free(uint64_t ap){
-	sys_memFree(ap);
+void mm_free(void * ap){
+	sys_memFree((void *)ap);
 }
 
 uint8_t sem_init(char*name){

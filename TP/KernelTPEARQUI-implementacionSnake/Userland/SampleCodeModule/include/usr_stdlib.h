@@ -60,7 +60,7 @@ void memory_manager_usr(uint64_t memoryManager);
 
 void* mm_malloc(uint64_t size);
 
-void mm_free(uint64_t ap);
+void mm_free(void * ap);
 
 void print_meminfo();
 

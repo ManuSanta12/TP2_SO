@@ -49,7 +49,7 @@ MemoryInfo *sys_memInfo();
 
 void* sys_memMalloc(uint64_t size);
 
-void sys_memFree(uint64_t ap);
+void sys_memFree(void * ap);
 
 uint8_t sys_semInit(char*name);
 
