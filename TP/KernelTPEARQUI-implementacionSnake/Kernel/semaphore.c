@@ -119,8 +119,14 @@ uint8_t sem_wait(char *name, int pid) {
     semaphore_t *s;
     for (int i = 0; (s = semManager->semaphores[i]) != NULL; i++) {
         if (strcmp(name, s->name) == 0) {
+        
             if (s->value == 0) {
                 queue_pid(s, pid);
+            } else {
+                wait_mutex(i);
+                s->value--;
+                post_mutex(i);
+                return 0;
             }
             while (s->value == 0 && peek_pid(s) != pid) {
                 yieldProcess();
