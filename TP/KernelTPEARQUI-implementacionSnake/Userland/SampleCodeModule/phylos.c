@@ -36,7 +36,7 @@ static char *phylos_names[] = {
 typedef enum { NONE = 0, EATING, HUNGRY, THINKING } PHYLO_STATE;
 
 uint8_t phylos_qty = 0;
-uint8_t line = 0;
+uint8_t phylos_line = 0;
 PHYLO_STATE phylos_states[MAX_QTY];
 int16_t phylos_pids[MAX_QTY];
 
@@ -54,7 +54,7 @@ int run_phylos() {
     }
 
     char command = '\0';
-    while ((command = getchar()) != QUIT) {
+    while ((command = getChar()) != QUIT) {
         switch (command) {
             case REMOVE:
                 if (phylos_qty > MIN_QTY) {
@@ -72,7 +72,7 @@ int run_phylos() {
                 }
                 break;
             case CLEAR:
-                line = !line;
+                phylos_line = !phylos_line;
                 break;
         }
     }
@@ -85,7 +85,7 @@ int run_phylos() {
 }
 
  void show_phylos() {
-    if (line) {
+    if (phylos_line) {
         clear_scr();
     }
     const static char letters[] = {' ', 'E', '.', '.'};
@@ -140,9 +140,9 @@ int run_phylos() {
     int i = atoi(argv[1]);
     phylos_states[i] = THINKING;
     while (1) {
-        wait(THINK);
+        sleep(THINK);
         take_fork(i);
-        wait(EAT);
+        sleep(EAT);
         put_fork(i);
     }
     return 0;

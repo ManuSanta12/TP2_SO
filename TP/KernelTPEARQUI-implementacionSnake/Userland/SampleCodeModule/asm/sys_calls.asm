@@ -24,7 +24,7 @@ GLOBAL sys_semWait
 GLOBAL sys_newProcess
 GLOBAL sys_getPid
 GLOBAL sys_semClose
-
+GLOBAL sys_sleepTime
 section .text
 
 ; Pasaje de parametros en C:
@@ -152,5 +152,10 @@ sys_getPid:
 
 sys_semClose:
     mov rax, 0x17
+    int 80h
+    ret
+
+sys_sleepTime:
+    mov rax, 0x18
     int 80h
     ret

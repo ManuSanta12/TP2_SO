@@ -289,6 +289,10 @@ uint64_t get_pid(){
 	return sys_getPid();
 }
 
+void sleep(int sec){
+	sys_sleepTime(sec);
+}
+
 static void reverse(char str[], int length) {
     int start = 0;
     int end = length - 1;

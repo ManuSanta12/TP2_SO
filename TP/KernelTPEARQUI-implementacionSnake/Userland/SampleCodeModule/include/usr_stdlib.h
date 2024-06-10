@@ -78,6 +78,7 @@ char* itoa(int num, char* str, int base);
 
 int atoi(const char* str);
 
+void sleep(int sec);
 
 typedef struct memoryInfo
 {
