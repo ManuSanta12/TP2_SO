@@ -19,20 +19,33 @@ void run_test(){
     }
     new->value=10;
     node* new2 = mm_malloc(sizeof(node));
-    new->value=20;
+    new2->value=20;
     node* new3 = mm_malloc(sizeof(node));
-    new->value=30;
+    new3->value=30;
 
     new->next=new2;
     new2->next=new3;
     new3->next=NULL;
 
     node*it=new;
+    printc('\n');
     while(it!=NULL){
-        printc('\n');
         printDec(it->value);
-        printc('\n');
+        prints("->",10);
         it=it->next;
     }
+    printc('\n');
+    
+    print_meminfo();
+    printc('\n');
+    printc('\n');
+
+    mm_free(new);
+    mm_free(new2);
+    mm_free(new3);
+    
+    printc('\n');
+    printc('\n');
+    print_meminfo();
 
 }
