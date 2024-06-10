@@ -140,9 +140,9 @@ int run_phylos() {
     int i = atoi(argv[1]);
     phylos_states[i] = THINKING;
     while (1) {
-        sleep_time(THINK);
+        wait(THINK);
         take_fork(i);
-        sleep_time(EAT);
+        wait(EAT);
         put_fork(i);
     }
     return 0;
