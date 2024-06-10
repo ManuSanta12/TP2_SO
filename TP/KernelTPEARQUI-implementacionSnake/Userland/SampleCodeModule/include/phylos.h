@@ -11,7 +11,7 @@ uint8_t remove_phylo(int index);
 void test(int i);
 void phylo_sem(int i);
 int left(int i);
-int right(int i)
+int right(int i);
 
 #endif
 

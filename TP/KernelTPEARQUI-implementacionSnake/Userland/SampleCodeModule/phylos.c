@@ -88,7 +88,7 @@ int run_phylos() {
     for (int i = 0; i < phylos_qty; i++) {
         if (letters[phylos_states[i]] != ' ') {
             present_phylos = 1;
-            prints(letters[phylos_states[i]]);
+            prints(letters[phylos_states[i]],100);
         }
     }
     if (present_phylos) {
@@ -97,11 +97,11 @@ int run_phylos() {
 }
 
  uint8_t add_phylo(int index) {
-    sem_wait(MUTEX_SEM_NAME);
+    sem_wait(MUTEX_SEM_NAME,get_pid());
     char philo_number_buffer[MAX_PHYLO_NUMBER] = {0};
     if (semInit(phylo_sem(index), 0) == -1)
         return -1;
-    itoa(index, philoNumberBuffer, 10);
+    itoa(index, philo_number_buffer, 10);
     char *params[] = {"philosopher", philo_number_buffer, NULL};
     int16_t file_descriptors[] = {DEV_NULL, STDOUT, STDERR};
     // phylos_pids[index] = createProcessWithFds(&phylo, params, "philosopher", 4, file_descriptors);
@@ -113,11 +113,11 @@ int run_phylos() {
 }
 
  uint8_t remove_phylo(int index) {
-    sem_wait(MUTEX_SEM_NAME);
+    sem_wait(MUTEX_SEM_NAME, ger_pid());
     while (phylos_states[left(index)] == EATING && phylos_states[right(index)] == EATING) { 
         sem_post(MUTEX_SEM_NAME);
-        sem_wait(phylo_sem(index));
-        sem_wait(MUTEX_SEM_NAME);
+        sem_wait(phylo_sem(index),get_pid());
+        sem_wait(MUTEX_SEM_NAME,get_pid());
     }
     // killProcess(phylos_pids[index]);
     // waitpid(phylos_pids[index]);
@@ -144,15 +144,15 @@ int run_phylos() {
 }
 
  void take_fork(int i) {
-    sem_wait(MUTEX_SEM_NAME);
+    sem_wait(MUTEX_SEM_NAME,get_pid());
     phylos_states[i] = HUNGRY;
     test(i);
     sem_post(MUTEX_SEM_NAME);
-    sem_wait(phylo_sem(i));
+    sem_wait(phylo_sem(i),get_pid());
 }
 
  void put_fork(int i) {
-    sem_wait(MUTEX_SEM_NAME);
+    sem_wait(MUTEX_SEM_NAME,get_pid());
     phylos_states[i] = THINKING;
     show_phylos();
     test(left(i));
