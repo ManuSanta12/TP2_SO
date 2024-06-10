@@ -2,6 +2,7 @@
 #include <scheduler.h>
 
 #define MAX_SEMAPHORES 10
+#define SEM_MANAGER_ADDRESS 0x70000
 
 typedef struct pidNode {
     int pid;
@@ -62,28 +63,39 @@ void post_mutex(int id) {
 
 
 uint8_t create_sem_manager() {
-    semManager = memory_manager_malloc(sizeof(semManagerCDT));
+    semManager = (semManagerADT) SEM_MANAGER_ADDRESS;
     semManager->lastId = 0;
     for (int i = 0; i < MAX_SEMAPHORES; i++)
         semManager->semaphores[i] = NULL;
+    return 1;
 }
 
 uint8_t sem_init(char *name, int value) {
     // Los semaforos se acceden por nombre, no puede haber dos con el mismo nombre.
     // retorna -1 si no lo pudo crear, 0 si pudo.
+    /*if(semManager->lastId == 0){
+        return 2;
+    }else{
+        return 1;
+    }*/
+    
     if (semManager->lastId > MAX_SEMAPHORES) {
         return -1;
     }
-    for (int i = 0; semManager->semaphores[i] != NULL; i++) {
+    for (int i = 0; i<semManager->lastId; i++) {
         if (strcmp(name, semManager->semaphores[i]->name) == 0) {
             return -1;
         }
     }
 
-    semaphore_t *new_sem = memory_manager_malloc(sizeof(semaphore_t));
-    new_sem->name = name;
-    new_sem->value = value;
 
+    semaphore_t *new_sem = memory_manager_malloc(sizeof(semaphore_t));
+    if(new_sem==NULL){
+        return -1;
+    }
+    new_sem->name = strcpy(name);
+    new_sem->value = value;
+    new_sem->mutex=1;
     semManager->semaphores[semManager->lastId] = new_sem;
     semManager->lastId++;
 
@@ -105,10 +117,16 @@ uint8_t sem_post(char *name) {
 
 uint8_t sem_wait(char *name, int pid) {
     semaphore_t *s;
-    for (int i = 0; s = semManager->semaphores[i] != NULL; i++) {
+    for (int i = 0; (s = semManager->semaphores[i]) != NULL; i++) {
         if (strcmp(name, s->name) == 0) {
+        
             if (s->value == 0) {
                 queue_pid(s, pid);
+            } else {
+                wait_mutex(i);
+                s->value--;
+                post_mutex(i);
+                return 0;
             }
             while (s->value == 0 && peek_pid(s) != pid) {
                 yieldProcess();

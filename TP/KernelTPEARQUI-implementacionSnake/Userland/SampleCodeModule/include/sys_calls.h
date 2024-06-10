@@ -63,4 +63,6 @@ int sys_newProcess(uint64_t rip, int argc, char *argv[]);
 
 uint64_t sys_getPid();
 
+uint64_t sys_sleepTime(int sec);
+
 #endif  

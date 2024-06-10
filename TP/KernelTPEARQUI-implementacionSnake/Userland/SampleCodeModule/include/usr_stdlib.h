@@ -73,6 +73,17 @@ uint8_t sem_wait(char*name, int pid);
 uint8_t sem_close(char*name);
 
 void run_loop();
+uint64_t get_pid();
+
+char* itoa(int num, char* str, int base);
+
+int atoi(const char* str);
+
+void sleep(int sec);
+
+int new_process(uint64_t rip, int argc, char *argv[]);
+
+char get_char_block();
 
 typedef struct memoryInfo
 {

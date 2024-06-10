@@ -1,5 +1,6 @@
 #ifndef PHYLOS_H
 #define PHYLOS_H
+#include <stdint.h> 
 
 int run_phylos();
 /*void take_fork(int i);
@@ -9,7 +10,7 @@ int phylo(int argc, char **argv);
 uint8_t add_phylo(int index);
 uint8_t remove_phylo(int index);
 void test(int i);
-void phylo_sem(int i);
+char * phylo_sem(int i);
 int left(int i);
 int right(int i);
 */
