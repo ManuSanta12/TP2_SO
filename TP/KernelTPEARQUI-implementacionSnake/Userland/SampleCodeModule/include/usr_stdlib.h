@@ -72,6 +72,8 @@ uint8_t sem_wait(char*name, int pid);
 
 uint8_t sem_close(char*name);
 
+void run_loop();
+
 typedef struct memoryInfo
 {
     char *memoryAlgorithmName;

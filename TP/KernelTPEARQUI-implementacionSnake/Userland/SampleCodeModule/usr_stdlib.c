@@ -288,3 +288,14 @@ int new_process(uint64_t rip, int argc, char *argv[]){
 uint64_t get_pid(){
 	return sys_getPid();
 }
+
+void run_loop(){
+	prints("\n Presionar q para finalizar\n",30);
+	char c=' ';
+	while((c=getChar())!='q'){
+		prints("\n Hola soy el proceso: ",30);
+		printDec(get_pid());
+		wait(2000);
+		printc('\n');
+	}
+}
