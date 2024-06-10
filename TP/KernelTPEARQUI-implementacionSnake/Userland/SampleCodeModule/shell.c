@@ -6,16 +6,17 @@
 #include "snake.h"
 #include "shell.h"
 #include "mem_tester.h"
+#include "phylos.h"
 
 #define MAX_BUFFER 254
-#define MAX_COMMANDS 12
+#define MAX_COMMANDS 13
 
 char line[MAX_BUFFER+1] = {0}; //asi me aseguro que al menos va haber un cero
 char parameter[MAX_BUFFER+1] = {0};
 char command[MAX_BUFFER+1] = {0};
 int linePos = 0;
 char lastc;
-const char * commands[] = {"undefined","help","time","clear","snake","inforeg","zerodiv","invopcode","sizeplus","sizeminus","mem","memtest"};
+const char * commands[] = {"undefined","help","time","clear","snake","inforeg","zerodiv","invopcode","sizeplus","sizeminus","mem","memtest","phylos"};
 
 void showCommands(){
 	prints("\n-time-               muestra la hora actual en pantalla",MAX_BUFFER);
@@ -28,6 +29,7 @@ void showCommands(){
 	prints("\n-sizeminus-          disminuye el tamanio de letra",MAX_BUFFER);
 	prints("\n-mem-      		   muestra la informacion de la memory manager actual",MAX_BUFFER);
 	prints("\n-memtest-			   corre un programa de testeo para el memory manager",MAX_BUFFER);
+	prints("\n-phylos-			   corre filosofos",MAX_BUFFER);
 	printc('\n');
 }
 
@@ -46,9 +48,10 @@ static void cmd_charsizeplus();
 static void cmd_charsizeminus();
 static void cmd_memory_manager();
 static void cmd_memory_tester();
+static void cmd_phylos();
 
 
-static void (*commands_ptr[MAX_COMMANDS])() = {cmd_undefined, cmd_help, cmd_time, cmd_clear, cmd_snake, cmd_inforeg, cmd_zeroDiv,cmd_invOpcode,cmd_charsizeplus,cmd_charsizeminus, cmd_memory_manager,cmd_memory_tester};
+static void (*commands_ptr[MAX_COMMANDS])() = {cmd_undefined, cmd_help, cmd_time, cmd_clear, cmd_snake, cmd_inforeg, cmd_zeroDiv,cmd_invOpcode,cmd_charsizeplus,cmd_charsizeminus, cmd_memory_manager,cmd_memory_tester,cmd_phylos};
 
 
 void shell (){
@@ -181,7 +184,8 @@ static void cmd_memory_tester(){
 	run_test();
 }
 
-
-
+static void cmd_phylos(){
+	run_phylos();
+}
 
 

@@ -265,8 +265,8 @@ void mm_free(void * ap){
 	sys_memFree((void *)ap);
 }
 
-uint8_t sem_init(char*name){
-	return sys_semInit(name);
+uint8_t sem_init(char*name,int value){
+	return sys_semInit(name,value);
 }
 
 uint8_t sem_post(char*name){

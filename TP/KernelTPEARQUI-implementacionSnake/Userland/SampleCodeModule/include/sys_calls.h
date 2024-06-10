@@ -51,7 +51,7 @@ void* sys_memMalloc(uint64_t size);
 
 void sys_memFree(void * ap);
 
-uint8_t sys_semInit(char*name);
+uint8_t sys_semInit(char*name,int value);
 
 uint8_t sys_semPost(char*name);
 

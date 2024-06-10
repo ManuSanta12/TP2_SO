@@ -64,7 +64,7 @@ void mm_free(void * ap);
 
 void print_meminfo();
 
-uint8_t sem_init(char*name);
+uint8_t sem_init(char*name,int value);
 
 uint8_t sem_post(char*name);
 
