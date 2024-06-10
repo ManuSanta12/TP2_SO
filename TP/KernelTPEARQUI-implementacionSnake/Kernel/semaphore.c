@@ -2,6 +2,7 @@
 #include <scheduler.h>
 
 #define MAX_SEMAPHORES 10
+#define SEM_MANAGER_ADDRESS 0x70000
 
 typedef struct pidNode {
     int pid;
@@ -62,7 +63,7 @@ void post_mutex(int id) {
 
 
 uint8_t create_sem_manager() {
-    semManager = memory_manager_malloc(sizeof(semManagerCDT));
+    semManager = (semManagerADT) SEM_MANAGER_ADDRESS;
     semManager->lastId = 0;
     for (int i = 0; i < MAX_SEMAPHORES; i++)
         semManager->semaphores[i] = NULL;
@@ -72,6 +73,12 @@ uint8_t create_sem_manager() {
 uint8_t sem_init(char *name, int value) {
     // Los semaforos se acceden por nombre, no puede haber dos con el mismo nombre.
     // retorna -1 si no lo pudo crear, 0 si pudo.
+    /*if(semManager->lastId == 0){
+        return 2;
+    }else{
+        return 1;
+    }*/
+    
     if (semManager->lastId > MAX_SEMAPHORES) {
         return -1;
     }
@@ -81,8 +88,12 @@ uint8_t sem_init(char *name, int value) {
         }
     }
 
+
     semaphore_t *new_sem = memory_manager_malloc(sizeof(semaphore_t));
-    new_sem->name = name;
+    if(new_sem==NULL){
+        return -1;
+    }
+    new_sem->name = strcpy(name);
     new_sem->value = value;
 
     semManager->semaphores[semManager->lastId] = new_sem;

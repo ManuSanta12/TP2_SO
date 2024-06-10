@@ -45,6 +45,7 @@ int run_phylos() {
     printc('\n');
     prints("creando semaforo...",100);
     printc('\n');
+    
     if (sem_init(MUTEX_SEM_NAME, 1) == -1){
         prints("retorne -1",100);
         
@@ -55,16 +56,22 @@ int run_phylos() {
     printc('\n');
 
     for (int i = 0; i < MAX_QTY; i++) {
+       
         phylos_states[i] = NONE;
         phylos_pids[i] = -1;
     }
 
     for (int i = 0; i < MIN_QTY; i++){
+        printc('\n');
+        prints("aca toy!",100);
         add_phylo(i);
     }
+  
 
     char command = '\0';
-    while ((command = getChar()) != QUIT) {
+    while (1) {
+         printc('\n');
+        prints("Me metí al while",100);
         switch (command) {
             case REMOVE:
                 if (phylos_qty > MIN_QTY) {
