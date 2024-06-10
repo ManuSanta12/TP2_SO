@@ -265,3 +265,25 @@ void mm_free(void * ap){
 	sys_memFree((void *)ap);
 }
 
+void getProcessesInfo()
+{
+    processInfo *current = sys_ps();
+	printDec(current->pid);
+    while (current != NULL)
+    {
+		printc('\n');
+		prints("PID: ", 100);
+		printDec(current->pid);
+		printc('\n');
+		prints("Priority: ",100);
+		printDec(current->priority);
+		printc('\n');
+		prints("Stack Base: 0x",100);
+		printDec(current->stackBase);
+		printc('\n');
+		prints("Status: ",MAX_BUFFER);
+		prints((current->status) ? "BLOCKED" : "READY", MAX_BUFFER);
+        sys_memFree(current);
+        current = current->next;
+    }
+}

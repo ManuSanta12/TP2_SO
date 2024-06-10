@@ -65,7 +65,7 @@ void mm_free(void * ap);
 
 void print_meminfo();
 
-
+void getProcessesInfo();
 
 
 
