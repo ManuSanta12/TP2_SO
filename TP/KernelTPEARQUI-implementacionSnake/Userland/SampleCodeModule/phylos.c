@@ -41,9 +41,19 @@ PHYLO_STATE phylos_states[MAX_QTY];
 int16_t phylos_pids[MAX_QTY];
 
 int run_phylos() {
+
+    printc('\n');
+    prints("creando semaforo...",100);
+    printc('\n');
     if (sem_init(MUTEX_SEM_NAME, 1) == -1){
+        prints("retorne -1",100);
+        
         return -1;
     } 
+    printc('\n');
+    prints("semaforo creado!",100);
+    printc('\n');
+
     for (int i = 0; i < MAX_QTY; i++) {
         phylos_states[i] = NONE;
         phylos_pids[i] = -1;

@@ -48,6 +48,7 @@ static uint8_t sys_semWait(char* name,int pid);
 static uint8_t sys_semClose(char* name);
 static pid_t sys_newProcess(uint64_t rip, int argc, char *argv[]);
 static uint64_t sys_getPid();
+static uint64_t sys_sleepTime(int sec);
 // los void los pongo sino me tira warning
 
 
@@ -192,7 +193,8 @@ static uint64_t (*syscall_handlers[])(uint64_t, uint64_t, uint64_t, uint64_t,
     (void *)sys_pixelMinus,   (void *)sys_playSound,   (void *)sys_mute,
     (void *)sys_memInfo,      (void *)sys_memMalloc,   (void *)sys_memFree, 
     (void*)sys_semInit,       (void*)sys_semPost,      (void*)sys_semWait,
-    (void*)sys_newProcess, (void*)sys_getPid, (void*)sys_semClose, (void *)sys_sleepTime};
+    (void*)sys_newProcess, (void*)sys_getPid, (void*)sys_semClose, 
+    (void *)sys_sleepTime};
 
 // Devuelve la syscall correspondiente
 //                                rdi           rsi           rdx rd10 r8 r9

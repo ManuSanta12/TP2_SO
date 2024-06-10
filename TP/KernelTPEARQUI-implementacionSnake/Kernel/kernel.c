@@ -55,8 +55,8 @@ int main() {
   clearScanCode();
   ((EntryPoint)sampleCodeModuleAddress)();
 	createScheduler();
-  create_sem_manager();
 	new_process((uint64_t)sampleCodeModuleAddress, 0, NULL);
+  create_sem_manager();
 	_sti();
 	_hlt();
 	return 0;

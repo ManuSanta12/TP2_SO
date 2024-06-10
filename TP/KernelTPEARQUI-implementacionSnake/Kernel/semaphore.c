@@ -66,6 +66,7 @@ uint8_t create_sem_manager() {
     semManager->lastId = 0;
     for (int i = 0; i < MAX_SEMAPHORES; i++)
         semManager->semaphores[i] = NULL;
+    return 1;
 }
 
 uint8_t sem_init(char *name, int value) {
@@ -74,7 +75,7 @@ uint8_t sem_init(char *name, int value) {
     if (semManager->lastId > MAX_SEMAPHORES) {
         return -1;
     }
-    for (int i = 0; semManager->semaphores[i] != NULL; i++) {
+    for (int i = 0; i<semManager->lastId; i++) {
         if (strcmp(name, semManager->semaphores[i]->name) == 0) {
             return -1;
         }
@@ -105,7 +106,7 @@ uint8_t sem_post(char *name) {
 
 uint8_t sem_wait(char *name, int pid) {
     semaphore_t *s;
-    for (int i = 0; s = semManager->semaphores[i] != NULL; i++) {
+    for (int i = 0; (s = semManager->semaphores[i]) != NULL; i++) {
         if (strcmp(name, s->name) == 0) {
             if (s->value == 0) {
                 queue_pid(s, pid);
