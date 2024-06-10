@@ -18,11 +18,27 @@ GLOBAL sys_mem
 GLOBAL sys_memInfo
 GLOBAL sys_memMalloc
 GLOBAL sys_memFree
-GLOBAL sys_semInit
-GLOBAL sys_semPost
-GLOBAL sys_semWait
-GLOBAL sys_newProcess
-GLOBAL sys_getPid
+GLOBAL sys_sem_open
+GLOBAL sys_sem_close
+GLOBAL sys_sem_post
+GLOBAL sys_sem_wait
+GLOBAL sys_yieldProcess
+GLOBAL sys_nice
+GLOBAL sys_pipe
+GLOBAL sys_dup2
+GLOBAL sys_open
+GLOBAL sys_close
+GLOBAL sys_ps
+GLOBAL sys_changeProcessStatus
+GLOBAL sys_getCurrentPid
+GLOBAL sys_exec
+GLOBAL sys_exit
+GLOBAL sys_waitpid
+GLOBAL sys_kill
+GLOBAL sys_block
+GLOBAL sys_unblock
+
+
 
 section .text
 
@@ -128,23 +144,97 @@ sys_memFree:
     int 80h
     ret
 
-sys_semInit:
+sys_sem_open:
     mov rax, 0x12
     int 80h
     ret
-sys_semPost:
+
+sys_sem_close:
     mov rax, 0x13
     int 80h
     ret
-sys_semWait:
+
+sys_sem_post:
     mov rax, 0x14
     int 80h
     ret
-sys_newProcess:
+
+sys_sem_wait:
     mov rax, 0x15
     int 80h
     ret
-sys_getPid:
+
+sys_yieldProcess:
     mov rax, 0x16
+    int 80h
+    ret
+
+sys_nice:
+    mov rax, 0x17
+    int 80h
+    ret
+
+sys_pipe:
+    mov rax, 0x18
+    int 80h
+    ret
+
+sys_dup2:
+    mov rax, 0x19
+    int 80h
+    ret
+
+sys_open:
+    mov rax, 0x1A
+    int 80h
+    ret
+
+sys_close:
+    mov rax, 0x1B
+    int 80h
+    ret
+
+sys_ps:
+    mov rax, 0x1C
+    int 80h
+    ret
+
+sys_changeProcessStatus:
+    mov rax, 0x1D
+    int 80h
+    ret
+
+sys_getCurrentPid:
+    mov rax, 0x1E
+    int 80h
+    ret
+
+sys_exec:
+    mov rax, 0x1F
+    int 80h
+    ret
+
+sys_exit:
+    mov rax, 0x20
+    int 80h
+    ret
+
+sys_waitpid:
+    mov rax, 0x21
+    int 80h
+    ret
+
+sys_kill:
+    mov rax, 0x22
+    int 80h
+    ret
+
+sys_block:
+    mov rax, 0x23
+    int 80h
+    ret
+
+sys_unblock:
+    mov rax, 0x24
     int 80h
     ret

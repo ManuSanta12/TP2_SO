@@ -1,22 +1,8 @@
-#ifndef _SEMAPHORE_H_
-#define _SEMAPHORE_H_
-
+#include <unistd.h>
 #include <stdint.h>
-#include <stddef.h>
-#include "memoryManager.h"
-#include "lib.h"
-//incluir scheduler
+#include <defs.h>
 
-typedef struct semManagerCDT *semManagerADT;
-
-uint8_t sem_init(char *name, int value);
-
-uint8_t sem_post(char *name);
-
-uint8_t sem_wait(char *name, int pid);
-
-void wait_mutex(int id);
-
-void post_mutex(int id);
-
-#endif // _SEMAPHORE_H_
+sem_t sem_open(char * name, uint64_t value);
+int sem_close(sem_t sem);
+int sem_post(sem_t sem);
+int sem_wait(sem_t sem);

@@ -6,8 +6,9 @@
 #include "snake.h"
 #include "shell.h"
 #include "mem_tester.h"
+#include "uniqueTypes.h"
 
-#define MAX_BUFFER 254
+
 #define MAX_COMMANDS 12
 
 char line[MAX_BUFFER+1] = {0}; //asi me aseguro que al menos va haber un cero
@@ -16,6 +17,8 @@ char command[MAX_BUFFER+1] = {0};
 int linePos = 0;
 char lastc;
 const char * commands[] = {"undefined","help","time","clear","snake","inforeg","zerodiv","invopcode","sizeplus","sizeminus","mem","memtest"};
+int runInBackground = 0; 
+
 
 void showCommands(){
 	prints("\n-time-               muestra la hora actual en pantalla",MAX_BUFFER);
@@ -46,7 +49,7 @@ static void cmd_charsizeplus();
 static void cmd_charsizeminus();
 static void cmd_memory_manager();
 static void cmd_memory_tester();
-
+static void runCommandInBackground(void (*cmd)());
 
 static void (*commands_ptr[MAX_COMMANDS])() = {cmd_undefined, cmd_help, cmd_time, cmd_clear, cmd_snake, cmd_inforeg, cmd_zeroDiv,cmd_invOpcode,cmd_charsizeplus,cmd_charsizeminus, cmd_memory_manager,cmd_memory_tester};
 
@@ -82,7 +85,11 @@ static void newLine(){
 
 	int i = checkLine();
 
-	(*commands_ptr[i])();
+    if (runInBackground) {
+        runCommandInBackground(commands_ptr[i]);
+    } else {
+        (*commands_ptr[i])();
+    }
 
 	for (int i = 0; line[i] != '\0' ; i++){
 		line[i] = 0;
@@ -98,33 +105,43 @@ static void newLine(){
 	}
 }
 
+static int checkLine() {
+    int i = 0;
+    int j = 0;
+    int k = 0;
+    runInBackground = 0; // Reset background flag
 
-//separa comando de parametro
-static int checkLine(){
-	int i = 0;
-	int j = 0;
-	int k = 0;
-	for ( j = 0 ; j < linePos && line[j] != ' ' ; j ++){
-		command[j] = line[j];
-	}
-	if (j < linePos){
-		j++;
-		while (j < linePos){
-			parameter[k++] = line[j++];
-		}
-	}
+    // Check if the command starts with "BG" to determine if it should run in background
+    if (linePos >= 2 && line[0] == 'B' && line[1] == 'G') {
+        runInBackground = 1; // Set background flag
+        j += 2; // Move past "BG"
+    }
 
+    // Extract command and parameters
+    for (; j < linePos && line[j] != ' '; j++) {
+        command[k++] = line[j];
+    }
 
+    if (j < linePos) {
+        j++;
+        while (j < linePos) {
+            parameter[k++] = line[j++];
+        }
+    }
 
-	for (i = 1 ; i < MAX_COMMANDS ; i++ ){
-		if (strcmp(command,commands[i]) == 0){
-			return i;
-		}
-	}
+    // Match command with predefined commands
+    for (i = 1; i < MAX_COMMANDS; i++) {
+        if (strcmp(command, commands[i]) == 0) {
+            return i;
+        }
+    }
 
-	return 0;
+    return 0;
 }
 
+void runCommandInBackground(void (*cmd)()) {
+    pid_t pid = sys_exec((uint64_t)cmd, 0, NULL);
+}
 
 static void cmd_help(){
 	prints("\n---HELP---\n",MAX_BUFFER);

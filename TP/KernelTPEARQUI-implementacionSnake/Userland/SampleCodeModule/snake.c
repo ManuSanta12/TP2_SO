@@ -27,7 +27,7 @@ static Color PURPLE = {255,32,160};
 
 #define PIXELWIDTH (get_scrWidht() / WIDTH)
 #define PIXELHEIGHT (get_scrHeight() / HEIGHT)
-#define MAX_BUFFER 254
+// #define MAX_BUFFER 254
 
 #define PLAYER1_UP 'w'
 #define PLAYER1_DOWN 's'

@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <colores.h>
 #include <stddef.h>
+#include <uniqueTypes.h>
 
 /* Prints a char in screen */
 void printc (char c);
@@ -64,19 +65,8 @@ void mm_free(void * ap);
 
 void print_meminfo();
 
-uint8_t sem_init(char*name);
 
-uint8_t sem_post(char*name);
 
-uint8_t sem_wait(char*name, int pid);
 
-typedef struct memoryInfo
-{
-    char *memoryAlgorithmName;
-    size_t freeMemory;
-    size_t occupiedMemory;
-    size_t totalMemory;
-    unsigned int blocksUsed;
-} MemoryInfo;
 
 #endif
