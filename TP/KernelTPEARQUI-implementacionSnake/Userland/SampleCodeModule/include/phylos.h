@@ -3,7 +3,7 @@
 #include <stdint.h> 
 
 int run_phylos();
-/*void take_fork(int i);
+void take_fork(int i);
 void put_fork(int i);
 void show_phylos();
 int phylo(int argc, char **argv);
@@ -13,7 +13,7 @@ void test(int i);
 char * phylo_sem(int i);
 int left(int i);
 int right(int i);
-*/
+
 #endif
 
 
