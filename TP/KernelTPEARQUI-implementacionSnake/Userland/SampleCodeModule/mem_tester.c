@@ -40,15 +40,24 @@ void run_test(){
     printc('\n');
     printc('\n');
 
-    /*mm_free(new);
+    prints("Liberando nodos de la lista...",100);
+    printc('\n');
+    printc('\n');
+
+    mm_free(new);
     mm_free(new2);
     mm_free(new3);
-    */
+    
     printc('\n');
+    print_meminfo();
+    printc('\n');
+
     printc('\n');
     //print_meminfo();
     prints("Alocando 100",100);
     printc('\n');
     void* ptr = mm_malloc(100);
     print_meminfo();
+
+
 }
