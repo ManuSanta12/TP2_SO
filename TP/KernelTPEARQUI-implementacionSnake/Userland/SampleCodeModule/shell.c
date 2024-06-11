@@ -16,7 +16,7 @@ char parameter[MAX_BUFFER+1] = {0};
 char command[MAX_BUFFER+1] = {0};
 int linePos = 0;
 char lastc;
-const char * commands[] = {"undefined","help","time","clear","snake","inforeg","zerodiv","invopcode","sizeplus","sizeminus","mem","memtest","phylos","loop", "cat", "filter", "wc"};
+const char * commands[] = {"undefined","help","time","clear","snake","inforeg","zerodiv","invopcode","sizeplus","sizeminus","mem","memtest","phylos","loop", "cat", "filter", "wc", "ps"};
 
 void showCommands(){
 	prints("\n-time-               muestra la hora actual en pantalla",MAX_BUFFER);
@@ -34,6 +34,7 @@ void showCommands(){
 	prints("\n-cat-                imprime el STDIN tal como lo recibe", MAX_BUFFER);
 	prints("\n-wc-                 cuenta la cantidad de lineas del input", MAX_BUFFER);
 	prints("\n-filter-             filtra las vocales del input", MAX_BUFFER);
+	prints("\n-ps-                 muestra en pantalla la inforacion de proceso actual", MAX_BUFFER);
 	printc('\n');
 }
 
@@ -57,10 +58,11 @@ static void cmd_loop();
 static void cmd_cat();
 static void cmd_wc();
 static void cmd_filter();
+static void cmd_ps();
+static void runCommandInBackground(void (*cmd)());
 
-
-static void (*commands_ptr[MAX_COMMANDS])() = {cmd_undefined, cmd_help, cmd_time, cmd_clear, cmd_snake, cmd_inforeg, cmd_zeroDiv,cmd_invOpcode,cmd_charsizeplus,cmd_charsizeminus, cmd_memory_manager,cmd_memory_tester,cmd_phylos,cmd_loop, cmd_cat, cmd_filter, cmd_wc};
-
+static void (*commands_ptr[MAX_COMMANDS])() = {cmd_undefined, cmd_help, cmd_time, cmd_clear, cmd_snake, cmd_inforeg, cmd_zeroDiv,cmd_invOpcode,cmd_charsizeplus,cmd_charsizeminus, cmd_memory_manager,cmd_memory_tester,cmd_phylos,cmd_loop, cmd_cat, cmd_filter, cmd_wc, cmd_ps};
+int runInBackground = 0; 
 
 void shell (){
 	char c;
@@ -70,6 +72,10 @@ void shell (){
 		c = getChar();
 		printLine(c);
 	};
+}
+
+static void runCommandInBackground(void (*cmd)()) {
+    pid_t pid = sys_exec((uint64_t)cmd, 0, NULL);
 }
 
 static void printLine(char c){
@@ -92,7 +98,9 @@ static void newLine(){
 
 
 	int i = checkLine();
-
+	// if (runInBackground){
+	// 	runCommandInBackground(commands_ptr[i]);
+	// }
 	(*commands_ptr[i])();
 
 	for (int i = 0; line[i] != '\0' ; i++){
@@ -115,6 +123,13 @@ static int checkLine(){
 	int i = 0;
 	int j = 0;
 	int k = 0;
+	runInBackground = 0; // Reset background flag
+    // Check if the command starts with "BG" to determine if it should run in background
+    // if (linePos >= 2 && line[0] == 'B' && line[1] == 'G') {
+    //     runInBackground = 1; // Set background flag
+    //     j += 2; // Move past "BG"
+    // }
+
 	for ( j = 0 ; j < linePos && line[j] != ' ' ; j ++){
 		command[j] = line[j];
 	}
@@ -208,4 +223,7 @@ static void cmd_cat(){
 }
 static void cmd_filter(){
 	run_filter();
+}
+static void cmd_ps(){
+	getProcessesInfo();
 }

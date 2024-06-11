@@ -91,6 +91,8 @@ int atoi(const char* str);
 void sleep(int sec);
 
 int new_process(uint64_t rip, int argc, char *argv[]);
+void getProcessesInfo();
+
 
 char get_char_block();
 

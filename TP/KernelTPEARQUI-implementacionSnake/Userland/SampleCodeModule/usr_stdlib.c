@@ -287,6 +287,29 @@ int new_process(uint64_t rip, int argc, char *argv[]){
 	return sys_newProcess(rip, argc, argv);
 }
 
+void getProcessesInfo()
+{
+    processInfo *current = sys_ps();
+	printDec(current->pid);
+    while (current != NULL)
+    {
+		printc('\n');
+		prints("PID: ", 100);
+		printDec(current->pid);
+		printc('\n');
+		prints("Priority: ",100);
+		printDec(current->priority);
+		printc('\n');
+		prints("Stack Base: 0x",100);
+		printDec(current->stackBase);
+		printc('\n');
+		prints("Status: ",MAX_BUFFER);
+		prints((current->status) ? "BLOCKED" : "READY", MAX_BUFFER);
+        sys_memFree(current);
+        current = current->next;
+    }
+}
+
 uint64_t get_pid(){
 	return sys_getPid();
 }
