@@ -7,6 +7,8 @@
 #define STDIN 0
 #define STDOUT 1
 #define STDERR 2
+#define EOF (-1)
+
 
 static char buffer[64] = { '0' };
 
@@ -299,9 +301,52 @@ void run_loop(){
 		printc('\n');
 	}
 }
+
 void sleep(int sec){
 	sys_sleepTime(sec);
 }
+
+
+static int isVocal(char c){
+	  if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u' ||
+        c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U') {
+        return 1; 
+    }
+    return 0; 
+}
+
+int run_filter() {
+ 	prints("\nfiltrando vocales:", 50);
+	char c;
+	while ((c = getChar()) != EOF) {
+		if (isVocal(c)){
+	 		printc(c);
+			wait(40);
+		}
+	}
+	printc('\n');
+	return 0;
+}
+
+int run_wc() {
+	char c;
+	int inputLines = 0;
+	while ((int) (c = getChar()) != EOF)
+		inputLines += (c == '\n');
+	prints("\nCantidad de lineas:", MAX_BUFFER);
+	printc(inputLines);
+	printc('\n');
+	return 0;
+}
+
+int run_cat() {
+	char c;
+	while ((c = getChar()) != EOF)
+		printc(c);
+	return 0;
+}
+
+
 
 static void reverse(char str[], int length) {
     int start = 0;

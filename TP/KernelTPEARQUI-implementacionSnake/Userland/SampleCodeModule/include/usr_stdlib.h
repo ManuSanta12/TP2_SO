@@ -5,6 +5,8 @@
 #include <colores.h>
 #include <stddef.h>
 
+#define MAX_BUFFER 254
+
 /* Prints a char in screen */
 void printc (char c);
 
@@ -73,7 +75,14 @@ uint8_t sem_wait(char*name, int pid);
 uint8_t sem_close(char*name);
 
 void run_loop();
+
 uint64_t get_pid();
+
+int run_filter();
+
+int run_wc();
+
+int run_cat();
 
 char* itoa(int num, char* str, int base);
 

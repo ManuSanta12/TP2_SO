@@ -60,7 +60,6 @@ char getCharFromKeyboard() {
     } else {
         retChar = hexMapPressed[scanCode];
     }
-
     //mayuscula
     if ( (retChar >= 'a' && retChar <= 'z') && (shift == 1 || capsLock == 1) ){
         return retChar - ('a'-'A');

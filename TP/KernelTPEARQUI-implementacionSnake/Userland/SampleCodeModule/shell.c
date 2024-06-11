@@ -9,14 +9,14 @@
 #include "phylos.h"
 
 #define MAX_BUFFER 254
-#define MAX_COMMANDS 14
+#define MAX_COMMANDS 17
 
 char line[MAX_BUFFER+1] = {0}; //asi me aseguro que al menos va haber un cero
 char parameter[MAX_BUFFER+1] = {0};
 char command[MAX_BUFFER+1] = {0};
 int linePos = 0;
 char lastc;
-const char * commands[] = {"undefined","help","time","clear","snake","inforeg","zerodiv","invopcode","sizeplus","sizeminus","mem","memtest","phylos","loop"};
+const char * commands[] = {"undefined","help","time","clear","snake","inforeg","zerodiv","invopcode","sizeplus","sizeminus","mem","memtest","phylos","loop", "cat", "filter", "wc"};
 
 void showCommands(){
 	prints("\n-time-               muestra la hora actual en pantalla",MAX_BUFFER);
@@ -29,8 +29,11 @@ void showCommands(){
 	prints("\n-sizeminus-          disminuye el tamanio de letra",MAX_BUFFER);
 	prints("\n-mem-                muestra la informacion de la memory manager actual",MAX_BUFFER);
 	prints("\n-memtest-            corre un programa de testeo para el memory manager",MAX_BUFFER);
-	prints("\n-phylos-             corre filosofos",MAX_BUFFER);
+	prints("\n-phylos-             corre una simulacion al problema de filosofos",MAX_BUFFER);
 	prints("\n-loop-               imprime pid cada 2 segundos",MAX_BUFFER);
+	prints("\n-cat-                imprime el STDIN tal como lo recibe", MAX_BUFFER);
+	prints("\n-wc-                 cuenta la cantidad de lineas del input", MAX_BUFFER);
+	prints("\n-filter-             filtra las vocales del input", MAX_BUFFER);
 	printc('\n');
 }
 
@@ -51,9 +54,12 @@ static void cmd_memory_manager();
 static void cmd_memory_tester();
 static void cmd_phylos();
 static void cmd_loop();
+static void cmd_cat();
+static void cmd_wc();
+static void cmd_filter();
 
 
-static void (*commands_ptr[MAX_COMMANDS])() = {cmd_undefined, cmd_help, cmd_time, cmd_clear, cmd_snake, cmd_inforeg, cmd_zeroDiv,cmd_invOpcode,cmd_charsizeplus,cmd_charsizeminus, cmd_memory_manager,cmd_memory_tester,cmd_phylos,cmd_loop};
+static void (*commands_ptr[MAX_COMMANDS])() = {cmd_undefined, cmd_help, cmd_time, cmd_clear, cmd_snake, cmd_inforeg, cmd_zeroDiv,cmd_invOpcode,cmd_charsizeplus,cmd_charsizeminus, cmd_memory_manager,cmd_memory_tester,cmd_phylos,cmd_loop, cmd_cat, cmd_filter, cmd_wc};
 
 
 void shell (){
@@ -192,4 +198,14 @@ static void cmd_phylos(){
 
 static void cmd_loop(){
 	run_loop();
+}
+
+static void cmd_wc(){
+	run_wc();
+}
+static void cmd_cat(){
+	run_cat();
+}
+static void cmd_filter(){
+	run_filter();
 }
