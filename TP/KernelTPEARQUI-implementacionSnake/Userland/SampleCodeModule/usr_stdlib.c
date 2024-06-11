@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <exc_test.h>
 #include "./include/usr_stdlib.h"
-
+#include <uniqueTypes.h>
 
 #define STDIN 0
 #define STDOUT 1

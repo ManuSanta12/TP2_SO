@@ -96,13 +96,5 @@ void getProcessesInfo();
 
 char get_char_block();
 
-typedef struct memoryInfo
-{
-    char *memoryAlgorithmName;
-    size_t freeMemory;
-    size_t occupiedMemory;
-    size_t totalMemory;
-    unsigned int blocksUsed;
-} MemoryInfo;
 
 #endif

@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <colores.h>
 #include "usr_stdlib.h"
-
+#include <uniqueTypes.h>
 
 
 /*
