@@ -8,6 +8,8 @@
 #include <semaphore.h>
 #include <scheduler.h>
 #include "timeRtc.h"
+#include <pipe.h>
+#include <queue.h>
 
 #define STDIN 0
 #define STDOUT 1
@@ -23,7 +25,7 @@ extern Color BLACK;
 
 int size = 0;
 
-#define SYS_CALLS_QTY 22
+#define SYS_CALLS_QTY 37
 
 static uint64_t sys_read(uint64_t fd, char *buff);
 static uint64_t sys_write(uint64_t fd, char buffer);
@@ -39,6 +41,7 @@ static uint64_t sys_pixelPlus();
 static uint64_t sys_pixelMinus();
 static uint64_t sys_playSound(uint32_t frequnce);
 static uint64_t sys_mute();
+
 static MemoryInfo *sys_memInfo();
 static void *sys_memMalloc(uint64_t size);
 static void sys_memFree(uint64_t ap);
@@ -50,7 +53,22 @@ static pid_t sys_newProcess(uint64_t rip, int argc, char *argv[]);
 static uint64_t sys_getPid();
 static uint64_t sys_sleepTime(int sec);
 // los void los pongo sino me tira warning
+static int sys_nice(pid_t pid, int new_priority);
+static int sys_pipe(int pipefd[2]);
+static int sys_dup2(int fd1, int fd2);
+static int sys_open(int fd);
+static int sys_close(int fd);
+static processInfo *sys_ps();
+static int sys_changeProcessStatus(pid_t pid);
+static pid_t sys_getCurrentPid();
 
+static pid_t sys_exec(uint64_t program, unsigned int argc, char *argv[]);
+static void sys_exit(int return_value, char autokill);
+
+static pid_t sys_waitpid(pid_t pid);
+static int sys_kill(pid_t pid);
+static int sys_block(pid_t pid);
+static int sys_unblock(pid_t pid);
 
 // llena buff con el caracter leido del teclado
 static uint64_t sys_read(uint64_t fd, char *buff)
@@ -183,6 +201,150 @@ static uint64_t sys_getPid(){
 static uint64_t sys_sleepTime(int sec){
   sleep_time(sec);
 }
+//MERGE DESDE ACA
+static int sys_nice(pid_t pid, int newPriority)
+{
+  if (pid <= 0)
+  {
+    return -1;
+  }
+
+  return changePriority(pid, newPriority);
+}
+
+static int sys_pipe(int pipefd[2])
+{
+  PCB *pcb = getProcess(getCurrentPid());
+  pcb->fileDescriptors[PIPEIN].mode = OPEN;
+  pcb->fileDescriptors[PIPEOUT].mode = OPEN;
+  pcb->pipe = pipeOpen();
+  pipefd[0] = PIPEIN;
+  pipefd[1] = PIPEOUT;
+  return 0;
+}
+
+static int sys_dup2(int fd1, int fd2)
+{
+  PCB *pcb = getProcess(getCurrentPid());
+  if (fd1 > pcb->lastFd || fd2 > pcb->lastFd || pcb->fileDescriptors[fd2].mode == CLOSED)
+    return 0;
+  pcb->fileDescriptors[fd1] = pcb->fileDescriptors[fd2];
+  return 1;
+}
+static int sys_open(int fd)
+{
+  PCB *pcb = getProcess(getCurrentPid());
+  if (pcb->lastFd < fd)
+    return 0;
+  pcb->fileDescriptors[fd].mode = OPEN;
+  return 1;
+}
+static int sys_close(int fd)
+{
+  PCB *pcb = getProcess(getCurrentPid());
+  if (pcb->lastFd < fd)
+    return 0;
+  pcb->fileDescriptors[fd].mode = CLOSED;
+  return 1;
+}
+
+static processInfo *sys_ps()
+{
+  return getProccessesInfo();
+}
+
+// Returns READY if unblocked, BLOCKED if blocked, -1 if failed
+static int sys_changeProcessStatus(pid_t pid)
+{
+  PCB *process = getProcess(pid);
+  if (process == NULL)
+  {
+    return -1;
+  }
+  if (process->status == READY)
+  {
+    sys_block(pid);
+    return BLOCKED;
+  }
+  else
+  {
+    sys_unblock(pid);
+    return READY;
+  }
+}
+
+static pid_t sys_getCurrentPid()
+{
+  return getCurrentPid();
+}
+
+static pid_t sys_exec(uint64_t program, unsigned int argc, char *argv[])
+{
+  return new_process(program, argc, argv);
+}
+
+static void sys_exit(int return_value, char autokill)
+{
+  PCB *pcb = getProcess(getCurrentPid());
+  unsigned int lastFd = pcb->lastFd;
+
+  for (int i = 0; i < lastFd; i++)
+  {
+    sys_close(i);
+  }
+
+  killProcess(return_value, autokill);
+}
+
+static pid_t sys_waitpid(pid_t pid)
+{
+  PCB *processPcb = getProcess(pid);
+  if (processPcb == NULL)
+  {
+    return -1;
+  }
+
+  pid_t currentPid = getCurrentPid();
+  enqueuePid(processPcb->blockedQueue, currentPid);
+  blockProcess(currentPid);
+
+  return pid;
+}
+
+static int sys_kill(pid_t pid)
+{
+  if (pid <= 0)
+  {
+    return -1;
+  }
+
+  int x = prepareDummy(pid);
+  if (x == -1)
+  {
+    return -1;
+  }
+
+  sys_exit(0, 0);
+  return 0;
+}
+
+static int sys_block(pid_t pid)
+{
+  if (pid <= 0)
+  {
+    return -1;
+  }
+  return blockProcess(pid);
+}
+
+static int sys_unblock(pid_t pid)
+{
+  if (pid <= 0)
+  {
+    return -1;
+  }
+  return unblockProcess(pid);
+}
 
 static uint64_t (*syscall_handlers[])(uint64_t, uint64_t, uint64_t, uint64_t,
                                       uint64_t) = {
@@ -194,7 +356,12 @@ static uint64_t (*syscall_handlers[])(uint64_t, uint64_t, uint64_t, uint64_t,
     (void *)sys_memInfo,      (void *)sys_memMalloc,   (void *)sys_memFree, 
     (void*)sys_semInit,       (void*)sys_semPost,      (void*)sys_semWait,
     (void*)sys_newProcess, (void*)sys_getPid, (void*)sys_semClose, 
-    (void *)sys_sleepTime};
+    (void *)sys_sleepTime, (void *)sys_nice,
+    (void *)sys_pipe, (void *)sys_dup2, (void *)sys_open,
+    (void *)sys_close, (void *)sys_ps, (void *)sys_changeProcessStatus,
+    (void *)sys_getCurrentPid, (void *)sys_exec, (void *)sys_exit,
+    (void *)sys_waitpid, (void *)sys_kill, (void *)sys_block,
+    (void *)sys_unblock};
 
 // Devuelve la syscall correspondiente
 //                                rdi           rsi           rdx rd10 r8 r9

@@ -22,10 +22,10 @@ Queue active = NULL;
 Queue expired = NULL;
 
 // Schelduler states
-int processAmount = -1;
-unsigned int processReadyCount = 0;
+int processAmount;
+unsigned int processReadyCount;
 pid_t placeholderProcessPid = NULL;
-char proccessBeingRun = 0;
+char proccessBeingRun;
 
 void dummyProcess()
 {
@@ -37,6 +37,11 @@ void dummyProcess()
 
 void createScheduler()
 {
+    active = newQueue();
+    expired = newQueue();
+    processAmount = 0;
+    processReadyCount = 0;
+    proccessBeingRun = 0;
     placeholderProcessPid = new_process((uint64_t)dummyProcess, 0, NULL);
     for (int i = 0; i <= 2; i++)
     {
