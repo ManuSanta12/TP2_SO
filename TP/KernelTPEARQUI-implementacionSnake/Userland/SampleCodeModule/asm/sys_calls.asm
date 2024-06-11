@@ -25,6 +25,20 @@ GLOBAL sys_newProcess
 GLOBAL sys_getPid
 GLOBAL sys_semClose
 GLOBAL sys_sleepTime
+GLOBAL sys_nice
+GLOBAL sys_pipe
+GLOBAL sys_dup2
+GLOBAL sys_open
+GLOBAL sys_close
+GLOBAL sys_ps
+GLOBAL sys_changeProcessStatus
+GLOBAL sys_getCurrentPid
+GLOBAL sys_exec
+GLOBAL sys_exit
+GLOBAL sys_waitpid
+GLOBAL sys_kill
+GLOBAL sys_block
+GLOBAL sys_unblock
 section .text
 
 ; Pasaje de parametros en C:
@@ -157,5 +171,75 @@ sys_semClose:
 
 sys_sleepTime:
     mov rax, 0x18
+    int 80h
+    ret
+
+sys_nice:
+    mov rax, 0x19
+    int 80h
+    ret
+
+sys_pipe:
+    mov rax, 0x1A
+    int 80h
+    ret
+
+sys_dup2:
+    mov rax, 0x1B
+    int 80h
+    ret
+
+sys_open:
+    mov rax, 0x1C
+    int 80h
+    ret
+
+sys_close:
+    mov rax, 0x1D
+    int 80h
+    ret
+
+sys_ps:
+    mov rax, 0x1E
+    int 80h
+    ret
+
+sys_changeProcessStatus:
+    mov rax, 0x1F
+    int 80h
+    ret
+
+sys_getCurrentPid:
+    mov rax, 0x20
+    int 80h
+    ret
+
+sys_exec:
+    mov rax, 0x21
+    int 80h
+    ret
+
+sys_exit:
+    mov rax, 0x22
+    int 80h
+    ret
+
+sys_waitpid:
+    mov rax, 0x23
+    int 80h
+    ret
+
+sys_kill:
+    mov rax, 0x24
+    int 80h
+    ret
+
+sys_block:
+    mov rax, 0x25
+    int 80h
+    ret
+
+sys_unblock:
+    mov rax, 0x26
     int 80h
     ret
