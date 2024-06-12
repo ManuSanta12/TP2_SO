@@ -295,7 +295,7 @@ static void sys_exit(int return_value, char autokill)
 
   killProcess(return_value, autokill);
 }
-
+/*
 static pid_t sys_waitpid(pid_t pid)
 {
   PCB *processPcb = getProcess(pid);
@@ -309,7 +309,7 @@ static pid_t sys_waitpid(pid_t pid)
   blockProcess(currentPid);
 
   return pid;
-}
+}*/
 
 static int sys_kill(pid_t pid)
 {

@@ -9,7 +9,7 @@
 #include "phylos.h"
 
 #define MAX_BUFFER 254
-#define MAX_COMMANDS 17
+#define MAX_COMMANDS 18
 
 char line[MAX_BUFFER+1] = {0}; //asi me aseguro que al menos va haber un cero
 char parameter[MAX_BUFFER+1] = {0};

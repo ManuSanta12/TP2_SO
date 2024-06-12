@@ -109,7 +109,7 @@ typedef struct
 
 typedef struct node
 {
-    PCB process;
+    PCB * process;
     struct node *next;
 } Node;
 
