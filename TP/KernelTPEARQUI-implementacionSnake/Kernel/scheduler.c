@@ -503,11 +503,6 @@ processInfo *getProccessesInfo()
     processInfo *first = NULL;
     processInfo *current = NULL;
     Queue currentNode = scheduler->active;
-    if(scheduler->active==NULL){
-        int x=1;
-        int a=0;
-        x=x/a;
-    }
     pid_t firstPid = scheduler->active->process->pid;
     while (currentNode != NULL)
     {
