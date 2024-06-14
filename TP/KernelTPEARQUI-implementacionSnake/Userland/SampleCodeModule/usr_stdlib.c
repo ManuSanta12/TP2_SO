@@ -291,6 +291,7 @@ void getProcessesInfo()
 {
     processInfo *current = sys_ps();
 	printDec(current->pid);
+	new_process((uint64_t)run_loop, 0, NULL);
     while (current != NULL)
     {
 		printc('\n');
