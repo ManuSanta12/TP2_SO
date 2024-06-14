@@ -65,4 +65,5 @@ uint64_t sys_getPid();
 
 uint64_t sys_sleepTime(int sec);
 
+processInfo * sys_ps();
 #endif  

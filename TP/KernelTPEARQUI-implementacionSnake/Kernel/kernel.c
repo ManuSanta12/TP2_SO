@@ -54,10 +54,10 @@ int main() {
 	load_idt();
 	create_memory(0x2000000 - 0x1000000);
   clearScanCode();
-  ((EntryPoint)sampleCodeModuleAddress)();
 	createScheduler();
-	new_process((uint64_t)sampleCodeModuleAddress, 0, NULL);
 	_sti();
 	_hlt();
+	new_process((uint64_t)sampleCodeModuleAddress, 0, NULL);
+  ((EntryPoint)sampleCodeModuleAddress)();
 	return 0;
 }
