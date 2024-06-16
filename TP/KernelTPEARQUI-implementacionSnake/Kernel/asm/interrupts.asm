@@ -9,7 +9,7 @@ GLOBAL interrupt_keyboard
 GLOBAL interrupt_timerTick
 GLOBAL interrupt_syscall
 EXTERN syscall_dispatcher
-
+EXTERN contextSwitch
 GLOBAL exception_divideByZero
 GLOBAL exception_invalidOpCode
 
@@ -18,7 +18,6 @@ GLOBAL inforeg
 GLOBAL hasInforeg
 
 EXTERN irqDispatcher
-EXTERN contextSwitch
 
 EXTERN timer_handler
 EXTERN keyboard_handler
@@ -212,7 +211,7 @@ interrupt_timerTick:
 	pushState
 
 	call timer_handler
-
+	call contextSwitch
 	endOfHardwareInterrupt
 	popState
 	iretq

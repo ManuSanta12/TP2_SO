@@ -18,6 +18,7 @@ extern void _int20h();                                                          
 priority_t priorities[NUMBER_OF_PRIORITIES] = {9, 8, 7, 6, 5, 4, 3, 2, 1};
 
 // Queues
+uint8_t init=0;
 typedef struct scheduler{
     Queue active;
     Queue expired;
@@ -68,6 +69,7 @@ void createScheduler()
     scheduler->active->process.status = BLOCKED;
     
     scheduler->processReadyCount--;
+    init = 1;
     
 }
 
@@ -368,6 +370,9 @@ int prepareDummy(pid_t pid)
 
 uint64_t contextSwitch(uint64_t rsp)
 {
+    if(init==0){
+        return;
+    }
     // C1.1 y C1.3 (Todos)
     if (!scheduler->proccessBeingRun)
     {
