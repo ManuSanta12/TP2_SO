@@ -9,6 +9,7 @@
 #define STDERR 2
 #define EOF (-1)
 
+int r=10;
 
 static char buffer[64] = { '0' };
 
@@ -288,14 +289,18 @@ int new_process(uint64_t rip, int argc, char *argv[]){
 }
 
 
-static void dummy_loop(){
-	while(1);
+
+static void dummy(){
+	
 }
+
 
 void getProcessesInfo()
 {
     processInfo *current = NULL;
-	new_process((uint64_t)dummy_loop, 0, NULL);
+	new_process((uint64_t)run_loop, 0, NULL);
+	new_process((uint64_t)dummy, 0, NULL);
+
 	current = sys_ps();
 	//printDec(current->pid);
     while (current != NULL)
@@ -371,10 +376,12 @@ int run_wc() {
 }
 
 int run_cat() {
+	/*
 	char c;
 	while ((c = getChar()) != EOF)
 		printc(c);
-	return 0;
+	return 0;*/
+	printDec(r);
 }
 
 
@@ -444,8 +451,8 @@ int atoi(const char* str) {
 
 int up_priority(pid_t pid){
 	priority_t prio = sys_getPriority(pid);
-	prints("\n old prio: \n",MAX_BUFFER);
-	printDec(prio);
-	printc('\n');
+	//prints("\n old prio: \n",MAX_BUFFER);
+	//printDec(prio);
+	//printc('\n');
     return sys_nice(pid, prio+1);
 }

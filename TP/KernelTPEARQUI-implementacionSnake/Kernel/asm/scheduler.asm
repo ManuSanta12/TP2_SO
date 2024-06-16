@@ -25,6 +25,7 @@ _start:
 ; rcx -> argv
 
 loadProcess:
+   
     enter 0, 0
 
     ; Muevo el rsp que me pasan por parametro a el registro rsp

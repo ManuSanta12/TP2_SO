@@ -240,4 +240,6 @@ static void cmd_nice(){
 	if(ret==-1){
 		prints("\nNo se pudo actualizar la prioridad\n", MAX_BUFFER);
 	}
+	prints("\nPrioridad aumentada!\n", MAX_BUFFER);
+
 }

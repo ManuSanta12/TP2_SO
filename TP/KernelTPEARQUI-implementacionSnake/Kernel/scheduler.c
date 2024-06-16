@@ -5,8 +5,8 @@
 #include <lib.h>
 #include <pipe.h>
 
-extern uint64_t loadProcess(uint64_t rip, uint64_t rsp, uint64_t argc, uint64_t argv); // implement on assembler
-extern void _int20h();                                                                 // implement int20h con assembler
+extern uint64_t loadProcess(uint64_t, uint64_t , uint64_t , uint64_t ); // implement on assembler
+extern void _int20h;                                                                 // implement int20h con assembler
 #define SCHEDULER_ADDRESS 0x60000
 // tck and ppriorities
 #define STACK_SIZE 4096
@@ -149,7 +149,7 @@ int blockProcess(pid_t pid)
     if (found)
     {
         scheduler->processReadyCount--;
-        _int20h();
+        _int20h;
         return 0;
     }
     return -1;
@@ -480,7 +480,7 @@ int killProcess(int returnValue, char autokill)
     if (autokill)
     {
        scheduler->proccessBeingRun = 0;
-        _int20h();
+        _int20h;
     }
     return returnValue;
 }
@@ -504,7 +504,7 @@ int changePriority(pid_t pid, int priorityValue)
 int yieldProcess()
 {
     scheduler->active->process.quantumsLeft = 0;
-    _int20h();
+    _int20h;
     return 0;
 }
 
