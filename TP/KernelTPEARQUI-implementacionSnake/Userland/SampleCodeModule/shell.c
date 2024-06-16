@@ -9,14 +9,14 @@
 #include "phylos.h"
 
 #define MAX_BUFFER 254
-#define MAX_COMMANDS 18
+#define MAX_COMMANDS 19
 
 char line[MAX_BUFFER+1] = {0}; //asi me aseguro que al menos va haber un cero
 char parameter[MAX_BUFFER+1] = {0};
 char command[MAX_BUFFER+1] = {0};
 int linePos = 0;
 char lastc;
-const char * commands[] = {"undefined","help","time","clear","snake","inforeg","zerodiv","invopcode","sizeplus","sizeminus","mem","memtest","phylos","loop", "cat", "filter", "wc", "ps"};
+const char * commands[] = {"undefined","help","time","clear","snake","inforeg","zerodiv","invopcode","sizeplus","sizeminus","mem","memtest","phylos","loop", "cat", "filter", "wc", "ps","nice"};
 
 void showCommands(){
 	prints("\n-time-               muestra la hora actual en pantalla",MAX_BUFFER);
@@ -35,6 +35,7 @@ void showCommands(){
 	prints("\n-wc-                 cuenta la cantidad de lineas del input", MAX_BUFFER);
 	prints("\n-filter-             filtra las vocales del input", MAX_BUFFER);
 	prints("\n-ps-                 muestra en pantalla la inforacion de proceso actual", MAX_BUFFER);
+	prints("\n-nice-               aumenta la prioridad del proceso deseado  ", MAX_BUFFER);
 	printc('\n');
 }
 
@@ -59,9 +60,10 @@ static void cmd_cat();
 static void cmd_wc();
 static void cmd_filter();
 static void cmd_ps();
+static void cmd_nice();
 static void runCommandInBackground(void (*cmd)());
 
-static void (*commands_ptr[MAX_COMMANDS])() = {cmd_undefined, cmd_help, cmd_time, cmd_clear, cmd_snake, cmd_inforeg, cmd_zeroDiv,cmd_invOpcode,cmd_charsizeplus,cmd_charsizeminus, cmd_memory_manager,cmd_memory_tester,cmd_phylos,cmd_loop, cmd_cat, cmd_filter, cmd_wc, cmd_ps};
+static void (*commands_ptr[MAX_COMMANDS])() = {cmd_undefined, cmd_help, cmd_time, cmd_clear, cmd_snake, cmd_inforeg, cmd_zeroDiv,cmd_invOpcode,cmd_charsizeplus,cmd_charsizeminus, cmd_memory_manager,cmd_memory_tester,cmd_phylos,cmd_loop, cmd_cat, cmd_filter, cmd_wc, cmd_ps,cmd_nice};
 int runInBackground = 0; 
 
 void shell (){
@@ -226,4 +228,16 @@ static void cmd_filter(){
 }
 static void cmd_ps(){
 	getProcessesInfo();
+}
+
+static void cmd_nice(){
+	if(strlen(parameter)==0){
+		prints("\nIngresar el pid del proceso por parametro\n",MAX_BUFFER);
+		return;
+	}
+	pid_t pid = charToInt(parameter);
+	int ret = up_priority(pid);
+	if(ret==-1){
+		prints("\nNo se pudo actualizar la prioridad\n", MAX_BUFFER);
+	}
 }

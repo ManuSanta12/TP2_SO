@@ -25,7 +25,7 @@ extern Color BLACK;
 
 int size = 0;
 
-#define SYS_CALLS_QTY 37
+#define SYS_CALLS_QTY 43
 
 static uint64_t sys_read(uint64_t fd, char *buff);
 static uint64_t sys_write(uint64_t fd, char buffer);
@@ -61,6 +61,7 @@ static int sys_close(int fd);
 static processInfo *sys_ps();
 static int sys_changeProcessStatus(pid_t pid);
 static pid_t sys_getCurrentPid();
+static priority_t sys_getPriority(pid_t pid);
 
 static pid_t sys_exec(uint64_t program, unsigned int argc, char *argv[]);
 static void sys_exit(int return_value, char autokill);
@@ -253,6 +254,10 @@ static processInfo *sys_ps()
   return getProccessesInfo();
 }
 
+static priority_t sys_getPriority(int pid){
+  return get_priority(pid);
+}
+
 // Returns READY if unblocked, BLOCKED if blocked, -1 if failed
 static int sys_changeProcessStatus(pid_t pid)
 {
@@ -356,13 +361,13 @@ static uint64_t (*syscall_handlers[])(uint64_t, uint64_t, uint64_t, uint64_t,
     (void *)sys_pixelMinus,   (void *)sys_playSound,   (void *)sys_mute,
     (void *)sys_memInfo,      (void *)sys_memMalloc,   (void *)sys_memFree, 
     (void*)sys_semInit,       (void*)sys_semPost,      (void*)sys_semWait,
-    (void*)sys_newProcess, (void*)sys_getPid, (void*)sys_semClose, 
-    (void *)sys_sleepTime, (void *)sys_nice,
-    (void *)sys_pipe, (void *)sys_dup2, (void *)sys_open,
-    (void *)sys_close, (void *)sys_ps, (void *)sys_changeProcessStatus,
-    (void *)sys_getCurrentPid, (void *)sys_exec, (void *)sys_exit,
-    (void *)sys_waitpid, (void *)sys_kill, (void *)sys_block,
-    (void *)sys_unblock};
+    (void*)sys_newProcess,    (void*)sys_getPid,       (void*)sys_semClose, 
+    (void *)sys_sleepTime,    (void *)sys_nice,        (void *)sys_pipe,         
+    (void *)sys_dup2,         (void *)sys_open,        (void *)sys_close,        
+    (void *)sys_ps,           (void *)sys_changeProcessStatus,
+    (void *)sys_getCurrentPid,(void *)sys_exec,        (void *)sys_exit, 
+    (void *)sys_waitpid,      (void *)sys_kill,        (void *)sys_block, 
+    (void *)sys_unblock ,     (void*)sys_getPriority};
 
 // Devuelve la syscall correspondiente
 //                                rdi           rsi           rdx rd10 r8 r9

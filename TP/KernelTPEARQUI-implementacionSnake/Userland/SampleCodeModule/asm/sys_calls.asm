@@ -39,6 +39,7 @@ GLOBAL sys_waitpid
 GLOBAL sys_kill
 GLOBAL sys_block
 GLOBAL sys_unblock
+GLOBAL sys_getPriority
 section .text
 
 ; Pasaje de parametros en C:
@@ -241,5 +242,10 @@ sys_block:
 
 sys_unblock:
     mov rax, 0x26
+    int 80h
+    ret
+
+sys_getPriority:
+    mov rax, 0x27
     int 80h
     ret

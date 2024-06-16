@@ -66,4 +66,9 @@ uint64_t sys_getPid();
 uint64_t sys_sleepTime(int sec);
 
 processInfo * sys_ps();
+
+priority_t sys_getPriority(pid_t pid);
+
+int sys_nice(pid_t pid, int newPriority);
+
 #endif  

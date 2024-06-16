@@ -287,11 +287,17 @@ int new_process(uint64_t rip, int argc, char *argv[]){
 	return sys_newProcess(rip, argc, argv);
 }
 
+
+static void dummy_loop(){
+	while(1);
+}
+
 void getProcessesInfo()
 {
-    processInfo *current = sys_ps();
-	printDec(current->pid);
-	new_process((uint64_t)run_loop, 0, NULL);
+    processInfo *current = NULL;
+	new_process((uint64_t)dummy_loop, 0, NULL);
+	current = sys_ps();
+	//printDec(current->pid);
     while (current != NULL)
     {
 		printc('\n');
@@ -325,6 +331,7 @@ void run_loop(){
 		printc('\n');
 	}
 }
+
 
 void sleep(int sec){
 	sys_sleepTime(sec);
@@ -431,4 +438,14 @@ int atoi(const char* str) {
     }
 
     return sign * result;
+}
+
+
+
+int up_priority(pid_t pid){
+	priority_t prio = sys_getPriority(pid);
+	prints("\n old prio: \n",MAX_BUFFER);
+	printDec(prio);
+	printc('\n');
+    return sys_nice(pid, prio+1);
 }

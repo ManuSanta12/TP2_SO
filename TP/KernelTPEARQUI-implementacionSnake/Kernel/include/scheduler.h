@@ -32,6 +32,6 @@ int killProcess(int returnValue, char autokill);
 int changePriority(pid_t pid, int priorityValue);
 int yieldProcess();
 processInfo * getProccessesInfo();
-
+priority_t get_priority(pid_t pid);
 
 #endif // SCHEDULER_H

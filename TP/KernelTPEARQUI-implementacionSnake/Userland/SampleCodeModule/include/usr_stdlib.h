@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <colores.h>
 #include <stddef.h>
+#include <uniqueTypes.h>
 
 #define MAX_BUFFER 254
 
@@ -91,9 +92,11 @@ int atoi(const char* str);
 void sleep(int sec);
 
 int new_process(uint64_t rip, int argc, char *argv[]);
+
 void getProcessesInfo();
 
-
+int up_priority(pid_t pid);
+    
 char get_char_block();
 
 
