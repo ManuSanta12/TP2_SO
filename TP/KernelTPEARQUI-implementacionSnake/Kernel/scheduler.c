@@ -7,6 +7,7 @@
 
 extern uint64_t loadProcess(uint64_t, uint64_t , uint64_t , uint64_t ); // implement on assembler
 extern void _int20h;                                                                 // implement int20h con assembler
+extern void execute_next(uint64_t);
 #define SCHEDULER_ADDRESS 0x60000
 // tck and ppriorities
 #define STACK_SIZE 4096
@@ -207,6 +208,7 @@ pid_t new_process(uint64_t rip, int argc, char *argv[])
 {
     Node *newProcess = memory_manager_malloc(sizeof(Node));
     //newProcess->process = memory_manager_malloc(sizeof(PCB));
+    newProcess->process.rip = rip;
     newProcess->process.pid = scheduler->processAmount++;
     newProcess->process.priority = DEFAULT_PRIORITY;
     newProcess->process.quantumsLeft = priorities[DEFAULT_PRIORITY];
@@ -368,11 +370,12 @@ int prepareDummy(pid_t pid)
     return 0;
 }
 
-uint64_t contextSwitch(uint64_t rsp)
+uint64_t contextSwitch(uint64_t rsp, uint64_t rip)
 {
     if(init==0){
         return;
     }
+    Node* aux = scheduler->active;
     // C1.1 y C1.3 (Todos)
     if (!scheduler->proccessBeingRun)
     {
@@ -391,7 +394,8 @@ uint64_t contextSwitch(uint64_t rsp)
 
     Node *currentProcess = scheduler->active;
     currentProcess->process.rsp = rsp;
-
+    //currentProcess->process.rip = rip;
+    uint64_t auxRIP = rip;
     // Si no tengo procesos en ready, es decir, estan todos bloqueados tengo que correr el placeholderProcess
     if (scheduler->processReadyCount == 0)
     {
@@ -446,6 +450,9 @@ uint64_t contextSwitch(uint64_t rsp)
         }
     }
     nextProcess();
+    if(aux!=scheduler->active){
+        execute_next(scheduler->active->process.rip);   
+    }
     return scheduler->active->process.rsp;
 }
 

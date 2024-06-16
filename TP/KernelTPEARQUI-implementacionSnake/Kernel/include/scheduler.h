@@ -27,7 +27,7 @@ int unblockProcess(pid_t pid);
 pid_t new_process(uint64_t rip, int argc, char *argv[]);
 void nextProcess();
 int prepareDummy(pid_t pid);
-uint64_t contextSwitch(uint64_t rsp);
+uint64_t contextSwitch(uint64_t rsp, uint64_t rip);
 int killProcess(int returnValue, char autokill);
 int changePriority(pid_t pid, int priorityValue);
 int yieldProcess();

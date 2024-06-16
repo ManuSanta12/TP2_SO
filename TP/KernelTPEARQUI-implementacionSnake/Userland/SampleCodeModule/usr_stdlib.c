@@ -291,14 +291,16 @@ int new_process(uint64_t rip, int argc, char *argv[]){
 
 
 static void dummy(){
-	
+	//prints("\nsoy el dummy\n",MAX_BUFFER);
+	r=5;
+	return;
 }
 
 
 void getProcessesInfo()
 {
     processInfo *current = NULL;
-	new_process((uint64_t)run_loop, 0, NULL);
+	//new_process((uint64_t)run_loop, 0, NULL);
 	new_process((uint64_t)dummy, 0, NULL);
 
 	current = sys_ps();
@@ -381,7 +383,9 @@ int run_cat() {
 	while ((c = getChar()) != EOF)
 		printc(c);
 	return 0;*/
+	printc('\n');
 	printDec(r);
+	printc('\n');
 }
 
 

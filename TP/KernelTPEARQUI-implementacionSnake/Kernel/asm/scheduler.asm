@@ -1,5 +1,6 @@
 GLOBAL loadProcess
 GLOBAL _int20h
+GLOBAL execute_next
 EXTERN contextSwitch
 
 section .text
@@ -61,3 +62,7 @@ loadProcess:
 _int20h:
     int 20h
     ret
+
+execute_next:
+        mov rax, rdi
+        jmp rax

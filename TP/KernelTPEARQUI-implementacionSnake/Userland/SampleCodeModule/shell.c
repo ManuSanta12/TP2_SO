@@ -239,7 +239,8 @@ static void cmd_nice(){
 	int ret = up_priority(pid);
 	if(ret==-1){
 		prints("\nNo se pudo actualizar la prioridad\n", MAX_BUFFER);
+	} else{
+		prints("\nPrioridad aumentada!\n", MAX_BUFFER);
 	}
-	prints("\nPrioridad aumentada!\n", MAX_BUFFER);
 
 }

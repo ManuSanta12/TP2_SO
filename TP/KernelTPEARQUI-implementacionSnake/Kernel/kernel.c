@@ -57,7 +57,7 @@ int main() {
 	createScheduler();
 	_sti();
 	_hlt();
-	new_process((uint64_t)sampleCodeModuleAddress, 0, NULL);
   ((EntryPoint)sampleCodeModuleAddress)();
+	new_process((uint64_t)sampleCodeModuleAddress, 0, NULL);
 	return 0;
 }

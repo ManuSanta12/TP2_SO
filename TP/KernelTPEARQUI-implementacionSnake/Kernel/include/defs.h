@@ -98,6 +98,7 @@ typedef struct
     status_t status;
     unsigned int quantumsLeft;
     uint64_t rsp;
+    uint64_t rip; //guardo el último rip a donde seguir ejecutando
     uint64_t stackBase;
     BlockedQueueADT blockedQueue;
     fd_t fileDescriptors[FDS];
