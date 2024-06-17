@@ -24,7 +24,7 @@ priority_t priorities[NUMBER_OF_PRIORITIES] = {9, 8, 7, 6, 5, 4, 3, 2, 1};
 
 uint8_t init=0;
 typedef struct scheduler{
-    Node *processes[MAX_PROC];
+    listNode *processes[MAX_PROC];
 	LinkedList lvls[LEVELS + 1];
 
     // Schelduler states
@@ -61,136 +61,192 @@ void createScheduler()
 }
 
 static uint16_t getNextPid() {
-	Node *process = NULL;
+	PCB *process = NULL;
 	for (int lvl = LEVELS - 1; lvl >= 0 && process == NULL; lvl--)
 		if (!isEmpty(scheduler->lvls[lvl]))
 			process = (Node *) (getFirst(scheduler->lvls[lvl]))->data;
 
 	if (process == NULL)
 		return FIRST_PID;
-	return process->process.pid;
+	return process->pid;
 }
 
-
-
- PCB *getProcess(pid_t pid)
-{
-    Node *current = scheduler->active;
-    while (current != NULL)
-    {
-        if (current->process.pid == pid)
-        {
-            return &(current->process);
-        }
-        else
-        {
-            current = current->next;
-        }
+int32_t set_priority(pid_t pid, priority_t newPriority) {
+	listNode *node = scheduler->processes[pid];
+	if (node == NULL || pid == FIRST_PID){
+		return -1;
     }
-    current = scheduler->expired;
-    while (current != NULL)
-    {
-        if (current->process.pid == pid)
-        {
-            return &(current->process);
-        }
-        else
-        {
-            current = current->next;
-        }
-    }
-    return NULL;
+	PCB *process = (PCB *) node->data;
+	if (newPriority >= LEVELS)
+		return -1;
+	if (process->status == READY || process->status == RUNNING) {
+		removeNode(scheduler->lvls[process->priority], node);
+		scheduler->processes[process->pid] = appendNode(scheduler->lvls[newPriority], node);
+	}
+	process->priority = newPriority;
+	return newPriority;
 }
 
-priority_t get_priority(pid_t pid){
-    PCB* auxPCB = getProcess(pid);
-    return auxPCB->priority;
+int8_t setStatus(uint16_t pid, uint8_t newStatus) {
+	listNode *node = scheduler->processes[pid];
+	if (node == NULL || pid == FIRST_PID)
+		return -1;
+	PCB *process = (PCB *) node->data;
+	status_t oldStatus = process->status;
+	if (newStatus == RUNNING || newStatus == ZOMBIE || oldStatus == ZOMBIE)
+		return -1;
+	if (newStatus == process->status)
+		return newStatus;
+
+	process->status = newStatus;
+	if (newStatus == BLOCKED) {
+		removeNode(scheduler->lvls[process->priority], node);
+		appendNode(scheduler->lvls[LEVELS], node); //los procesos bloqueados estan en el ultimo nivel
+	}
+	else if (oldStatus == BLOCKED) {
+		removeNode(scheduler->lvls[LEVELS], node);
+		process->priority = MAX_PRIORITY;
+		prependNode(scheduler->lvls[process->priority], node);
+		scheduler->remainingQuantum = 0;
+	}
+	return newStatus;
 }
 
-uint64_t getCurrentPid()
-{
-    if (scheduler->active != NULL)
-    {
-        return scheduler->active->process.pid;
+status_t get_status(pid_t pid){
+    listNode* node = scheduler->processes[pid];
+    if(node == NULL){
+        return DEAD;
     }
-    return -1;
+    return ((PCB *) node->data)->status;
+
 }
 
-int blockProcess(pid_t pid)
-{
-    Node *current = scheduler->active;
-    char found = 0;
+void *schedule(void *prevStackPointer) {
+	static int firstTime = 1;
 
-    while (!found && current != NULL)
-    {
-        if (current->process.pid == pid)
-        {
-            found = 1;
-            current->process.status = BLOCKED;
-        }
-        else
-        {
-            current = current->next;
-        }
-    }
-    current = scheduler->expired;
-    while (!found && current != NULL)
-    {
-        if (current->process.pid == pid)
-        {
-            found = 1;
-            current->process.status = BLOCKED;
-        }
-        else
-        {
-            current = current->next;
-        }
-    }
-    if (found)
-    {
-        scheduler->processReadyCount--;
-        _int20h;
-        return 0;
-    }
-    return -1;
+	scheduler->remainingQuantum--;
+	if (!scheduler->processAmount || scheduler->remainingQuantum > 0)
+		return prevStackPointer;
+
+	PCB *currentProcess;
+	listNode *node = scheduler->processes[scheduler->currentPid];
+
+	if (node != NULL) {
+		currentProcess = (PCB *) node->data;
+		if (!firstTime)
+			currentProcess->rsp = prevStackPointer;
+		else
+			firstTime = 0;
+		if (currentProcess->status == RUNNING)
+			currentProcess->status = READY;
+
+		uint8_t newPriority = currentProcess->priority > 0 ? currentProcess->priority - 1 : currentProcess->priority;
+		setPriority(currentProcess->pid, newPriority);
+	}
+
+	scheduler->currentPid = getNextPid(scheduler);
+	currentProcess = scheduler->processes[scheduler->currentPid]->data;
+
+	if (scheduler->killFg && currentProcess->fileDescriptors[STDIN] == STDIN) {
+		scheduler->killFg = 0;
+		if (killCurrentProcess(-1) != -1)
+			forceTimerTick();
+	}
+	scheduler->remainingQuantum = (MAX_PRIORITY - currentProcess->priority);
+	currentProcess->status = RUNNING;
+	return currentProcess->rsp;
 }
 
-int unblockProcess(pid_t pid)
-{
-    Node *current = scheduler->active;
-    char found = 0;
+int16_t createProcess(main_foo code, char **args, char *name, uint8_t priority, int16_t fileDescriptors[], uint8_t unkillable) {
+	if (scheduler->processAmount >= MAX_PROC) // TODO: Agregar panic?
+		return -1;
+	PCB *process = (PCB *) memory_manager_malloc(sizeof(PCB));
+	initProcess(process, scheduler->nextPid, scheduler->currentPid, code, args, name, priority, fileDescriptors, unkillable);
 
-    while (!found && current != NULL)
-    {
-        if (current->process.pid == pid)
-        {
-            found = 1;
-            current->process.status = READY;
-        }
-        else
-        {
-            current = current->next;
-        }
-    }
-    current = scheduler->expired;
-    while (!found && current != NULL)
-    {
-        if (current->process.pid == pid)
-        {
-            found = 1;
-            current->process.status = READY;
-        }
-        else
-        {
-            current = current->next;
-        }
-    }
-    if (found)
-    {
-        scheduler->processReadyCount++;
-        return 0;
-    }
-    return -1;
+	listNode *processNode;
+	if (process->pid != FIRST_PID)
+		processNode = appendElement(scheduler->lvls[process->priority], (void *) process);
+	else {
+		processNode = allocMemory(sizeof(Node));
+		processNode->data = (void *) process;
+	}
+	scheduler->processes[process->pid] = processNode;
+
+	while (scheduler->processes[scheduler->nextPid] != NULL)
+		scheduler->nextPid = (scheduler->nextPid + 1) % MAX_PROC;
+	scheduler->processAmount++;
+	return process->pid;
+}
+
+static void destroyZombie(PCB *zombie) {
+	listNode *zombieNode = scheduler->processes[zombie->pid];
+	scheduler->processAmount--;
+	scheduler->processes[zombie->pid] = NULL;
+	freeProcess(zombie);
+	free(zombieNode);
+}
+
+int32_t killCurrentProcess(int32_t retValue) {
+	return killProcess(scheduler->currentPid, retValue);
+}
+
+int32_t killProcess(uint16_t pid, int32_t retValue) {
+	listNode *processToKillNode = scheduler->processes[pid];
+	if (processToKillNode == NULL)
+		return -1;
+	PCB *processToKill = (PCB *) processToKillNode->data;
+	if (processToKill->status == ZOMBIE || processToKill->canBeKilled)
+		return -1;
+
+	closeFileDescriptors(processToKill);
+
+	uint8_t priorityIndex = processToKill->status != BLOCKED ? processToKill->priority : BLOCKED_INDEX;
+	removeNode(scheduler->lvls[priorityIndex], processToKillNode);
+	processToKill->retVal = retValue;
+
+	processToKill->status = ZOMBIE;
+
+	begin(processToKill->zombie);
+	while (hasNext(processToKill->zombie)) {
+		destroyZombie(scheduler, (PCB *) next(processToKill->zombie));
+	}
+
+	listNode *parentNode = scheduler->processes[processToKill->parentPID];
+	if (parentNode != NULL && ((PCB *) parentNode->data)->status != ZOMBIE) {
+		PCB *parent = (PCB *) parentNode->data;
+		appendNode(parent->zombie, processToKillNode);
+		if (processIsWaiting(parent, processToKill->pid))
+			setStatus(processToKill->parentPID, READY);
+	}
+	else {
+		destroyZombie(processToKill);
+	}
+	if (pid == scheduler->currentPid)
+		yield();
+	return 0;
+}
+
+processInfo * getProccessesInfo(){
+    processInfo * info = memory_manager_malloc(sizeof(processInfo));
+	processInfo *ps = memory_manager_malloc(scheduler->processAmount * sizeof(processInfo));
+	int processIndex = 0;
+
+	loadSnapshot(&ps[processIndex++], (PCB *) scheduler->processes[FIRST_PID]->data);
+	for (int lvl = LEVELS; lvl >= 0; lvl--) { // Se cuentan tambien los bloqueados
+		begin(scheduler->lvls[lvl]);
+		while (hasNext(scheduler->lvls[lvl])) {
+			PCB *nextProcess = (PCB *) next(scheduler->lvls[lvl]);
+			loadSnapshot(&ps[processIndex], nextProcess);
+			processIndex++;
+			if (nextProcess->status != ZOMBIE) {
+				getZombiesSnapshots(processIndex, ps, nextProcess);
+				processIndex += getLength(nextProcess->zombie);
+			}
+		}
+	}
+	info->length = scheduler->processAmount;
+	info->snapshotList = ps;
+	return info;
 }
 
 char **copy_argv(int argc, char **argv)
@@ -277,328 +333,3 @@ int getZombiesSnapshots(int processIndex, ProcessSnapshot psArray[], Process *ne
 
 
 
-void nextProcess()
-{
-    Node *current = scheduler->active;
-    Node *previous = NULL;
-    while (current != NULL && current->process.status == BLOCKED)
-    {
-        previous = current;
-        current = current->next;
-    }
-    if (current != NULL)
-    {
-        if (previous != NULL)
-        {
-            previous->next = current->next;
-            current->next = scheduler->active;
-            scheduler->active = current;
-        }
-    }
-    else
-    {
-        Node *aux = scheduler->active;
-        scheduler->active = scheduler->expired;
-        scheduler->expired = aux;
-
-        current = scheduler->active;
-        previous = NULL;
-        while (current != NULL && current->process.status == BLOCKED)
-        {
-            previous = current;
-            current = current->next;
-        }
-        if (previous != NULL && current != NULL)
-        {
-            previous->next = current->next;
-            current->next = scheduler->active;
-            scheduler->active = current;
-        }
-    }
-}
-
-int prepareDummy(pid_t pid)
-{
-    Node *current = scheduler->active;
-    Node *previous = NULL;
-    while (current != NULL && current->process.pid != pid)
-    {
-        previous = current;
-        current = current->next;
-    }
-
-    if (current != NULL)
-    {
-        if (previous != NULL)
-        {
-            previous->next = current->next;
-            current->next = scheduler->active;
-            scheduler->active = current;
-        }
-    }
-    else
-    {
-        current = scheduler->expired;
-        previous = NULL;
-        while (current != NULL && current->process.pid != pid)
-        {
-            previous = current;
-            current = current->next;
-        }
-        if (current == NULL)
-        {
-            return -1;
-        }
-        if (previous == NULL)
-        {
-            scheduler->expired = current->next;
-        }
-        else
-        {
-            previous->next = current->next;
-        }
-        current->next = scheduler->active;
-        scheduler->active = current;
-    }
-    return 0;
-}
-void nohagonada(){
-    return;
-}
-
-uint64_t contextSwitch(uint64_t rsp)
-{
-    if(init==0){
-        return;
-    }
-    scheduler->active->process.rsp=rsp;
-    Node* aux = scheduler->active;
-    // C1.1 y C1.3 (Todos)
-    if (!scheduler->proccessBeingRun)
-    {
-        scheduler->proccessBeingRun = 1;
-        // C1.1 o C1.3.1: NO HAY NADA CORRIENDOSE Y TENGO ALGO PARA CORRER
-        if (scheduler->processReadyCount > 0)
-        {
-            nextProcess();
-        }
-        else
-        { // C1.3.2 y C1.3.3
-            prepareDummy(scheduler->placeholderProcessPid);
-        }
-        return scheduler->active->process.rsp;
-        //return 0;
-    }
-
-    Node *currentProcess = scheduler->active;
-    //currentProcess->process.rsp = rsp;
-    // Si no tengo procesos en ready, es decir, estan todos bloqueados tengo que correr el placeholderProcess
-    if (scheduler->processReadyCount == 0)
-    {
-        prepareDummy(scheduler->placeholderProcessPid);
-        return scheduler->active->process.rsp;
-    }
-
-    if (currentProcess->process.status != BLOCKED && currentProcess->process.quantumsLeft > 0)
-    {
-        currentProcess->process.quantumsLeft--;
-        return rsp;
-    }
-
-    // Acomodo el que termino de correr (no me interesa el status) en su lugar en la lista de expirados
-    // teniendo en cuenta su prioridad.
-    if (currentProcess->process.quantumsLeft == 0)
-    {
-        if (currentProcess->process.newPriority != -1)
-        {
-            currentProcess->process.priority = currentProcess->process.newPriority;
-            currentProcess->process.newPriority = -1;
-        }
-        currentProcess->process.quantumsLeft = priorities[currentProcess->process.priority];
-
-        Node *currentExpired = scheduler->expired;
-        Node *previousExpired = NULL;
-        while (currentExpired != NULL && currentProcess->process.priority >= currentExpired->process.priority)
-        {
-            previousExpired = currentExpired;
-            currentExpired = currentExpired->next;
-        }
-        /*
-            Debo colocar el current_process en el lugar indicado dentro de los expirados pero teniendo muy en cuenta
-            que antes de cambiar el next de este nodo tengo que hacerlo en el active para evitar problemas.
-            En cualquiera de ambos casos active tendra que ser igual a active->next porque paso el current_process a expirados.
-        */
-        scheduler->active = scheduler->active->next;
-        if (previousExpired == NULL)
-        {
-            currentProcess->next = scheduler->expired;
-            scheduler->expired = currentProcess;
-        }
-        else
-        {
-            previousExpired->next = currentProcess;
-            currentProcess->next = currentExpired;
-        }
-        if (scheduler->active == NULL)
-        {
-            scheduler->active = scheduler->expired;
-            scheduler->expired = NULL;
-        }
-    }
-    nextProcess();
-    if(scheduler->active->process.run == 1){
-        execute_next(scheduler->active->process.rsp);  
-    } 
-    else {
-        scheduler->active->process.run = 1;
-        execute_from_rip(scheduler->active->process.rip);
-    }
-    nohagonada();
-    kill_by_pid(scheduler->active->process.pid);//si llega a este punto es porque termino de ejecutar.
-    return scheduler->active->process.rsp;
-}
-
-int killProcess(int returnValue, char autokill)
-{
-    Node *currentProcess = scheduler->active;
-
-    pid_t blockedPid;
-    while ((blockedPid = dequeuePid(currentProcess->process.blockedQueue)) != -1)
-    {
-        unblockProcess(blockedPid);
-    }
-    scheduler->active = currentProcess->next;
-    if (currentProcess->process.status != BLOCKED)
-    {
-        scheduler->processReadyCount--;
-    }
-    for (int i = 0; i < currentProcess->process.argc; i++)
-    {
-        free_memory_manager(currentProcess->process.argv[i]);
-    }
-    free_memory_manager(currentProcess->process.argv);
-    freeQueue(currentProcess->process.blockedQueue);
-    free_memory_manager((void *)currentProcess->process.stackBase);
-    if (currentProcess->process.pipe != NULL)
-    {
-        char msg[1] = {EOF};
-        //(currentProcess->process.pipe, msg, 1);
-        // pipeClose(currentProcess->process.pipe);
-    }
-    free_memory_manager(currentProcess);
-    if (autokill)
-    {
-       scheduler->proccessBeingRun = 0;
-        _int20h;
-    }
-    return returnValue;
-}
-
-int changePriority(pid_t pid, int priorityValue)
-{
-    if (priorityValue < 0 || priorityValue > 8)
-    {
-        return -1;
-    }
-    PCB *process = getProcess(pid);
-    if (process == NULL)
-    {
-        return -1;
-    }
-
-    process->newPriority = priorityValue;
-    return 0;
-}
-
-int yieldProcess()
-{
-    scheduler->active->process.quantumsLeft = 0;
-    _int20h;
-    return 0;
-}
-
-processInfo *getProccessesInfo()
-{
-    processInfo *first = NULL;
-    processInfo *current = NULL;
-    Queue currentNode = scheduler->active;
-    pid_t firstPid = scheduler->active->process.pid;
-    while (currentNode != NULL)
-    {
-        if (current != NULL)
-        {
-            current->next = (processInfo *)memory_manager_malloc(sizeof(processInfo));
-            current = current->next;
-        }
-        else
-        {
-            current = (processInfo *)memory_manager_malloc(sizeof(processInfo));
-        }
-        current->pid = currentNode->process.pid;
-        if (current->pid == firstPid)
-        {
-            first = current;
-        }
-        current->priority = currentNode->process.priority;
-        current->stackBase = currentNode->process.stackBase;
-        current->status = currentNode->process.status;
-        currentNode = currentNode->next;
-    }
-    currentNode = scheduler->expired;
-    /**/
-    while (currentNode != NULL)
-    {
-        if (current != NULL)
-        {
-            current->next = (processInfo *)memory_manager_malloc(sizeof(processInfo));
-            current = current->next;
-        }
-        else
-        {
-            current = (processInfo *)memory_manager_malloc(sizeof(processInfo));
-        }
-        current->pid = currentNode->process.pid;
-        current->priority = currentNode->process.priority;
-        current->stackBase = currentNode->process.stackBase;
-        current->status = currentNode->process.status;
-        currentNode = currentNode->next;
-    }
-    current->next = NULL;
-    return first;
-}
-
-int kill_by_pid(pid_t pid){
-    Node * current = scheduler->active;
-    if(current->process.pid == pid){
-        scheduler->active = current->next;
-        free_memory_manager(current);
-        return 1;
-    }
-    while(current!=NULL){
-        if(current->next->process.pid == pid){
-            Node* aux = current->next;
-            current->next = current->next->next;
-            free_memory_manager(aux);
-            return 1;
-        }
-        current=current->next;
-    }
-
-    current = scheduler->expired;
-    if(current->process.pid == pid){
-        scheduler->expired = current->next;
-        free_memory_manager(current);
-        return 1;
-    }
-    while(current!=NULL){
-        if(current->next->process.pid == pid){
-            Node* aux = current->next;
-            current->next = current->next->next;
-            free_memory_manager(aux);
-            return 1;
-        }
-        current=current->next;
-    }
-    return 0;
-    
-}

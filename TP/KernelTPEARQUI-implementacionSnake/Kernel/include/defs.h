@@ -36,6 +36,12 @@
 
 #define MAX_PROC 4096
 
+#define BLOCKED 0
+#define READY 1
+#define RUNNING 2
+#define ZOMBIE 3
+#define DEAD 4
+
 typedef int pid_t;
 
 typedef struct blockednode {
@@ -93,7 +99,7 @@ typedef int16_t fd_t;
 
 
 typedef unsigned int priority_t;
-typedef unsigned int status_t;
+typedef int8_t status_t;
 
 typedef struct
 {
@@ -112,6 +118,7 @@ typedef struct
     unsigned int argc;
     char **argv;
     int64_t retVal;
+    uint8_t canBeKilled;
 } PCB;
 
 typedef struct node
