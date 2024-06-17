@@ -146,7 +146,7 @@ typedef struct processInfo
 typedef struct processInfoList {
     int lenght;
     processInfo *processList;
-}
+}processInfoList;
 
 
 typedef struct memoryInfo
