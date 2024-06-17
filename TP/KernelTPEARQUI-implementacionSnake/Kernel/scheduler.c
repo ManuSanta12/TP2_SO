@@ -393,9 +393,8 @@ uint64_t contextSwitch(uint64_t rsp, uint64_t rip)
     }
 
     Node *currentProcess = scheduler->active;
-    currentProcess->process.rsp = rsp;
+    //currentProcess->process.rsp = rsp;
     //currentProcess->process.rip = rip;
-    uint64_t auxRIP = rip;
     // Si no tengo procesos en ready, es decir, estan todos bloqueados tengo que correr el placeholderProcess
     if (scheduler->processReadyCount == 0)
     {

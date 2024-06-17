@@ -291,7 +291,10 @@ int new_process(uint64_t rip, int argc, char *argv[]){
 
 
 static void dummy(){
-	//prints("\nsoy el dummy\n",MAX_BUFFER);
+	prints("\nsoy el dummy\n",MAX_BUFFER);
+	prints("\n mi pid es: ", 100);
+	printDec(get_pid());
+	printc('\n');
 	r=5;
 	return;
 }
@@ -331,11 +334,13 @@ uint64_t get_pid(){
 void run_loop(){
 	prints("\n Presionar q para finalizar\n",30);
 	char c=' ';
-	while((c=getChar())!='q'){
+	int a = 1;
+	while(/*(c=getChar())!='q'*/ a<30){
 		prints("\n Hola soy el proceso: ",30);
 		printDec(get_pid());
-		wait(2000);
+		//wait(2000);
 		printc('\n');
+		a++;
 	}
 }
 

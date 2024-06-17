@@ -208,13 +208,23 @@ interrupt_keyboard:
 
 
 interrupt_timerTick:
-	pushState
+    pushState             ; Guarda el estado de la CPU
 
-	call timer_handler
-	call contextSwitch
-	endOfHardwareInterrupt
-	popState
-	iretq
+    ; El valor de RIP justo antes de la interrupción está en (rsp + pushState_size + 8)
+    ; pushState_size es el tamaño de todos los registros que has guardado en pushState
+    ; En este caso, has guardado 15 registros (8 bytes cada uno) -> 15 * 8 = 120
+    ; También hay 8 bytes del valor de RFLAGS
+    ; Así que el valor de RIP está en (rsp + 128)
+    mov rdi, rsp          ; Mueve el valor de rsp a rdi
+    mov rsi, [rsp + 128]  ; Mueve el valor de rip (guardado) a rsi
+
+    call timer_handler    ; Llama a la función timer_handler
+
+    call contextSwitch    ; Llama a contextSwitch(rsp, rip)
+
+    endOfHardwareInterrupt
+    popState              ; Restaura el estado de la CPU
+    iretq                 ; Retorna de la interrupción
 
 
 exception_divideByZero:
