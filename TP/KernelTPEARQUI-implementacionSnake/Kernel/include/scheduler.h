@@ -16,7 +16,7 @@ int16_t create_process(main_foo code, char** args, char* name, uint8_t priority,
 static void destroy_zombie(PCB* zombie);
 int32_t kill_current_process(int32_t retValue);
 int32_t kill_process(uint16_t pid, int32_t retValue);
-processInfo* get_processes_info();
+processInfoList* get_processes_info();
 char** copy_argv(int argc, char** argv);
 void process_wrapper(main_foo fun, char** args);
 static int argv_len(char** argv);

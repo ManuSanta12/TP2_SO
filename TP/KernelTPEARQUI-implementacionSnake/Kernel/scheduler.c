@@ -222,7 +222,7 @@ int32_t kill_process(uint16_t pid, int32_t retValue) {
 	return 0;
 }
 
-processInfo * get_processes_info(){
+processInfoList * get_processes_info(){
     processInfoList * info = memory_manager_malloc(sizeof(processInfoList));
 	processInfo *ps = memory_manager_malloc(scheduler->processAmount * sizeof(processInfo));
 	int processIndex = 0;

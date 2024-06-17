@@ -59,7 +59,10 @@ int main() {
 	_hlt();
   char *argsShell[2] = {"shell", NULL};
 	int16_t fileDescriptors[] = {STDIN, STDOUT, STDERR};
+  create_process((main_foo) sampleCodeModuleAddress, argsShell, "shell", 4, fileDescriptors, 1);
   ((EntryPoint)sampleCodeModuleAddress)();
-	//create_process((main_foo)sampleCodeModuleAddress, argsShell, "shell", 4, fileDescriptors, 1);
-	return 0;
+	while (1){
+		_hlt();
+  }
+	return 0;	return 0;
 }

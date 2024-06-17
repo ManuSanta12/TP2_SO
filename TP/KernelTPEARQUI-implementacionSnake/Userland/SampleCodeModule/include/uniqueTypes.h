@@ -20,6 +20,10 @@ typedef struct processInfo{
     struct processInfo * next;
 } processInfo;
 
+typedef struct processInfoList {
+    int lenght;
+    processInfo *processList;
+}processInfoList;
 
 // Memory
 typedef struct memoryInfo

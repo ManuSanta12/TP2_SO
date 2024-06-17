@@ -301,9 +301,10 @@ void dummy(){
 
 void get_process_info()
 {
-    processInfo *current = NULL;
+    processInfoList *list = NULL;
 	//new_process((uint64_t)run_loop, 0, NULL);
-	current = sys_ps();
+	list = sys_ps();
+	processInfo* current = list->processList;
 	//printDec(current->pid);
     while (current != NULL)
     {
