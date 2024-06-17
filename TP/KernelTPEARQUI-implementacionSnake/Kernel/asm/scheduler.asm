@@ -28,38 +28,22 @@ _start:
 
 loadProcess:
    
-    enter 0, 0
-
-    ; Muevo el rsp que me pasan por parametro a el registro rsp
-    mov rsp, rsi
-
-    push qword 0x0      ; SS
-    push rsi            ; RSP
-    push qword 0x202    ; RFLAGS
-    push qword 0x8      ; CS
-    push _start         ; RIP
-
-    push qword 0x0      ; RAX
-    push qword 0x0      ; RBX
-    push rdi            ; RCX
-    push qword 0x0      ; RDX
-    push qword 0x0      ; RBP
-    push rdx            ; RDI
-    push rcx            ; RSI
-    push qword 0x0      ; R8
-    push qword 0x0      ; R9
-    push qword 0x0      ; R10
-    push qword 0x0      ; R11
-    push qword 0x0      ; R12
-    push qword 0x0      ; R13
-    push qword 0x0      ; R14
-    push qword 0x0      ; R15
-
-    mov rax, rsp
-
-    leave
-    ret        
-
+    mov r8, rsp 	
+	mov r9, rbp		
+	mov rsp, rdx 	
+	mov rbp, rdx
+	push 0x0
+	push rdx
+	push 0x202
+	push 0x8
+	push rdi
+	mov rdi, rsi 		
+	mov rsi, rcx		
+	pushState
+	mov rax, rsp
+	mov rsp, r8
+	mov rbp, r9
+	ret
 _int20h:
     int 20h
     ret

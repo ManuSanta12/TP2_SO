@@ -23,10 +23,18 @@
 #define ACS_STACK (ACS_PRESENT | ACS_DSEG | ACS_WRITE)
 
 #define PIPESIZE 512
-#define FDS 10
+#define FDS 3
 #define OPEN 1
 #define CLOSED 0
 
+#define STDIN 0
+#define STDOUT 1
+#define STDERR 2
+
+#define READ 0
+#define WRITE 1
+
+#define MAX_PROC 4096
 
 typedef int pid_t;
 
@@ -81,10 +89,7 @@ typedef struct PipeList {
 
 typedef pipeNode *pipeList;
 
-typedef struct
-{
-    unsigned int mode;
-} fd_t;
+typedef int16_t fd_t;
 
 
 typedef unsigned int priority_t;
@@ -93,20 +98,20 @@ typedef unsigned int status_t;
 typedef struct
 {
     pid_t pid;
+    pid_t  parentPID;
     priority_t priority;
-    int newPriority;
     status_t status;
+    uint16_t waiting;
     unsigned int quantumsLeft;
-    uint64_t rsp;
-    uint64_t rip; //rip donde comienza el proceso
-    uint8_t run; //si ya corrio una vez o no
-    uint64_t stackBase;
-    BlockedQueueADT blockedQueue;
+    void *rsp;
+    void *stackBase;
+    BlockedQueueADT zombie; //los hijos que quedan zombie
     fd_t fileDescriptors[FDS];
     Pipe *pipe;
-    unsigned int lastFd;
+    char * name;
     unsigned int argc;
     char **argv;
+    int64_t retVal;
 } PCB;
 
 typedef struct node
@@ -119,10 +124,14 @@ typedef Node *Queue;
 
 typedef struct processInfo
 {
+    char*name;
     pid_t pid;
+    pid_t parentPID;
     priority_t priority;
-    uint64_t stackBase;
+    void *stackBase;
+    void *rsp;
     status_t status;
+    uint8_t foreground;
     struct processInfo *next;
 } processInfo;
 
@@ -136,5 +145,7 @@ typedef struct memoryInfo
     size_t totalMemory;
     unsigned int blocksUsed;
 } MemoryInfo;
+
+typedef int (*main_foo  )(int argc, char **args);
 
 #endif

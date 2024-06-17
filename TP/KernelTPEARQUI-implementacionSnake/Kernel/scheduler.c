@@ -4,6 +4,7 @@
 #include <queue.h>
 #include <lib.h>
 #include <pipe.h>
+#include <linkedList.h>
 
 extern uint64_t loadProcess(uint64_t, uint64_t , uint64_t , uint64_t ); // implement on assembler
 extern void _int20h;                                                                 // implement int20h con assembler
@@ -12,24 +13,27 @@ extern void execute_from_rip(uint64_t);
 #define SCHEDULER_ADDRESS 0x60000
 // tck and ppriorities
 #define STACK_SIZE 4096
+#define LEVELS 5
 #define MIN_PRIORITY 1
 #define MAX_PRIORITY 9
 #define EOF -1
+#define FIRST_PID
 #define NUMBER_OF_PRIORITIES 9
 #define DEFAULT_PRIORITY 4
 priority_t priorities[NUMBER_OF_PRIORITIES] = {9, 8, 7, 6, 5, 4, 3, 2, 1};
 
-// Queues
 uint8_t init=0;
 typedef struct scheduler{
-    Queue active;
-    Queue expired;
+    Node *processes[MAX_PROC];
+	LinkedList lvls[LEVELS + 1];
 
     // Schelduler states
     int processAmount;
     unsigned int processReadyCount;
-    pid_t placeholderProcessPid;
-    unsigned int proccessBeingRun;
+    uint16_t nextPid;
+    pid_t currentPid;
+    int8_t remainingQuantum;
+	int8_t killFg;
 }schedulerCDT;
 
 typedef schedulerCDT* schedulerADT;
@@ -47,33 +51,27 @@ void dummyProcess()
 void createScheduler()
 {
     scheduler = (schedulerADT)SCHEDULER_ADDRESS;
-    /*
-    scheduler->active = memory_manager_malloc(sizeof(Node));
-    scheduler->expired = memory_manager_malloc(sizeof(Node));;
-    */
-    scheduler->processAmount = 0;
-    scheduler->processReadyCount = 0;
-    scheduler->proccessBeingRun = 0;
-    scheduler->active=NULL;
-    scheduler->expired=NULL;
-    
-    scheduler->placeholderProcessPid = new_process((uint64_t)dummyProcess, 0, NULL);
-    for (int i = 0; i <= 2; i++)
-    {
-        scheduler->active->process.fileDescriptors[i].mode = OPEN;
-    }
-    // PIPEOUT, PIPEIN
-    for (int i = 3; i <= 4; i++)
-    {
-        scheduler->active->process.fileDescriptors[i].mode = CLOSED;
-    }
-    scheduler->active->process.lastFd = 4;
-    scheduler->active->process.status = BLOCKED;
-    
-    scheduler->processReadyCount--;
-    init = 1;
+	for (int i = 0; i < MAX_PROC; i++)
+		scheduler->processes[i] = NULL;
+	for (int i = 0; i < LEVELS + 1; i++)
+		scheduler->lvls[i] = createLinkedList();
+	scheduler->nextPid = 0;
+	scheduler->killFg = 0;
     
 }
+
+static uint16_t getNextPid() {
+	Node *process = NULL;
+	for (int lvl = LEVELS - 1; lvl >= 0 && process == NULL; lvl--)
+		if (!isEmpty(scheduler->lvls[lvl]))
+			process = (Node *) (getFirst(scheduler->lvls[lvl]))->data;
+
+	if (process == NULL)
+		return FIRST_PID;
+	return process->process.pid;
+}
+
+
 
  PCB *getProcess(pid_t pid)
 {
@@ -205,86 +203,79 @@ char **copy_argv(int argc, char **argv)
     return new_argv;
 }
 
-pid_t new_process(uint64_t rip, int argc, char *argv[])
-{
-    Node *newProcess = memory_manager_malloc(sizeof(Node));
-    //newProcess->process = memory_manager_malloc(sizeof(PCB));
-    newProcess->process.rip = rip;
-    newProcess->process.run = 0;
-    newProcess->process.pid = scheduler->processAmount++;
-    newProcess->process.priority = DEFAULT_PRIORITY;
-    newProcess->process.quantumsLeft = priorities[DEFAULT_PRIORITY];
-    newProcess->process.blockedQueue = newQueue();
-    newProcess->process.newPriority = -1;
-    newProcess->process.status = READY;
-    newProcess->process.argc = argc;
-    newProcess->process.argv = copy_argv(argc, argv);
-
-    // STDIN, STDOUT, STDERR, PIPEOUT, PIPEIN
-    if (scheduler->active != NULL)
-    {
-        for (int i = 0; i <= scheduler->active->process.lastFd; i++)
-        {
-            newProcess->process.fileDescriptors[i].mode = scheduler->active->process.fileDescriptors[i].mode;
-        }
-        newProcess->process.lastFd = scheduler->active->process.lastFd;
-        newProcess->process.pipe = scheduler->active->process.pipe;
-    }
-
-    uint64_t rsp = (uint64_t)memory_manager_malloc(4 * 1024);
-    if (rsp == 0)
-    {
-        return -1;
-    }
-    newProcess->process.stackBase = rsp;
-    uint64_t newRsp = (uint64_t)loadProcess(rip, rsp + 4 * 1024, newProcess->process.argc, (uint64_t)newProcess->process.argv);
-    newProcess->process.rsp = newRsp;
-
-    if (scheduler->active == NULL)
-    {
-        newProcess->next = NULL;
-        scheduler->active = newProcess;
-    }
-    else
-    {
-        if (scheduler->expired == NULL)
-        {
-            newProcess->next = NULL;
-            scheduler->expired = newProcess;
-        }
-        else
-        {
-            Node *current = scheduler->expired;
-            Node *previous = NULL;
-            // Si el numero del que quiero insertar es mayor que el current entonces tengo que insertarlo despues
-            // new_process -> 2 y current -> 1. La 1 es mejor que la 2. El menor numero gana
-            while (current->next != NULL && newProcess->process.priority >= current->process.priority)
-            {
-                previous = current;
-                current = current->next;
-            }
-            if (current->next == NULL && newProcess->process.priority >= current->process.priority)
-            {
-                newProcess->next = NULL;
-                current->next = newProcess;
-            }
-            else
-            {
-                newProcess->next = current;
-                if (previous != NULL)
-                {
-                    previous->next = newProcess;
-                }
-                else
-                {
-                    scheduler->expired = newProcess;
-                }
-            }
-        }
-    }
-    scheduler->processReadyCount++;
-    return newProcess->process.pid;
+void processWrapper(main_foo fun, char **args) {
+	int len = stringArrayLen(args);
+	int retValue = fun(len, args);
+	killCurrentProcess(retValue);
 }
+
+Node* new_process(uint64_t rip, int argc, char *argv[],pid_t parentPID, char* name){  
+    Node* newProcess = memory_manager_malloc(sizeof(Node*));
+    newProcess->process.pid = scheduler->processAmount++;
+	newProcess->process.parentPID = parentPID;
+	newProcess->process.stackBase = memory_manager_malloc(STACK_SIZE);
+	newProcess->process.argv = copy_argv(argc, argv);
+	newProcess->process.name = allocMemory(strlen(name) + 1);
+	newProcess->process.name = strcpy(name);
+	newProcess->process.priority = DEFAULT_PRIORITY;
+	void *stackEnd = (void *) ((uint64_t) newProcess->process.stackBase + STACK_SIZE);
+	newProcess->process.rsp = loadProcess(&processWrapper, rip, stackEnd, (void *) newProcess->process.argv);
+	newProcess->process.status = READY;
+	newProcess->process.zombie = newQueue();
+	//newProcess->process.unkillable = unkillable;
+	newProcess->process.waiting = 0;
+
+	assignFileDescriptor(newProcess, STDIN, newProcess->process.fileDescriptors[STDIN], READ);
+	assignFileDescriptor(newProcess, STDOUT, newProcess->process.fileDescriptors[STDOUT], WRITE);
+	assignFileDescriptor(newProcess, STDERR, newProcess->process.fileDescriptors[STDERR], WRITE);
+}
+
+static void assignFileDescriptor(Node *new, uint8_t fdIndex, fd_t fdValue, uint8_t mode) {
+	new->process.fileDescriptors[fdIndex] = fdValue;
+	if (fdValue >= FDS)
+		pipeOpenForPid(new->process.pid, fdValue, mode);
+}
+
+void close_all_fd(Node *p) {
+	close_fds(p->process.pid, p->process.fileDescriptors[STDIN]);
+	close_fds(p->process.pid, p->process.fileDescriptors[STDOUT]);
+	close_fds(p->process.pid, p->process.fileDescriptors[STDERR]);
+}
+
+void free_process(Node *p) {
+	freeQueue(p->process->zombie);
+	free_memory_manager(p->process.stackBase);
+	free_memory_manager(p->process.name);
+	free_memory_manager(p->process.argv);
+	free_memory_manager(p);
+}
+
+processInfo *save_info(Node *p) {
+    processInfo* info = memory_manager_malloc(sizeof(processInfo));
+	info->name = strcpy(p->process.name);
+	info->pid = p->process.pid;
+	info->parentPID = p->process.parentPID;
+	info->stackBase = p->process.stackBase;
+	info->rsp = p->process.rsp;
+	info->priority = p->process.priority;
+	info->status = p->process.status;
+	info->foreground = p->process.fileDescriptors[STDIN] == STDIN;
+	return info;
+}
+
+int processIsWaiting(Node *p, uint16_t pidToWait) {
+	return p->process.waiting == pidToWait && p->process.status == BLOCKED;
+}
+/*
+int getZombiesSnapshots(int processIndex, ProcessSnapshot psArray[], Process *nextProcess) {
+	LinkedListADT zombieChildren = nextProcess->zombieChildren;
+	begin(zombieChildren);
+	while (hasNext(zombieChildren))
+		loadSnapshot(&psArray[processIndex++], (Process *) next(zombieChildren));
+	return processIndex;
+}*/
+
+
 
 void nextProcess()
 {
