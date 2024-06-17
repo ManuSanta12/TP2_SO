@@ -216,14 +216,14 @@ interrupt_timerTick:
     ; También hay 8 bytes del valor de RFLAGS
     ; Así que el valor de RIP está en (rsp + 128)
     mov rdi, rsp          ; Mueve el valor de rsp a rdi
-    mov rsi, [rsp + 128]  ; Mueve el valor de rip (guardado) a rsi
+    ;mov rsi, [rsp + 128]  ; Mueve el valor de rip (guardado) a rsi
 
     call timer_handler    ; Llama a la función timer_handler
 
     call contextSwitch    ; Llama a contextSwitch(rsp, rip)
 
     endOfHardwareInterrupt
-    popState              ; Restaura el estado de la CPU
+	popState              ; Restaura el estado de la CPU
     iretq                 ; Retorna de la interrupción
 
 

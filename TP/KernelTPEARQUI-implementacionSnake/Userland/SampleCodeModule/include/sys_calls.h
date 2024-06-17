@@ -71,4 +71,6 @@ priority_t sys_getPriority(pid_t pid);
 
 int sys_nice(pid_t pid, int newPriority);
 
+int sys_kill(pid_t pid);
+
 #endif  

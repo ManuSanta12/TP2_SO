@@ -8,6 +8,7 @@
 extern uint64_t loadProcess(uint64_t, uint64_t , uint64_t , uint64_t ); // implement on assembler
 extern void _int20h;                                                                 // implement int20h con assembler
 extern void execute_next(uint64_t);
+extern void execute_from_rip(uint64_t);
 #define SCHEDULER_ADDRESS 0x60000
 // tck and ppriorities
 #define STACK_SIZE 4096
@@ -209,6 +210,7 @@ pid_t new_process(uint64_t rip, int argc, char *argv[])
     Node *newProcess = memory_manager_malloc(sizeof(Node));
     //newProcess->process = memory_manager_malloc(sizeof(PCB));
     newProcess->process.rip = rip;
+    newProcess->process.run = 0;
     newProcess->process.pid = scheduler->processAmount++;
     newProcess->process.priority = DEFAULT_PRIORITY;
     newProcess->process.quantumsLeft = priorities[DEFAULT_PRIORITY];
@@ -369,13 +371,16 @@ int prepareDummy(pid_t pid)
     }
     return 0;
 }
+void nohagonada(){
+    return;
+}
 
-uint64_t contextSwitch(uint64_t rsp, uint64_t rip)
+uint64_t contextSwitch(uint64_t rsp)
 {
     if(init==0){
         return;
     }
-    scheduler->active->process.rip=rip;
+    scheduler->active->process.rsp=rsp;
     Node* aux = scheduler->active;
     // C1.1 y C1.3 (Todos)
     if (!scheduler->proccessBeingRun)
@@ -390,8 +395,8 @@ uint64_t contextSwitch(uint64_t rsp, uint64_t rip)
         { // C1.3.2 y C1.3.3
             prepareDummy(scheduler->placeholderProcessPid);
         }
-        //return scheduler->active->process.rsp;
-        return 0;
+        return scheduler->active->process.rsp;
+        //return 0;
     }
 
     Node *currentProcess = scheduler->active;
@@ -450,10 +455,15 @@ uint64_t contextSwitch(uint64_t rsp, uint64_t rip)
         }
     }
     nextProcess();
-    if(aux!=scheduler->active){
-        execute_next(scheduler->active->process.rip);   
-        //scheduler->active=NULL;
+    if(scheduler->active->process.run == 1){
+        execute_next(scheduler->active->process.rsp);  
+    } 
+    else {
+        scheduler->active->process.run = 1;
+        execute_from_rip(scheduler->active->process.rip);
     }
+    nohagonada();
+    kill_by_pid(scheduler->active->process.pid);//si llega a este punto es porque termino de ejecutar.
     return scheduler->active->process.rsp;
 }
 
@@ -566,3 +576,38 @@ processInfo *getProccessesInfo()
     return first;
 }
 
+int kill_by_pid(pid_t pid){
+    Node * current = scheduler->active;
+    if(current->process.pid == pid){
+        scheduler->active = current->next;
+        free_memory_manager(current);
+        return 1;
+    }
+    while(current!=NULL){
+        if(current->next->process.pid == pid){
+            Node* aux = current->next;
+            current->next = current->next->next;
+            free_memory_manager(aux);
+            return 1;
+        }
+        current=current->next;
+    }
+
+    current = scheduler->expired;
+    if(current->process.pid == pid){
+        scheduler->expired = current->next;
+        free_memory_manager(current);
+        return 1;
+    }
+    while(current!=NULL){
+        if(current->next->process.pid == pid){
+            Node* aux = current->next;
+            current->next = current->next->next;
+            free_memory_manager(aux);
+            return 1;
+        }
+        current=current->next;
+    }
+    return 0;
+    
+}

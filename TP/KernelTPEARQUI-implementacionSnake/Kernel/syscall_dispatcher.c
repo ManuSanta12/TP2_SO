@@ -319,6 +319,7 @@ static pid_t sys_waitpid(pid_t pid)
 
 static int sys_kill(pid_t pid)
 {
+  /*
   if (pid <= 0)
   {
     return -1;
@@ -332,6 +333,8 @@ static int sys_kill(pid_t pid)
 
   sys_exit(0, 0);
   return 0;
+  */
+  return kill_by_pid(pid);
 }
 
 static int sys_block(pid_t pid)
@@ -367,7 +370,7 @@ static uint64_t (*syscall_handlers[])(uint64_t, uint64_t, uint64_t, uint64_t,
     (void *)sys_ps,           (void *)sys_changeProcessStatus,
     (void *)sys_getCurrentPid,(void *)sys_exec,        (void *)sys_exit, 
     (void *)sys_waitpid,      (void *)sys_kill,        (void *)sys_block, 
-    (void *)sys_unblock ,     (void*)sys_getPriority};
+    (void *)sys_unblock ,     (void*)sys_getPriority,  };
 
 // Devuelve la syscall correspondiente
 //                                rdi           rsi           rdx rd10 r8 r9

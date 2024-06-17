@@ -7,6 +7,7 @@
 #include "shell.h"
 #include "mem_tester.h"
 #include "phylos.h"
+#include "sinc.h"
 
 #define MAX_BUFFER 254
 #define MAX_COMMANDS 19
@@ -179,6 +180,7 @@ static void cmd_snake(){
 
 static void cmd_clear(){
 	clear_scr();
+	//run_sinc();
 }
 
 static void cmd_inforeg(){
@@ -221,7 +223,8 @@ static void cmd_wc(){
 	run_wc();
 }
 static void cmd_cat(){
-	run_cat();
+	//run_cat();
+	run_sinc();
 }
 static void cmd_filter(){
 	run_filter();

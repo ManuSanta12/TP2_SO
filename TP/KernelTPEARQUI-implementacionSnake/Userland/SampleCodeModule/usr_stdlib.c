@@ -115,9 +115,6 @@ void printBin(uint64_t value){
     printBase(value, (uint32_t) 2);
 }
 
-
-
-
 static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base){
     char *p = buffer;
     char *p1, *p2;
@@ -218,6 +215,7 @@ void inforeg(){
 
 
 
+
 void test_invopcode(){
 	ex_invopcode();
 }
@@ -290,7 +288,7 @@ int new_process(uint64_t rip, int argc, char *argv[]){
 
 
 
-static void dummy(){
+void dummy(){
 	prints("\nsoy el dummy\n",MAX_BUFFER);
 	prints("\n mi pid es: ", 100);
 	printDec(get_pid());
@@ -304,8 +302,6 @@ void getProcessesInfo()
 {
     processInfo *current = NULL;
 	//new_process((uint64_t)run_loop, 0, NULL);
-	new_process((uint64_t)dummy, 0, NULL);
-
 	current = sys_ps();
 	//printDec(current->pid);
     while (current != NULL)

@@ -49,6 +49,8 @@ void test_invopcode();
 void test_zerodiv();
 //void sizePlus();
 //void sizeMinus();
+void dummy();
+
 int print_mem(uint64_t mem);
 
 void increaseScale();

@@ -1,6 +1,7 @@
 GLOBAL loadProcess
 GLOBAL _int20h
 GLOBAL execute_next
+GLOBAL execute_from_rip
 EXTERN contextSwitch
 
 section .text
@@ -64,5 +65,10 @@ _int20h:
     ret
 
 execute_next:
-        mov rax, rdi
-        jmp rax
+    mov rsp, rdi
+    popState
+    iretq
+
+execute_from_rip:
+    mov rax, rdi 
+    jmp rax 
