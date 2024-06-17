@@ -245,14 +245,22 @@ processInfoList * get_processes_info(){
 	return info;
 }
 
-char **copy_argv(int argc, char **argv)
-{
-    char **new_argv = memory_manager_malloc(sizeof(char *) * argc);
-    for (int i = 0; i < argc; i++)
-    {
-        new_argv[i] = strcpy(argv[i]);
-    }
-    return new_argv;
+static char **copy_argv(char **args) {
+	int argc = argv_len(args), totalArgsLen = 0;
+	int argsLen[argc];
+	for (int i = 0; i < argc; i++) {
+		argsLen[i] = strlen(args[i]) + 1;
+		totalArgsLen += argsLen[i];
+	}
+	char **newArgsArray = (char **) memory_manager_malloc(totalArgsLen + sizeof(char **) * (argc + 1));
+	char *charPosition = (char *) newArgsArray + (sizeof(char **) * (argc + 1));
+	for (int i = 0; i < argc; i++) {
+		newArgsArray[i] = charPosition;
+		memcpy(charPosition, args[i], argsLen[i]);
+		charPosition += argsLen[i];
+	}
+	newArgsArray[argc] = NULL;
+	return newArgsArray;
 }
 
 void process_wrapper(main_foo fun, char **args) {
@@ -269,12 +277,12 @@ static int argv_len(char **argv) {
 }
 
 void new_process(pid_t pid, pid_t parentPID, main_foo mainFun, char **argv, char *name, priority_t priority, fd_t fileDescriptors[], uint8_t kill){  
-    PCB* newProcess = memory_manager_malloc(sizeof(listNode*));
-    newProcess->pid = scheduler->processAmount++;
+    PCB* newProcess = memory_manager_malloc(sizeof(PCB));
+    newProcess->pid = pid;
 	newProcess->parentPID = parentPID;
 	newProcess->stackBase = memory_manager_malloc(STACK_SIZE);
     int argc = argv_len(argv);
-	newProcess->argv = copy_argv(argc, argv);
+	//newProcess->argv = copy_argv(argv );
 	newProcess->name = memory_manager_malloc(strlen(name) + 1);
 	newProcess->name = strcpy(name);
 	newProcess->priority = DEFAULT_PRIORITY;

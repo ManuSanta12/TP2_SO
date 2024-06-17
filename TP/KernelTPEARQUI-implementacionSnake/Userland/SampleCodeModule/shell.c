@@ -215,7 +215,9 @@ static void cmd_phylos(){
 }
 
 static void cmd_loop(){
-	run_loop();
+	char**args={"loop",NULL};
+	new_process(&run_loop,args,"loop",4);
+	//run_loop();
 }
 
 static void cmd_wc(){

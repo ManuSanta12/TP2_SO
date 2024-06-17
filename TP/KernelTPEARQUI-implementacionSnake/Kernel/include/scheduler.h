@@ -17,7 +17,7 @@ static void destroy_zombie(PCB* zombie);
 int32_t kill_current_process(int32_t retValue);
 int32_t kill_process(uint16_t pid, int32_t retValue);
 processInfoList* get_processes_info();
-char** copy_argv(int argc, char** argv);
+static char** copy_argv( char** argv);
 void process_wrapper(main_foo fun, char** args);
 static int argv_len(char** argv);
 void new_process(pid_t pid, pid_t parentPID, main_foo mainFun, char** argv, char* name, priority_t priority, fd_t fileDescriptors[], uint8_t kill);
