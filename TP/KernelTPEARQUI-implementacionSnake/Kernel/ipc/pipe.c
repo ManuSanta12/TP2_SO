@@ -9,8 +9,8 @@ Pipe *pipeOpen()
     Pipe *newPipe = (Pipe *)memory_manager_malloc(sizeof(Pipe));
     newPipe->isReadOpen = 1;
     newPipe->isWriteOpen = 1;
-    newPipe->readQueue = newQueue();
-    newPipe->writeQueue = newQueue();
+    newPipe->readQueue = new_queue();
+    newPipe->writeQueue = new_queue();
     newPipe->processCount = 1;
 
     pipeNode *newPipeNode = (pipeNode *)memory_manager_malloc(sizeof(pipeNode));
@@ -37,8 +37,8 @@ int pipeClose(Pipe *pipe) {
         return 0;
     }
 
-    freeQueue(pipe->readQueue);
-    freeQueue(pipe->writeQueue);
+    free_queue(pipe->readQueue);
+    free_queue(pipe->writeQueue);
     if (current->next != NULL)
     {
         current->next->previous = current->previous;
@@ -64,9 +64,9 @@ int pipeReadData(Pipe *pipe, char *msg, int size) {
         //verificamos que el readIndex sea igual al writeIndex
         if (pipe->readIndex == pipe->writeIndex) {
             //si lo son, es porque no hay datos para leer en el pipe
-            currentPid = getCurrentPid();
+            currentPid = get_current_pid();
             //se agrega a la readQueue hasta que haya datos disponibles para leer
-            enqueuePid(pipe->readQueue, currentPid);
+            enqueue_pid(pipe->readQueue, currentPid);
             //el proceso actual se blquea
             blockProcess(currentPid);
         }
@@ -75,7 +75,7 @@ int pipeReadData(Pipe *pipe, char *msg, int size) {
         pipe->readIndex++;
         //despues de cada lectura verificamos si hay procesos bloqueados esperando
         //para escribir en el tubo
-        while ((currentPid = dequeuePid(pipe->writeQueue)) != -1) {
+        while ((currentPid = dequeue_pid(pipe->writeQueue)) != -1) {
             //si hay, se desbloquean y se sacan de la writeQueue
             unblockProcess(currentPid);
         }
@@ -97,15 +97,15 @@ int pipeWriteData(Pipe *pipe, const char *msg, int size) {
 
     for (i = 0; i < size; i++) {
         if (pipe->writeIndex == pipe->readIndex + PIPESIZE) {
-            currentPid = getCurrentPid();
-            enqueuePid(pipe->writeQueue, currentPid);
+            currentPid = get_current_pid();
+            enqueue_pid(pipe->writeQueue, currentPid);
             blockProcess(currentPid);
         }
 
         pipe->data[pipe->writeIndex % PIPESIZE] = msg[i];
         pipe->writeIndex++;
 
-        while ((currentPid = dequeuePid(pipe->readQueue)) != -1) {
+        while ((currentPid = dequeue_pid(pipe->readQueue)) != -1) {
             unblockProcess(currentPid);
         }
     }

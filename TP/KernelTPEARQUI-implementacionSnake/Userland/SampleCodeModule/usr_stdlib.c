@@ -298,7 +298,7 @@ void dummy(){
 }
 
 
-void getProcessesInfo()
+void get_process_info()
 {
     processInfo *current = NULL;
 	//new_process((uint64_t)run_loop, 0, NULL);

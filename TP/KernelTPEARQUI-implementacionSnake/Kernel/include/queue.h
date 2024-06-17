@@ -4,10 +4,10 @@
 #include <defs.h>
 #include <memoryManager.h>
 
-BlockedQueueADT newQueue();
-pid_t dequeuePid(BlockedQueueADT queue);
-void enqueuePid(BlockedQueueADT queue, pid_t pid);
-void freeQueue(BlockedQueueADT queue);
+BlockedQueueADT new_queue();
+pid_t dequeue_pid(BlockedQueueADT queue);
+void enqueue_pid(BlockedQueueADT queue, pid_t pid);
+void free_queue(BlockedQueueADT queue);
 
 
 #endif

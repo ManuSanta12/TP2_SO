@@ -196,7 +196,7 @@ static pid_t sys_newProcess(uint64_t rip, int argc, char *argv[]){
 }
 
 static uint64_t sys_getPid(){
-  return getCurrentPid();
+  return get_current_pid();
 }
 
 static uint64_t sys_sleepTime(int sec){
@@ -215,7 +215,7 @@ static int sys_nice(pid_t pid, int newPriority)
 
 static int sys_pipe(int pipefd[2])
 {
-  PCB *pcb = getProcess(getCurrentPid());
+  PCB *pcb = get_process(get_current_pid());
   pcb->fileDescriptors[PIPEIN].mode = OPEN;
   pcb->fileDescriptors[PIPEOUT].mode = OPEN;
   pcb->pipe = pipeOpen();
@@ -226,7 +226,7 @@ static int sys_pipe(int pipefd[2])
 
 static int sys_dup2(int fd1, int fd2)
 {
-  PCB *pcb = getProcess(getCurrentPid());
+  PCB *pcb = get_process(get_current_pid());
   if (fd1 > pcb->lastFd || fd2 > pcb->lastFd || pcb->fileDescriptors[fd2].mode == CLOSED)
     return 0;
   pcb->fileDescriptors[fd1] = pcb->fileDescriptors[fd2];
@@ -234,7 +234,7 @@ static int sys_dup2(int fd1, int fd2)
 }
 static int sys_open(int fd)
 {
-  PCB *pcb = getProcess(getCurrentPid());
+  PCB *pcb = get_process(get_current_pid());
   if (pcb->lastFd < fd)
     return 0;
   pcb->fileDescriptors[fd].mode = OPEN;
@@ -242,7 +242,7 @@ static int sys_open(int fd)
 }
 static int sys_close(int fd)
 {
-  PCB *pcb = getProcess(getCurrentPid());
+  PCB *pcb = get_process(get_current_pid());
   if (pcb->lastFd < fd)
     return 0;
   pcb->fileDescriptors[fd].mode = CLOSED;
@@ -251,7 +251,7 @@ static int sys_close(int fd)
 
 static processInfo *sys_ps()
 {
-  return getProccessesInfo();
+  return get_processes_info();
 }
 
 static priority_t sys_getPriority(int pid){
@@ -261,7 +261,7 @@ static priority_t sys_getPriority(int pid){
 // Returns READY if unblocked, BLOCKED if blocked, -1 if failed
 static int sys_changeProcessStatus(pid_t pid)
 {
-  PCB *process = getProcess(pid);
+  PCB *process = get_process(pid);
   if (process == NULL)
   {
     return -1;
@@ -280,7 +280,7 @@ static int sys_changeProcessStatus(pid_t pid)
 
 static pid_t sys_getCurrentPid()
 {
-  return getCurrentPid();
+  return get_current_pid();
 }
 
 static pid_t sys_exec(uint64_t program, unsigned int argc, char *argv[])
@@ -290,7 +290,7 @@ static pid_t sys_exec(uint64_t program, unsigned int argc, char *argv[])
 
 static void sys_exit(int return_value, char autokill)
 {
-  PCB *pcb = getProcess(getCurrentPid());
+  PCB *pcb = get_process(get_current_pid());
   unsigned int lastFd = pcb->lastFd;
 
   for (int i = 0; i < lastFd; i++)
@@ -303,14 +303,14 @@ static void sys_exit(int return_value, char autokill)
 
 static pid_t sys_waitpid(pid_t pid)
 {
-  PCB *processPcb = getProcess(pid);
+  PCB *processPcb = get_process(pid);
   if (processPcb == NULL)
   {
     return -1;
   }
 
-  pid_t currentPid = getCurrentPid();
-  enqueuePid(processPcb->blockedQueue, currentPid);
+  pid_t currentPid = get_current_pid();
+  enqueue_pid(processPcb->blockedQueue, currentPid);
   blockProcess(currentPid);
 
   return pid;

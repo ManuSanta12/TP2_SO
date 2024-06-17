@@ -54,7 +54,7 @@ int main() {
 	load_idt();
 	create_memory(0x2000000 - 0x1000000);
   clearScanCode();
-	createScheduler();
+	create_sch();
 	_sti();
 	_hlt();
   ((EntryPoint)sampleCodeModuleAddress)();

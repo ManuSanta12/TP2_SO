@@ -9,18 +9,19 @@ typedef struct listNode {
 	struct listNode *next;
 } listNode;
 
-LinkedList createLinkedList();
-listNode *appendElement(LinkedList list, void *data);
-listNode *appendlistNode(LinkedList list, listNode *listNode);
-listNode *prependlistNode(LinkedList list, listNode *listNode);
-void *removelistNode(LinkedList list, listNode *listNode);
-listNode *getFirst(LinkedList list);
-int isEmpty(LinkedList list);
+
+LinkedList create_linked_list();
+listNode *append_element(LinkedList list, void *data);
+listNode *append_list_node(LinkedList list, listNode *node);
+listNode *prepend_list_node(LinkedList list, listNode *node);
+listNode *get_first(LinkedList list);
+int is_empty(LinkedList list);
+int get_length(LinkedList list);
+void *remove_list_node(LinkedList list, listNode *node);
 void begin(LinkedList list);
-int hasNext(LinkedList list);
+int has_next(LinkedList list);
 void *next(LinkedList list);
-void freeLinkedListDeep(LinkedList list);
-void freeLinkedList(LinkedList list);
-int getLength(LinkedList list);
+void free_linked_list_deep(LinkedList list);
+void free_linked_list(LinkedList list);
 
 #endif

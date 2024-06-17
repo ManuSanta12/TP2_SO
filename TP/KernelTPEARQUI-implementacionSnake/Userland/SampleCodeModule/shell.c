@@ -230,7 +230,7 @@ static void cmd_filter(){
 	run_filter();
 }
 static void cmd_ps(){
-	getProcessesInfo();
+	get_process_info();
 }
 
 static void cmd_nice(){

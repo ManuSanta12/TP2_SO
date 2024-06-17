@@ -143,6 +143,11 @@ typedef struct processInfo
 } processInfo;
 
 
+typedef struct processInfoList {
+    int lenght;
+    processInfo *processList;
+}
+
 
 typedef struct memoryInfo
 {

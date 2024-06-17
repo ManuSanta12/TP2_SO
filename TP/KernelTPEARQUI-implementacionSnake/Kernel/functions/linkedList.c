@@ -12,8 +12,8 @@ typedef struct LinkedListCDT {
 
 
 
-LinkedList createLinkedList() {
-	LinkedList list = (LinkedList) allocMemory(sizeof(LinkedListCDT));
+LinkedList create_linked_list() {
+	LinkedList list = (LinkedList) memory_manager_malloc(sizeof(LinkedListCDT));
 	list->len = 0;
 	list->first = NULL;
 	list->last = NULL;
@@ -21,15 +21,15 @@ LinkedList createLinkedList() {
 	return list;
 }
 
-listNode *appendElement(LinkedList list, void *data) {
+listNode *append_element(LinkedList list, void *data) {
 	if (list == NULL)
 		return NULL;
-	listNode *newlistNode = (listNode *) allocMemory(sizeof(listNode));
+	listNode *newlistNode = (listNode *) memory_manager_malloc(sizeof(listNode));
 	newlistNode->data = data;
-	return appendlistNode(list, newlistNode);
+	return append_list_node(list, newlistNode);
 }
 
-listNode *appendlistNode(LinkedList list, listNode *listNode) {
+listNode *append_list_node(LinkedList list, listNode *listNode) {
 	if (list == NULL)
 		return NULL;
 	listNode->next = NULL;
@@ -43,7 +43,7 @@ listNode *appendlistNode(LinkedList list, listNode *listNode) {
 	return listNode;
 }
 
-listNode *prependlistNode(LinkedList list, listNode *listNode) {
+listNode *prepend_list_node(LinkedList list, listNode *listNode) {
 	if (list == NULL)
 		return NULL;
 	listNode->prev = NULL;
@@ -57,25 +57,25 @@ listNode *prependlistNode(LinkedList list, listNode *listNode) {
 	return listNode;
 }
 
-listNode *getFirst(LinkedList list) {
+listNode *get_first(LinkedList list) {
 	if (list == NULL)
 		return NULL;
 	return list->first;
 }
 
-int isEmpty(LinkedList list) {
+int is_empty(LinkedList list) {
 	if (list == NULL)
 		return -1;
 	return !list->len;
 }
 
-int getLength(LinkedList list) {
+int get_length(LinkedList list) {
 	if (list == NULL)
 		return -1;
 	return list->len;
 }
 
-void *removelistNode(LinkedList list, listNode *listNode) {
+void *remove_list_node(LinkedList list, listNode *listNode) {
 	if (list == NULL || listNode == NULL)
 		return NULL;
 
@@ -105,21 +105,21 @@ void begin(LinkedList list) {
 	list->current = list->first;
 }
 
-int hasNext(LinkedList list) {
+int has_next(LinkedList list) {
 	if (list == NULL)
 		return -1;
 	return list->current != NULL;
 }
 
 void *next(LinkedList list) {
-	if (!hasNext(list))
+	if (!has_next(list))
 		return NULL;
 	void *data = list->current->data;
 	list->current = list->current->next;
 	return data;
 }
 
-void freeLinkedListDeep(LinkedList list) {
+void free_linked_list_deep(LinkedList list) {
 	listNode *current = list->first;
 	listNode *next;
 	while (current != NULL) {
@@ -127,9 +127,9 @@ void freeLinkedListDeep(LinkedList list) {
 		free(current);
 		current = next;
 	}
-	freeLinkedList(list);
+	free_linked_list(list);
 }
 
-void freeLinkedList(LinkedList list) {
+void free_linked_list(LinkedList list) {
 	free(list);
 }

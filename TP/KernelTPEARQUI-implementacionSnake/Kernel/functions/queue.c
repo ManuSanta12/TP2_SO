@@ -1,7 +1,7 @@
 #include <queue.h>
 
 //funcion para la nueva queue de bloqueados
-BlockedQueueADT newQueue() {
+BlockedQueueADT new_queue() {
     BlockedQueueADT queue = memory_manager_malloc(sizeof(BlockedQueueCDT));
     if (queue != NULL) {
         queue->head = NULL;
@@ -15,7 +15,7 @@ BlockedQueueADT newQueue() {
 }
 
 //funcion para eliminar un proceso de la queue de bloqueados. Devuelve el PID
-pid_t dequeuePid(BlockedQueueADT queue) {
+pid_t dequeue_pid(BlockedQueueADT queue) {
     if (queue == NULL || queue->head == NULL) {
         return -1;
     }
@@ -33,7 +33,7 @@ pid_t dequeuePid(BlockedQueueADT queue) {
 }
 
 //funcion para agregar un proceso a la queue
-void enqueuePid(BlockedQueueADT queue, pid_t pid) {
+void enqueue_pid(BlockedQueueADT queue, pid_t pid) {
     if (queue == NULL) {
         return;
     }
@@ -54,7 +54,7 @@ void enqueuePid(BlockedQueueADT queue, pid_t pid) {
 }
 
 //funcion para liberar la memoria de la queue
-void freeQueue(BlockedQueueADT queue) {
+void free_queue(BlockedQueueADT queue) {
     if (queue == NULL) {
         return;
     }

@@ -5,6 +5,7 @@ GLOBAL getMinutes
 GLOBAL getTime
 GLOBAL outSpeaker
 GLOBAL inSpeaker
+GLOBAL force_tick
 section .text
 	
 
@@ -121,3 +122,8 @@ outSpeaker:
 	mov rsp, rbp
 	pop rbp
 	ret
+
+
+force_tick:
+    int 0x20
+    ret

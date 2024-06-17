@@ -95,7 +95,7 @@ void sleep(int sec);
 
 int new_process(uint64_t rip, int argc, char *argv[]);
 
-void getProcessesInfo();
+void get_process_info();
 
 int up_priority(pid_t pid);
     
