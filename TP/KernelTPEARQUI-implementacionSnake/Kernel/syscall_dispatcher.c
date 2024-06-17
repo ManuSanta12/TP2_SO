@@ -58,7 +58,7 @@ static int sys_pipe(int pipefd[2]);
 static int sys_dup2(int fd1, int fd2);
 static int sys_open(int fd);
 static int sys_close(int fd);
-static processInfo *sys_ps();
+static processInfoList *sys_ps();
 static int sys_changeProcessStatus(pid_t pid);
 static pid_t sys_getCurrentPid();
 static priority_t sys_getPriority(pid_t pid);
@@ -252,7 +252,7 @@ static int sys_close(int fd)
   return 1;
 }
 
-static processInfo *sys_ps()
+static processInfoList *sys_ps()
 {
   return get_processes_info();
 }

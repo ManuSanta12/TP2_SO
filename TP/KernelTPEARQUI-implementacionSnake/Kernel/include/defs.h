@@ -143,7 +143,7 @@ typedef struct processInfo
     void *rsp;
     status_t status;
     uint8_t foreground;
-    struct processInfo *next;
+    //struct processInfo *next;
 } processInfo;
 
 
@@ -162,6 +162,6 @@ typedef struct memoryInfo
     unsigned int blocksUsed;
 } MemoryInfo;
 
-typedef int (*main_foo  )(int argc, char **args);
+typedef int (*main_foo)(int argc, char **args);
 
 #endif

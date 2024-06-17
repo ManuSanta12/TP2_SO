@@ -48,21 +48,17 @@ void *initializeKernelBinary() {
 }
 
 int main() {
-
-
-  create_sem_manager();
 	create_memory(0x2000000 - 0x1000000);
-  clearScanCode();
 	create_sch();
+  create_sem_manager();
+  clearScanCode();
 	load_idt();
 	_sti();
 	_hlt();
-  char *argsShell[2] = {"shell", NULL};
+  char *argsShell[2] = {"shell"};
 	int16_t fileDescriptors[] = {STDIN, STDOUT, STDERR};
   create_process((main_foo) sampleCodeModuleAddress, argsShell, "shell", 4, fileDescriptors, 1);
   ((EntryPoint)sampleCodeModuleAddress)();
-	while (1){
-		_hlt();
-  }
-	return 0;	return 0;
+	
+	return 0;	
 }

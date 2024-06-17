@@ -20,7 +20,7 @@ processInfoList* get_processes_info();
 static char** copy_argv( char** argv);
 void process_wrapper(main_foo fun, char** args);
 static int argv_len(char** argv);
-void new_process(pid_t pid, pid_t parentPID, main_foo mainFun, char** argv, char* name, priority_t priority, fd_t fileDescriptors[], uint8_t kill);
+void new_process(PCB* newProcess,pid_t pid, pid_t parentPID, main_foo mainFun, char** argv, char* name, priority_t priority, fd_t fileDescriptors[], uint8_t kill);
 static void assign_FD(PCB* new, uint8_t fdIndex, fd_t fdValue, uint8_t mode);
 void close_all_fd(PCB* p);
 void free_process(PCB* p);

@@ -282,9 +282,9 @@ uint8_t sem_close(char*name){
 	return sys_semClose(name);
 }
 
-void new_process(void *code, char **args, char *name, uint8_t priority){
+int new_process(void *code, char **args, char *name, uint8_t priority){
 	int16_t fds[] = {STDIN, STDOUT, STDERR};
-	sys_newProcess(code, args, name, priority,fds);
+	return sys_newProcess(code, args, name, priority,fds);
 }
 
 
@@ -306,7 +306,8 @@ void get_process_info()
 	list = sys_ps();
 	processInfo* current = list->processList;
 	//printDec(current->pid);
-    while (current != NULL)
+	int i = 0;
+    while (i < list->lenght)
     {
 		printc('\n');
 		prints("PID: ", 100);
@@ -321,7 +322,8 @@ void get_process_info()
 		prints("Status: ",MAX_BUFFER);
 		prints((current->status) ? "BLOCKED" : "READY", MAX_BUFFER);
         sys_memFree(current);
-        current = current->next;
+        current++;
+		i++;
     }
 }
 
@@ -336,7 +338,7 @@ void run_loop(){
 	while((c=getChar())!='q'){
 		prints("\n Hola soy el proceso: ",30);
 		printDec(get_pid());
-		wait(2000);
+		//wait(2000);
 		printc('\n');
 		a++;
 	}

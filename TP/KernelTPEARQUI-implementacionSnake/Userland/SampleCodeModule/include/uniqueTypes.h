@@ -17,7 +17,7 @@ typedef struct processInfo{
     priority_t priority;
     uint64_t stackBase;
     status_t status;
-    struct processInfo * next;
+    //struct processInfo * next;
 } processInfo;
 
 typedef struct processInfoList {

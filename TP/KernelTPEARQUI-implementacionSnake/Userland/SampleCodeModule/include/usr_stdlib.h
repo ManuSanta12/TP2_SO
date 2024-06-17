@@ -93,7 +93,7 @@ int atoi(const char* str);
 
 void sleep(int sec);
 
-void new_process(void *code, char **args, char *name, uint8_t priority);
+int new_process(void *code, char **args, char *name, uint8_t priority);
 
 void get_process_info();
 
