@@ -1,114 +1,194 @@
+
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+#include <defs.h>
+#include <memoryManager.h>
 #include <pipe.h>
+#include <scheduler.h>
+#include <stdint.h>
+#include <stdlib.h>
 
-pipeList pipesList = NULL;
+#define MAX_PIPES (1 << 12)
+#define bufferPosition(pipe) (((pipe)->startPosition + (pipe)->currentSize) % PIPE_SIZE)
 
-//funcion para abrir un pipe nuevo
-Pipe *pipeOpen()
-{
-    //incluimos en el newpipe las variables de pipe e inicializamos
-    Pipe *newPipe = (Pipe *)memory_manager_malloc(sizeof(Pipe));
-    newPipe->isReadOpen = 1;
-    newPipe->isWriteOpen = 1;
-    newPipe->readQueue = new_queue();
-    newPipe->writeQueue = new_queue();
-    newPipe->processCount = 1;
+typedef struct Pipe {
+	char buffer[PIPE_SIZE];
+	uint16_t startPosition;
+	uint16_t currentSize;
+	int16_t inputPid, outputPid;
+	uint8_t isBlocking;
+} Pipe;
 
-    pipeNode *newPipeNode = (pipeNode *)memory_manager_malloc(sizeof(pipeNode));
-    newPipeNode->pipe = newPipe;
-    newPipeNode->next = pipesList;
-    newPipeNode->previous = NULL;
-    pipesList = newPipeNode;
-    return newPipe;
+static int16_t getPipeIndexById(uint16_t id);
+static Pipe *getPipeById(PipeManagerADT pipeManager, uint16_t id);
+static void freePipe(Pipe *pipe);
+static Pipe *createPipe();
+
+typedef struct PipeManagerCDT {
+	Pipe *pipes[MAX_PIPES];
+	uint16_t lastFreePipe;
+	uint16_t qtyPipes;
+} PipeManagerCDT;
+
+PipeManagerADT pipeManager;
+
+
+static int16_t getPipeIndexById(uint16_t id) {
+	int16_t index = (int16_t) id - 3;
+	if (index < 0 || index >= MAX_PIPES)
+		return -1;
+	return index;
 }
 
-
-int pipeClose(Pipe *pipe) {
-    if (pipe->processCount > 1)
-    {
-        pipe->processCount--;
-    }
-    pipeNode *current = pipesList;
-    while (current != NULL && current->pipe != pipe)
-    {
-        current = current->next;
-    }
-    if (current == NULL)
-    {
-        return 0;
-    }
-
-    free_queue(pipe->readQueue);
-    free_queue(pipe->writeQueue);
-    if (current->next != NULL)
-    {
-        current->next->previous = current->previous;
-    }
-    if (current->previous != NULL)
-    {
-        current->previous->next = current->next;
-    }
-    free_memory_manager(current);
-    free_memory_manager(pipe);
-    return 1;
+static Pipe *getPipeById(PipeManagerADT pipeManager, uint16_t id) {
+	int16_t index;
+	if ((index = getPipeIndexById(id)) == -1)
+		return NULL;
+	return pipeManager->pipes[index];
 }
 
-//devuelve la cantidad de chars leidos y sino -1
-int pipeReadData(Pipe *pipe, char *msg, int size) {
-    if (!pipe->isReadOpen) {
-        return -1;
-    }
-
-    int i;
-    pid_t currentPid;
-    for (i = 0; i < size; i++) {
-        //verificamos que el readIndex sea igual al writeIndex
-        if (pipe->readIndex == pipe->writeIndex) {
-            //si lo son, es porque no hay datos para leer en el pipe
-            currentPid = get_current_pid();
-            //se agrega a la readQueue hasta que haya datos disponibles para leer
-            enqueue_pid(pipe->readQueue, currentPid);
-            //el proceso actual se blquea
-            blockProcess(currentPid);
-        }
-        //si hay datos, se lee un char y se almacena en msg
-        msg[i] = pipe->data[pipe->readIndex % PIPESIZE];
-        pipe->readIndex++;
-        //despues de cada lectura verificamos si hay procesos bloqueados esperando
-        //para escribir en el tubo
-        while ((currentPid = dequeue_pid(pipe->writeQueue)) != -1) {
-            //si hay, se desbloquean y se sacan de la writeQueue
-            unblockProcess(currentPid);
-        }
-    }
-
-    return i;
+PipeManagerADT createPipeManager() {
+	PipeManagerADT pipeManager = memory_manager_malloc(sizeof(PipeManagerCDT));
+	for (int i = 0; i < MAX_PIPES; i++)
+		pipeManager->pipes[i] = NULL;
+	pipeManager->lastFreePipe = MAX_PIPES - 1;
+	pipeManager->qtyPipes = 0;
+	return pipeManager;
 }
 
+int16_t getLastFreePipe() {
+	if (pipeManager->qtyPipes >= MAX_PIPES)
+		return -1;
+	while (pipeManager->pipes[pipeManager->lastFreePipe] != NULL)
+		pipeManager->lastFreePipe = (pipeManager->lastFreePipe + MAX_PIPES - 1) % MAX_PIPES;
+	Pipe *pipe = createPipe();
+	pipeManager->pipes[pipeManager->lastFreePipe] = pipe;
+	pipeManager->qtyPipes++;
+	return pipeManager->lastFreePipe + 3;
+}
 
-//devuelve la cantidad de chars escritos y sino -1
-//funciona de manera similar que el pipeReadData
-int pipeWriteData(Pipe *pipe, const char *msg, int size) {
-    if (!pipe->isWriteOpen) {
-        return -1;
-    }
+int8_t pipeOpen(uint16_t id, uint8_t mode) {
+	return pipeOpenForPid(get_current_pid(), id, mode);
+}
 
-    int i;
-    pid_t currentPid;
+int8_t pipeOpenForPid(uint16_t pid, uint16_t id, uint8_t mode) {
+	int16_t index;
+	if ((index = getPipeIndexById(id)) == -1)
+		return -1;
+	Pipe *pipe = pipeManager->pipes[index];
+	pipeManager->qtyPipes++;
+	if (pipe == NULL) {
+		pipe = createPipe();
+		pipeManager->pipes[index] = pipe;
+	}
+	if (mode == READ && pipe->outputPid < 0)
+		pipe->outputPid = pid;
+	else if (mode == WRITE && pipe->inputPid < 0)
+		pipe->inputPid = pid;
+	else
+		return -1;
+	return 0;
+}
 
-    for (i = 0; i < size; i++) {
-        if (pipe->writeIndex == pipe->readIndex + PIPESIZE) {
-            currentPid = get_current_pid();
-            enqueue_pid(pipe->writeQueue, currentPid);
-            blockProcess(currentPid);
-        }
+int8_t pipeClose(uint16_t id) {
+	return pipeCloseForPid(get_current_pid(), id);
+}
 
-        pipe->data[pipe->writeIndex % PIPESIZE] = msg[i];
-        pipe->writeIndex++;
+int8_t pipeCloseForPid(uint16_t pid, uint16_t id) {
+	int16_t index;
+	if ((index = getPipeIndexById(id)) == -1)
+		return -1;
+	Pipe *pipe = pipeManager->pipes[index];
+	if (pipe == NULL)
+		return -1;
 
-        while ((currentPid = dequeue_pid(pipe->readQueue)) != -1) {
-            unblockProcess(currentPid);
-        }
-    }
+	if (pid == pipe->inputPid) {
+		char eofString[1] = {EOF};
+		writePipe(pid, id, eofString, 1);
+	}
+	else if (pid == pipe->outputPid) {
+		freePipe(pipeManager->pipes[index]);
+		pipeManager->pipes[index] = NULL;
+		pipeManager->qtyPipes--;
+	}
+	else
+		return -1;
+	return 0;
+}
+static void freePipe(Pipe *pipe) {
+	free_memory_manager(pipe);
+}
 
-    return 1;
+static Pipe *createPipe() {
+	Pipe *pipe = (Pipe *) memory_manager_malloc(sizeof(Pipe));
+	pipe->startPosition = 0;
+	pipe->currentSize = 0;
+	pipe->inputPid = -1;
+	pipe->outputPid = -1;
+	pipe->isBlocking = 0;
+	for (int i = 0; i < PIPE_SIZE; i++)
+		pipe->buffer[i] = 0;
+	return pipe;
+}
+
+int64_t writePipe(uint16_t pid, uint16_t id, char *sourceBuffer, uint64_t len) {
+	Pipe *pipe = getPipeById(pipeManager, id);
+	if (pipe == NULL ||
+		pipe->inputPid != pid ||
+		len == 0)
+		return -1;
+
+	uint64_t writtenBytes = 0;
+	while (writtenBytes < len && (int) pipe->buffer[bufferPosition(pipe)] != EOF) {
+		if (pipe->currentSize >= PIPE_SIZE) {
+			pipe->isBlocking = 1;
+			set_status((uint16_t) pipe->inputPid, BLOCKED);
+			yield();
+		}
+		if (pipe != getPipeById(pipeManager, id)) // Validar que no haya muerto el pipe
+			return -1;
+
+		while (pipe->currentSize < PIPE_SIZE && writtenBytes < len) {
+			pipe->buffer[bufferPosition(pipe)] = sourceBuffer[writtenBytes];
+			if ((int) sourceBuffer[writtenBytes++] == EOF)
+				break;
+			pipe->currentSize++;
+		}
+		if (pipe->isBlocking) {
+			set_status((uint16_t) pipe->outputPid, READY);
+			pipe->isBlocking = 0;
+		}
+	}
+	return writtenBytes;
+}
+
+int64_t readPipe(uint16_t id, char *destinationBuffer, uint64_t len) {
+	Pipe *pipe = getPipeById(pipeManager, id);
+	if (pipe == NULL ||
+		pipe->outputPid != get_current_pid() ||
+		len == 0)
+		return -1;
+	uint8_t eofRead = 0;
+	uint64_t readBytes = 0;
+	while (readBytes < len && !eofRead) {
+		if (pipe->currentSize == 0 && (int) pipe->buffer[pipe->startPosition] != EOF) {
+			pipe->isBlocking = 1;
+			set_status((uint16_t) pipe->outputPid, BLOCKED);
+			yield();
+		}
+		while ((pipe->currentSize > 0 || (int) pipe->buffer[pipe->startPosition] == EOF) && readBytes < len) {
+			destinationBuffer[readBytes] = pipe->buffer[pipe->startPosition];
+			if ((int) destinationBuffer[readBytes++] == EOF) {
+				eofRead = 1;
+				break;
+			}
+			pipe->currentSize--;
+			pipe->startPosition = (pipe->startPosition + 1) % PIPE_SIZE;
+		}
+		if (pipe->isBlocking) {
+			set_status((uint16_t) pipe->inputPid, READY);
+			pipe->isBlocking = 0;
+		}
+	}
+	return readBytes;
 }

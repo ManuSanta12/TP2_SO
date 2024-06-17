@@ -1,8 +1,7 @@
-GLOBAL loadProcess
+GLOBAL load_process
 GLOBAL _int20h
 GLOBAL execute_next
 GLOBAL execute_from_rip
-EXTERN contextSwitch
 
 section .text
 
@@ -26,7 +25,7 @@ _start:
 ; rdx -> argc
 ; rcx -> argv
 
-loadProcess:
+load_process:
    
     mov r8, rsp 	
 	mov r9, rbp		

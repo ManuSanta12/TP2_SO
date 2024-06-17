@@ -51,7 +51,7 @@ int dequeue_pid(semaphore_t *sem) {
 
 void wait_mutex(int id) {
     while (semManager->semaphores[id]->mutex == 0) {
-        yieldProcess();
+        yield();
     }
     return;
 }
@@ -129,7 +129,7 @@ uint8_t sem_wait(char *name, int pid) {
                 return 0;
             }
             while (s->value == 0 && peek_pid(s) != pid) {
-                yieldProcess();
+                yield();
             }
             wait_mutex(i);
             s->value--;

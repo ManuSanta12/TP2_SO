@@ -9,7 +9,7 @@
 #include <scheduler.h>
 #include "timeRtc.h"
 #include <pipe.h>
-#include <queue.h>
+
 
 #define STDIN 0
 #define STDOUT 1
@@ -49,7 +49,7 @@ static uint8_t sys_semInit(char*name,int value);
 static uint8_t sys_semPost(char* name);
 static uint8_t sys_semWait(char* name,int pid);
 static uint8_t sys_semClose(char* name);
-static pid_t sys_newProcess(uint64_t rip, int argc, char *argv[]);
+static pid_t sys_newProcess(main_foo code,char **argv, char* name,  priority_t priority, fd_t fileDescriptors[]);
 static uint64_t sys_getPid();
 static uint64_t sys_sleepTime(int sec);
 // los void los pongo sino me tira warning
@@ -191,8 +191,8 @@ static uint8_t sys_semClose(char* name){
   return sem_close(name);
 }
 
-static pid_t sys_newProcess(uint64_t rip, int argc, char *argv[]){
-  return new_process(rip, argc, argv);
+static pid_t sys_newProcess(main_foo code, char **argv,char* name, priority_t priority, fd_t fileDescriptors[]){
+  return create_process(code, argv, name, priority, fileDescriptors, 0);
 }
 
 static uint64_t sys_getPid(){
@@ -210,42 +210,45 @@ static int sys_nice(pid_t pid, int newPriority)
     return -1;
   }
 
-  return changePriority(pid, newPriority);
+  return set_priority(pid, newPriority);
 }
-
 static int sys_pipe(int pipefd[2])
 {
+/*
   PCB *pcb = get_process(get_current_pid());
   pcb->fileDescriptors[PIPEIN].mode = OPEN;
   pcb->fileDescriptors[PIPEOUT].mode = OPEN;
   pcb->pipe = pipeOpen();
   pipefd[0] = PIPEIN;
   pipefd[1] = PIPEOUT;
+*/
   return 0;
 }
-
 static int sys_dup2(int fd1, int fd2)
-{
+{/*
   PCB *pcb = get_process(get_current_pid());
   if (fd1 > pcb->lastFd || fd2 > pcb->lastFd || pcb->fileDescriptors[fd2].mode == CLOSED)
     return 0;
   pcb->fileDescriptors[fd1] = pcb->fileDescriptors[fd2];
+  */
   return 1;
 }
 static int sys_open(int fd)
-{
+{/*
   PCB *pcb = get_process(get_current_pid());
   if (pcb->lastFd < fd)
     return 0;
   pcb->fileDescriptors[fd].mode = OPEN;
+  */
   return 1;
 }
 static int sys_close(int fd)
-{
+{/*
   PCB *pcb = get_process(get_current_pid());
   if (pcb->lastFd < fd)
     return 0;
   pcb->fileDescriptors[fd].mode = CLOSED;
+  */
   return 1;
 }
 
@@ -255,12 +258,13 @@ static processInfo *sys_ps()
 }
 
 static priority_t sys_getPriority(int pid){
-  return get_priority(pid);
+  return 4;
 }
 
 // Returns READY if unblocked, BLOCKED if blocked, -1 if failed
 static int sys_changeProcessStatus(pid_t pid)
 {
+  /*
   PCB *process = get_process(pid);
   if (process == NULL)
   {
@@ -275,7 +279,8 @@ static int sys_changeProcessStatus(pid_t pid)
   {
     sys_unblock(pid);
     return READY;
-  }
+  }*/
+  return 0;
 }
 
 static pid_t sys_getCurrentPid()
@@ -285,11 +290,12 @@ static pid_t sys_getCurrentPid()
 
 static pid_t sys_exec(uint64_t program, unsigned int argc, char *argv[])
 {
-  return new_process(program, argc, argv);
+ // return new_process(program, argc, argv);
+  return 0; 
 }
 
 static void sys_exit(int return_value, char autokill)
-{
+{/*
   PCB *pcb = get_process(get_current_pid());
   unsigned int lastFd = pcb->lastFd;
 
@@ -299,10 +305,11 @@ static void sys_exit(int return_value, char autokill)
   }
 
   killProcess(return_value, autokill);
+  */
 }
 
 static pid_t sys_waitpid(pid_t pid)
-{
+{/*
   PCB *processPcb = get_process(pid);
   if (processPcb == NULL)
   {
@@ -313,7 +320,8 @@ static pid_t sys_waitpid(pid_t pid)
   enqueue_pid(processPcb->blockedQueue, currentPid);
   blockProcess(currentPid);
 
-  return pid;
+  return pid;*/
+  return;
 }
 
 
@@ -334,7 +342,8 @@ static int sys_kill(pid_t pid)
   sys_exit(0, 0);
   return 0;
   */
-  return kill_by_pid(pid);
+  //return kill_by_pid(pid);
+  return 0;
 }
 
 static int sys_block(pid_t pid)
@@ -343,7 +352,8 @@ static int sys_block(pid_t pid)
   {
     return -1;
   }
-  return blockProcess(pid);
+ // return blockProcess(pid);
+ return 0;
 }
 
 static int sys_unblock(pid_t pid)
@@ -352,7 +362,8 @@ static int sys_unblock(pid_t pid)
   {
     return -1;
   }
-  return unblockProcess(pid);
+  //return unblockProcess(pid);
+  return 0;
 }
 
 static uint64_t (*syscall_handlers[])(uint64_t, uint64_t, uint64_t, uint64_t,

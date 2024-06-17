@@ -129,7 +129,7 @@ int run_phylos() {
     itoa(index, philo_number_buffer, 10);
     char *params[] = {"philosopher", philo_number_buffer, NULL};
     int16_t file_descriptors[] = {DEV_NULL, STDOUT, STDERR};
-    phylos_pids[index] = new_process(&phylo, 3,params);
+    //phylos_pids[index] = new_process(&phylo, 3,params);
     if (phylos_pids[index] != -1)
         prints("hola",11);
         phylos_qty++;

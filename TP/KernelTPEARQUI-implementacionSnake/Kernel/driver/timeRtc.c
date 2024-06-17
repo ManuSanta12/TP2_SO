@@ -12,5 +12,5 @@ static uint32_t get_seconds() {
 void sleep_time(int seconds) {
 	uint32_t limit = get_seconds() + seconds;
 	while (get_seconds() < limit)
-		yieldProcess();
+		yield();
 }

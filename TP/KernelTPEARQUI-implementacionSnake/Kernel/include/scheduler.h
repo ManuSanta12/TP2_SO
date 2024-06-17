@@ -2,9 +2,10 @@
 #define SCHEDULER_H
 
 #include <stdint.h>
-
+#include <linkedList.h>
+#include <defs.h>
+#include <pipe.h>
 // Prototipos de las funciones definidas en el archivo .c
-void dummy_process();
 void create_sch();
 static uint16_t get_next_pid();
 int32_t set_priority(pid_t pid, priority_t newPriority);
@@ -19,7 +20,7 @@ processInfo* get_processes_info();
 char** copy_argv(int argc, char** argv);
 void process_wrapper(main_foo fun, char** args);
 static int argv_len(char** argv);
-listNode* new_process(pid_t pid, pid_t parentPID, main_foo mainFun, char** argv, char* name, priority_t priority, fd_t fileDescriptors[], uint8_t kill);
+void new_process(pid_t pid, pid_t parentPID, main_foo mainFun, char** argv, char* name, priority_t priority, fd_t fileDescriptors[], uint8_t kill);
 static void assign_FD(PCB* new, uint8_t fdIndex, fd_t fdValue, uint8_t mode);
 void close_all_fd(PCB* p);
 void free_process(PCB* p);
@@ -32,5 +33,6 @@ void yield();
 int change_file_descriptor(uint16_t pid, uint8_t position, int16_t newFd);
 int get_current_process_FD(uint8_t fdIndex);
 void kill_foreground_process();
+pid_t get_current_pid();
 
 #endif // SCHEDULER_H

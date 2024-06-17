@@ -22,7 +22,9 @@
 #define ACS_DATA (ACS_PRESENT | ACS_DSEG | ACS_WRITE)
 #define ACS_STACK (ACS_PRESENT | ACS_DSEG | ACS_WRITE)
 
-#define PIPESIZE 512
+#define DEV_NULL -1
+
+
 #define FDS 3
 #define OPEN 1
 #define CLOSED 0
@@ -68,7 +70,7 @@ typedef struct
 } semaphore;
 
 typedef semaphore *sem_t;
-
+/*
 typedef struct Pipe
 {
     char data[PIPESIZE];
@@ -80,7 +82,8 @@ typedef struct Pipe
     BlockedQueueADT writeQueue;
     BlockedQueueADT readQueue;
 } Pipe;
-
+*/
+/*
 typedef struct pipeNode
 {
     Pipe *pipe;
@@ -94,7 +97,7 @@ typedef struct PipeList {
 } PipeList;
 
 typedef pipeNode *pipeList;
-
+*/
 typedef int16_t fd_t;
 
 
@@ -113,12 +116,13 @@ typedef struct
     void *stackBase;
     BlockedQueueADT zombie; //los hijos que quedan zombie
     fd_t fileDescriptors[FDS];
-    Pipe *pipe;
+    //Pipe *pipe;
     char * name;
     unsigned int argc;
     char **argv;
     int64_t retVal;
     uint8_t canBeKilled;
+
 } PCB;
 
 typedef struct node

@@ -51,13 +51,15 @@ int main() {
 
 
   create_sem_manager();
-	load_idt();
 	create_memory(0x2000000 - 0x1000000);
   clearScanCode();
 	create_sch();
+	load_idt();
 	_sti();
 	_hlt();
+  char *argsShell[2] = {"shell", NULL};
+	int16_t fileDescriptors[] = {STDIN, STDOUT, STDERR};
   ((EntryPoint)sampleCodeModuleAddress)();
-	//new_process((uint64_t)sampleCodeModuleAddress, 0, NULL);
+	//create_process((main_foo)sampleCodeModuleAddress, argsShell, "shell", 4, fileDescriptors, 1);
 	return 0;
 }

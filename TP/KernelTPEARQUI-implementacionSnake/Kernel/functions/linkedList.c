@@ -93,12 +93,9 @@ void *remove_list_node(LinkedList list, listNode *listNode) {
 	void *data = listNode->data;
 	listNode->next = NULL;
 	listNode->prev = NULL;
-	// free(listNode);
 	return data;
 }
 
-// Atención: Usar funciones de agregado/borrado cuando se itera sobre la lista
-// puede causar comportamiento indefinido.
 void begin(LinkedList list) {
 	if (list == NULL)
 		return;
@@ -124,12 +121,12 @@ void free_linked_list_deep(LinkedList list) {
 	listNode *next;
 	while (current != NULL) {
 		next = current->next;
-		free(current);
+		free_memory_manager(current);
 		current = next;
 	}
 	free_linked_list(list);
 }
 
 void free_linked_list(LinkedList list) {
-	free(list);
+	free_memory_manager(list);
 }

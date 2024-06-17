@@ -282,8 +282,9 @@ uint8_t sem_close(char*name){
 	return sys_semClose(name);
 }
 
-int new_process(uint64_t rip, int argc, char *argv[]){
-	return sys_newProcess(rip, argc, argv);
+void new_process(void *code, char **args, char *name, uint8_t priority){
+	int16_t fds[] = {STDIN, STDOUT, STDERR};
+	sys_newProcess(code, args, name, priority,fds);
 }
 
 

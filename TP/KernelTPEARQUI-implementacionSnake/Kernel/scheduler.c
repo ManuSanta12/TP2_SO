@@ -1,13 +1,12 @@
 #include <scheduler.h>
 #include <interrupts.h>
 #include <memoryManager.h>
-#include <queue.h>
 #include <lib.h>
 #include <pipe.h>
 #include <linkedList.h>
 
-extern void* load_process(void*, void* , void* , void* ); // implement on assembler
-extern void _int20h;                                                                 // implement int20h con assembler
+extern void *load_process(void *, void *, void *, void *);
+extern void _int20h;                                                                 
 extern void execute_next(uint64_t);
 extern void execute_from_rip(uint64_t);
 #define SCHEDULER_ADDRESS 0x60000
@@ -40,17 +39,14 @@ typedef schedulerCDT* schedulerADT;
 
 schedulerADT scheduler;
 
-void dummy_process()
-{
-    while (1)
-    {
-        _hlt();
-    }
+pid_t get_current_pid(){
+    return scheduler->currentPid;
 }
 
 void create_sch()
 {
     scheduler = (schedulerADT)SCHEDULER_ADDRESS;
+    scheduler->processAmount = 0;
 	for (int i = 0; i < MAX_PROC; i++)
 		scheduler->processes[i] = NULL;
 	for (int i = 0; i < LEVELS + 1; i++)
@@ -80,8 +76,8 @@ int32_t set_priority(pid_t pid, priority_t newPriority) {
 	if (newPriority >= LEVELS)
 		return -1;
 	if (process->status == READY || process->status == RUNNING) {
-		remove_node(scheduler->lvls[process->priority], listNode);
-		scheduler->processes[process->pid] = append_node(scheduler->lvls[newPriority], listNode);
+		remove_list_node(scheduler->lvls[process->priority], listNode);
+		scheduler->processes[process->pid] = append_list_node(scheduler->lvls[newPriority], listNode);
 	}
 	process->priority = newPriority;
 	return newPriority;
@@ -100,13 +96,13 @@ int8_t set_status(uint16_t pid, uint8_t newStatus) {
 
 	process->status = newStatus;
 	if (newStatus == BLOCKED) {
-		remove_node(scheduler->lvls[process->priority], listNode);
-		append_node(scheduler->lvls[LEVELS], listNode); //los procesos bloqueados estan en el ultimo nivel
+		remove_list_node(scheduler->lvls[process->priority], listNode);
+		append_list_node(scheduler->lvls[LEVELS], listNode); //los procesos bloqueados estan en el ultimo nivel
 	}
 	else if (oldStatus == BLOCKED) {
-		remove_node(scheduler->lvls[LEVELS], listNode);
+		remove_list_node(scheduler->lvls[LEVELS], listNode);
 		process->priority = MAX_PRIORITY;
-		prepend_node(scheduler->lvls[process->priority], listNode);
+		prepend_list_node(scheduler->lvls[process->priority], listNode);
 		scheduler->remainingQuantum = 0;
 	}
 	return newStatus;
@@ -183,7 +179,7 @@ static void destroy_zombie(PCB *zombie) {
 	scheduler->processAmount--;
 	scheduler->processes[zombie->pid] = NULL;
 	free_process(zombie);
-	free(zombieNode);
+	free_memory_manager(zombieNode);
 }
 
 int32_t kill_current_process(int32_t retValue) {
@@ -198,10 +194,10 @@ int32_t kill_process(uint16_t pid, int32_t retValue) {
 	if (processToKill->status == ZOMBIE || processToKill->canBeKilled)
 		return -1;
 
-	close_FDs(processToKill);
+	close_all_fd(processToKill);
 
 	uint8_t priorityIndex = processToKill->status != BLOCKED ? processToKill->priority : LEVELS;
-	remove_node(scheduler->lvls[priorityIndex], processToKillNode);
+	remove_list_node(scheduler->lvls[priorityIndex], processToKillNode);
 	processToKill->retVal = retValue;
 
 	processToKill->status = ZOMBIE;
@@ -214,7 +210,7 @@ int32_t kill_process(uint16_t pid, int32_t retValue) {
 	listNode *parentNode = scheduler->processes[processToKill->parentPID];
 	if (parentNode != NULL && ((PCB *) parentNode->data)->status != ZOMBIE) {
 		PCB *parent = (PCB *) parentNode->data;
-		append_node(parent->zombie, processToKillNode);
+		append_list_node(parent->zombie, processToKillNode);
 		if (is_process_waiting(parent, processToKill->pid))
 			set_status(processToKill->parentPID, READY);
 	}
@@ -272,7 +268,7 @@ static int argv_len(char **argv) {
 	return len;
 }
 
-listNode* new_process(pid_t pid, pid_t parentPID, main_foo mainFun, char **argv, char *name, priority_t priority, fd_t fileDescriptors[], uint8_t kill){  
+void new_process(pid_t pid, pid_t parentPID, main_foo mainFun, char **argv, char *name, priority_t priority, fd_t fileDescriptors[], uint8_t kill){  
     PCB* newProcess = memory_manager_malloc(sizeof(listNode*));
     newProcess->pid = scheduler->processAmount++;
 	newProcess->parentPID = parentPID;
@@ -285,7 +281,7 @@ listNode* new_process(pid_t pid, pid_t parentPID, main_foo mainFun, char **argv,
 	void *stackEnd = (void *) ((uint64_t) newProcess->stackBase + STACK_SIZE);
 	newProcess->rsp = load_process(&process_wrapper, mainFun, stackEnd, (void *) newProcess->argv);
 	newProcess->status = READY;
-	newProcess->zombie = newQueue();
+	newProcess->zombie = create_linked_list();
 	newProcess->canBeKilled = kill;
 	newProcess->waiting = 0;
 
@@ -299,7 +295,10 @@ static void assign_FD(PCB *new, uint8_t fdIndex, fd_t fdValue, uint8_t mode) {
 	if (fdValue >= FDS)
 		pipeOpenForPid(new->pid, fdValue, mode);
 }
-
+static void close_fds(uint16_t pid, int16_t fdValue) {
+	if (fdValue >= 3)
+		pipeCloseForPid(pid, fdValue);
+}
 void close_all_fd(PCB *p) {
 	close_fds(p->pid, p->fileDescriptors[STDIN]);
 	close_fds(p->pid, p->fileDescriptors[STDOUT]);
@@ -307,7 +306,7 @@ void close_all_fd(PCB *p) {
 }
 
 void free_process(PCB *p) {
-	freeQueue(p->zombie);
+	free_linked_list(p->zombie);
 	free_memory_manager(p->stackBase);
 	free_memory_manager(p->name);
 	free_memory_manager(p->argv);
@@ -352,7 +351,7 @@ int get_zombie_value(uint16_t pid) {
 		set_status(parent->pid, BLOCKED);
 		yield();
 	}
-	remove_node(parent->zombie, zombieNode);
+	remove_list_node(parent->zombie, zombieNode);
 	destroy_zombie(zombieProcess);
 	return zombieProcess->retVal;
 }
