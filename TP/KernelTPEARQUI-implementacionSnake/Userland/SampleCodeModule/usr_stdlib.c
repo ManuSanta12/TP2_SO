@@ -335,10 +335,10 @@ void run_loop(){
 	prints("\n Presionar q para finalizar\n",30);
 	char c=' ';
 	int a = 1;
-	while(/*(c=getChar())!='q'*/ a<30){
+	while((c=getChar())!='q'){
 		prints("\n Hola soy el proceso: ",30);
 		printDec(get_pid());
-		//wait(2000);
+		wait(2000);
 		printc('\n');
 		a++;
 	}
@@ -383,14 +383,14 @@ int run_wc() {
 }
 
 int run_cat() {
-	/*
 	char c;
 	while ((c = getChar()) != EOF)
 		printc(c);
-	return 0;*/
+	return 0;
+	/*
 	printc('\n');
 	printDec(r);
-	printc('\n');
+	printc('\n');*/
 }
 
 

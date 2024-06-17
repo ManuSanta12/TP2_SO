@@ -375,6 +375,7 @@ uint64_t contextSwitch(uint64_t rsp, uint64_t rip)
     if(init==0){
         return;
     }
+    scheduler->active->process.rip=rip;
     Node* aux = scheduler->active;
     // C1.1 y C1.3 (Todos)
     if (!scheduler->proccessBeingRun)
@@ -389,12 +390,12 @@ uint64_t contextSwitch(uint64_t rsp, uint64_t rip)
         { // C1.3.2 y C1.3.3
             prepareDummy(scheduler->placeholderProcessPid);
         }
-        return scheduler->active->process.rsp;
+        //return scheduler->active->process.rsp;
+        return 0;
     }
 
     Node *currentProcess = scheduler->active;
     //currentProcess->process.rsp = rsp;
-    //currentProcess->process.rip = rip;
     // Si no tengo procesos en ready, es decir, estan todos bloqueados tengo que correr el placeholderProcess
     if (scheduler->processReadyCount == 0)
     {
@@ -451,6 +452,7 @@ uint64_t contextSwitch(uint64_t rsp, uint64_t rip)
     nextProcess();
     if(aux!=scheduler->active){
         execute_next(scheduler->active->process.rip);   
+        //scheduler->active=NULL;
     }
     return scheduler->active->process.rsp;
 }

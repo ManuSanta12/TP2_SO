@@ -14,7 +14,6 @@ int main() {
 	
 	showCommands();
 
-	//new_process((uint64_t)shell, 0, NULL);
 	shell();
 
 
