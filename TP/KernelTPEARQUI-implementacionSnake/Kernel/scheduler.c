@@ -40,17 +40,13 @@ void dummyProcess()
 {
     while (1)
     {
-        _hlt();
+        //_hlt();
     }
 }
 
 void createScheduler()
 {
     scheduler = (schedulerADT)SCHEDULER_ADDRESS;
-    /*
-    scheduler->active = memory_manager_malloc(sizeof(Node));
-    scheduler->expired = memory_manager_malloc(sizeof(Node));;
-    */
     scheduler->processAmount = 0;
     scheduler->processReadyCount = 0;
     scheduler->proccessBeingRun = 0;
@@ -205,12 +201,31 @@ char **copy_argv(int argc, char **argv)
     return new_argv;
 }
 
-pid_t new_process(uint64_t rip, int argc, char *argv[])
+static void start(fun f, int argc, char *argv[]) {
+    int status = f(argc, argv);
+    killProcess(status,0);
+}
+
+static context* new_context(fun foo, int argc, char**argv){
+    context *context = memory_manager_malloc(sizeof(context));
+
+    context->rdi = (uint64_t)foo;
+    context->rsi = (uint64_t)argc;
+    context->rdx = (uint64_t)argv;  
+    context->rip = (uint64_t)&start;
+
+    context->cs = CS;
+    context->eflags = EFLAGS;
+    context->ss = SS;
+
+    context->rsp = (uint64_t)context;
+
+    return context;
+}
+
+pid_t new_process(fun foo, int argc, char *argv[])
 {
     Node *newProcess = memory_manager_malloc(sizeof(Node));
-    //newProcess->process = memory_manager_malloc(sizeof(PCB));
-    newProcess->process.rip = rip;
-    newProcess->process.run = 0;
     newProcess->process.pid = scheduler->processAmount++;
     newProcess->process.priority = DEFAULT_PRIORITY;
     newProcess->process.quantumsLeft = priorities[DEFAULT_PRIORITY];
@@ -219,6 +234,7 @@ pid_t new_process(uint64_t rip, int argc, char *argv[])
     newProcess->process.status = READY;
     newProcess->process.argc = argc;
     newProcess->process.argv = copy_argv(argc, argv);
+    newProcess->process.context = new_context(foo,argc,argv);
 
     // STDIN, STDOUT, STDERR, PIPEOUT, PIPEIN
     if (scheduler->active != NULL)
@@ -230,7 +246,7 @@ pid_t new_process(uint64_t rip, int argc, char *argv[])
         newProcess->process.lastFd = scheduler->active->process.lastFd;
         newProcess->process.pipe = scheduler->active->process.pipe;
     }
-
+    /*
     uint64_t rsp = (uint64_t)memory_manager_malloc(4 * 1024);
     if (rsp == 0)
     {
@@ -239,7 +255,7 @@ pid_t new_process(uint64_t rip, int argc, char *argv[])
     newProcess->process.stackBase = rsp;
     uint64_t newRsp = (uint64_t)loadProcess(rip, rsp + 4 * 1024, newProcess->process.argc, (uint64_t)newProcess->process.argv);
     newProcess->process.rsp = newRsp;
-
+    */
     if (scheduler->active == NULL)
     {
         newProcess->next = NULL;
@@ -375,12 +391,12 @@ void nohagonada(){
     return;
 }
 
-uint64_t contextSwitch(uint64_t rsp)
+context* contextSwitch(context* rsp)
 {
     if(init==0){
-        return;
+        return rsp;
     }
-    scheduler->active->process.rsp=rsp;
+    //scheduler->active->process.rsp=rsp;
     Node* aux = scheduler->active;
     // C1.1 y C1.3 (Todos)
     if (!scheduler->proccessBeingRun)
@@ -393,9 +409,10 @@ uint64_t contextSwitch(uint64_t rsp)
         }
         else
         { // C1.3.2 y C1.3.3
-            prepareDummy(scheduler->placeholderProcessPid);
+            //prepareDummy(scheduler->placeholderProcessPid);
+            return rsp;
         }
-        return scheduler->active->process.rsp;
+        return scheduler->active->process.context;
         //return 0;
     }
 
@@ -405,7 +422,7 @@ uint64_t contextSwitch(uint64_t rsp)
     if (scheduler->processReadyCount == 0)
     {
         prepareDummy(scheduler->placeholderProcessPid);
-        return scheduler->active->process.rsp;
+        return scheduler->active->process.context;
     }
 
     if (currentProcess->process.status != BLOCKED && currentProcess->process.quantumsLeft > 0)
@@ -454,17 +471,7 @@ uint64_t contextSwitch(uint64_t rsp)
             scheduler->expired = NULL;
         }
     }
-    nextProcess();
-    if(scheduler->active->process.run == 1){
-        execute_next(scheduler->active->process.rsp);  
-    } 
-    else {
-        scheduler->active->process.run = 1;
-        execute_from_rip(scheduler->active->process.rip);
-    }
-    nohagonada();
-    kill_by_pid(scheduler->active->process.pid);//si llega a este punto es porque termino de ejecutar.
-    return scheduler->active->process.rsp;
+    return scheduler->active->process.context;
 }
 
 int killProcess(int returnValue, char autokill)
@@ -487,7 +494,7 @@ int killProcess(int returnValue, char autokill)
     }
     free_memory_manager(currentProcess->process.argv);
     freeQueue(currentProcess->process.blockedQueue);
-    free_memory_manager((void *)currentProcess->process.stackBase);
+    //free_memory_manager((void *)currentProcess->process.stackBase);
     if (currentProcess->process.pipe != NULL)
     {
         char msg[1] = {EOF};
@@ -549,7 +556,7 @@ processInfo *getProccessesInfo()
             first = current;
         }
         current->priority = currentNode->process.priority;
-        current->stackBase = currentNode->process.stackBase;
+        //current->stackBase = currentNode->process.stackBase;
         current->status = currentNode->process.status;
         currentNode = currentNode->next;
     }
@@ -568,7 +575,7 @@ processInfo *getProccessesInfo()
         }
         current->pid = currentNode->process.pid;
         current->priority = currentNode->process.priority;
-        current->stackBase = currentNode->process.stackBase;
+        //current->stackBase = currentNode->process.stackBase;
         current->status = currentNode->process.status;
         currentNode = currentNode->next;
     }

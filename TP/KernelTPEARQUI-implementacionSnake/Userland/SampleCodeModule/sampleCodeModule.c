@@ -9,12 +9,12 @@ char * v = (char*)0xB8000 + 79 * 2;
 
 
 int main() {
-	
-	prints("a continuacion se detallan las rutinas disponibles para ejecutar:\n",MAX_BUFFER);
-	
-	showCommands();
-
 	shell();
+	
+	//prints("a continuacion se detallan las rutinas disponibles para ejecutar:\n",MAX_BUFFER);
+	
+	//showCommands();
+
 
 
 	return 0;
