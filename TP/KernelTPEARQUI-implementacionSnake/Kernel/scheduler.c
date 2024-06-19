@@ -53,7 +53,8 @@ void createScheduler()
     scheduler->active=NULL;
     scheduler->expired=NULL;
     
-    scheduler->placeholderProcessPid = new_process((uint64_t)dummyProcess, 0, NULL);
+    //scheduler->placeholderProcessPid = new_process((uint64_t)dummyProcess, 0, NULL);
+    /*
     for (int i = 0; i <= 2; i++)
     {
         scheduler->active->process.fileDescriptors[i].mode = OPEN;
@@ -67,6 +68,7 @@ void createScheduler()
     scheduler->active->process.status = BLOCKED;
     
     scheduler->processReadyCount--;
+    */
     init = 1;
     
 }
@@ -227,8 +229,13 @@ pid_t new_process(fun foo, int argc, char *argv[])
 {
     Node *newProcess = memory_manager_malloc(sizeof(Node));
     newProcess->process.pid = scheduler->processAmount++;
-    newProcess->process.priority = DEFAULT_PRIORITY;
-    newProcess->process.quantumsLeft = priorities[DEFAULT_PRIORITY];
+    if(newProcess->process.pid==0){
+        newProcess->process.priority = MAX_PRIORITY;
+        newProcess->process.quantumsLeft = priorities[MAX_PRIORITY];
+    }else{
+        newProcess->process.priority = DEFAULT_PRIORITY;
+        newProcess->process.quantumsLeft = priorities[DEFAULT_PRIORITY];
+    }
     newProcess->process.blockedQueue = newQueue();
     newProcess->process.newPriority = -1;
     newProcess->process.status = READY;
@@ -395,6 +402,9 @@ context* contextSwitch(context* rsp)
 {
     if(init==0){
         return rsp;
+    }
+    if(scheduler->processAmount==1){
+        return scheduler->active->process.context;
     }
     //scheduler->active->process.rsp=rsp;
     Node* aux = scheduler->active;

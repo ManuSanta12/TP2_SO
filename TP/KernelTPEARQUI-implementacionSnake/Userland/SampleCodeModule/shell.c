@@ -78,7 +78,7 @@ void run_shell(){
 }
 
 void shell (){
-	new_process(run_shell, 0, NULL);
+	new_process(&run_shell, 0, NULL);
 }
 
 static void runCommandInBackground(void (*cmd)()) {

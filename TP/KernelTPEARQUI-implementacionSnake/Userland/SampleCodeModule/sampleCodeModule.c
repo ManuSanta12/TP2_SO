@@ -17,5 +17,5 @@ int main() {
 	shell();
 
 
-	return 0xDEADBEEF;
+	return 0;
 } 
