@@ -54,7 +54,7 @@ void createScheduler()
     scheduler->expired=NULL;
     
     //scheduler->placeholderProcessPid = new_process((uint64_t)dummyProcess, 0, NULL);
-    /*
+    
     for (int i = 0; i <= 2; i++)
     {
         scheduler->active->process.fileDescriptors[i].mode = OPEN;
@@ -68,7 +68,7 @@ void createScheduler()
     scheduler->active->process.status = BLOCKED;
     
     scheduler->processReadyCount--;
-    */
+    
     init = 1;
     
 }
@@ -402,6 +402,9 @@ context* contextSwitch(context* rsp)
     if(init==0){
         return rsp;
     }
+    if(scheduler->processAmount==0){
+        return rsp;
+    }
     
     //scheduler->active->process.rsp=rsp;
     Node* aux = scheduler->active;
@@ -416,7 +419,7 @@ context* contextSwitch(context* rsp)
         }
         else
         { // C1.3.2 y C1.3.3
-            prepareDummy(scheduler->placeholderProcessPid);
+            //prepareDummy(scheduler->placeholderProcessPid);
             return rsp;
         }
         return scheduler->active->process.context;
