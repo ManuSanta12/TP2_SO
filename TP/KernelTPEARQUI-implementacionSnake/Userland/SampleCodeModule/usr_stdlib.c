@@ -282,8 +282,8 @@ uint8_t sem_close(char*name){
 	return sys_semClose(name);
 }
 
-int new_process(uint64_t rip, int argc, char *argv[]){
-	return sys_newProcess(rip, argc, argv);
+int new_process(void* f, int argc, char *argv[]){
+	return sys_newProcess(f, argc, argv);
 }
 
 
@@ -379,14 +379,13 @@ int run_wc() {
 }
 
 int run_cat() {
+	/*
 	char c;
 	while ((c = getChar()) != EOF)
 		printc(c);
 	return 0;
-	/*
-	printc('\n');
-	printDec(r);
-	printc('\n');*/
+	*/
+	new_process(dummy, 0, NULL);
 }
 
 

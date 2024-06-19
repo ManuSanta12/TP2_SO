@@ -11,7 +11,7 @@ void exception_divideByZero(void);
 
 
 
-void _cli(void);
+extern void _cli(void);
 
 void _sti(void);
 

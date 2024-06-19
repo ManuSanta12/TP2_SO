@@ -67,6 +67,11 @@ static void runCommandInBackground(void (*cmd)());
 static void (*commands_ptr[MAX_COMMANDS])() = {cmd_undefined, cmd_help, cmd_time, cmd_clear, cmd_snake, cmd_inforeg, cmd_zeroDiv,cmd_invOpcode,cmd_charsizeplus,cmd_charsizeminus, cmd_memory_manager,cmd_memory_tester,cmd_phylos,cmd_loop, cmd_cat, cmd_filter, cmd_wc, cmd_ps,cmd_nice};
 int runInBackground = 0; 
 
+void start_shell(){
+	new_process(shell, 0, NULL);
+}
+
+
 void shell (){
 	char c;
 	prints("$ User> ",9);
@@ -223,8 +228,8 @@ static void cmd_wc(){
 	run_wc();
 }
 static void cmd_cat(){
-	//run_cat();
-	run_sinc();
+	run_cat();
+	//run_sinc();
 }
 static void cmd_filter(){
 	run_filter();

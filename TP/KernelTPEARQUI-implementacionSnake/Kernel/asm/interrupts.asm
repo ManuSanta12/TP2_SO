@@ -9,9 +9,10 @@ GLOBAL interrupt_keyboard
 GLOBAL interrupt_timerTick
 GLOBAL interrupt_syscall
 EXTERN syscall_dispatcher
-EXTERN contextSwitch
+EXTERN context_switch
 GLOBAL exception_divideByZero
 GLOBAL exception_invalidOpCode
+GLOBAL move_flag
 
 GLOBAL regdata_exc
 GLOBAL inforeg
@@ -208,23 +209,17 @@ interrupt_keyboard:
 
 
 interrupt_timerTick:
-    pushState             ; Guarda el estado de la CPU
-
-    ; El valor de RIP justo antes de la interrupción está en (rsp + pushState_size + 8)
-    ; pushState_size es el tamaño de todos los registros que has guardado en pushState
-    ; En este caso, has guardado 15 registros (8 bytes cada uno) -> 15 * 8 = 120
-    ; También hay 8 bytes del valor de RFLAGS
-    ; Así que el valor de RIP está en (rsp + 128)
-    mov rdi, rsp          ; Mueve el valor de rsp a rdi
-    ;mov rsi, [rsp + 128]  ; Mueve el valor de rip (guardado) a rsi
-
-    call timer_handler    ; Llama a la función timer_handler
-
-    call contextSwitch    ; Llama a contextSwitch(rsp, rip)
+    pushState           
+    call timer_handler    
+    
+    mov rdi, rsp
+	call context_switch
+	mov rsp, rax   
+    jmp rax
 
     endOfHardwareInterrupt
-	popState              ; Restaura el estado de la CPU
-    iretq                 ; Retorna de la interrupción
+	popState   
+    iretq               
 
 
 exception_divideByZero:
@@ -255,10 +250,10 @@ haltcpu:
 	ret
 
 
-
 SECTION .bss
 	aux resq 1
 	regdata_exc		resq	18	; reserva 18 bytes para guardar los registros para excepciones
 	inforeg	resq	17	; reserve space for 17 qwords (one for each register we want to show on inforeg).
 	hasInforeg 		resb 	1 	; reserve 1 byte for a boolean on whether a regdump has already occurred.
 	left_shift  	resb 	1   ; shift presionado
+

@@ -49,7 +49,7 @@ static uint8_t sys_semInit(char*name,int value);
 static uint8_t sys_semPost(char* name);
 static uint8_t sys_semWait(char* name,int pid);
 static uint8_t sys_semClose(char* name);
-static pid_t sys_newProcess(uint64_t rip, int argc, char *argv[]);
+static pid_t sys_newProcess(void* f, int argc, char *argv[]);
 static uint64_t sys_getPid();
 static uint64_t sys_sleepTime(int sec);
 // los void los pongo sino me tira warning
@@ -63,7 +63,7 @@ static int sys_changeProcessStatus(pid_t pid);
 static pid_t sys_getCurrentPid();
 static priority_t sys_getPriority(pid_t pid);
 
-static pid_t sys_exec(uint64_t program, unsigned int argc, char *argv[]);
+static pid_t sys_exec(void* program, unsigned int argc, char *argv[]);
 static void sys_exit(int return_value, char autokill);
 
 static pid_t sys_waitpid(pid_t pid);
@@ -191,8 +191,8 @@ static uint8_t sys_semClose(char* name){
   return sem_close(name);
 }
 
-static pid_t sys_newProcess(uint64_t rip, int argc, char *argv[]){
-  return new_process(rip, argc, argv);
+static pid_t sys_newProcess(void* f, int argc, char *argv[]){
+  return new_process(f, argc, argv);
 }
 
 static uint64_t sys_getPid(){
@@ -283,7 +283,7 @@ static pid_t sys_getCurrentPid()
   return getCurrentPid();
 }
 
-static pid_t sys_exec(uint64_t program, unsigned int argc, char *argv[])
+static pid_t sys_exec(void* program, unsigned int argc, char *argv[])
 {
   return new_process(program, argc, argv);
 }

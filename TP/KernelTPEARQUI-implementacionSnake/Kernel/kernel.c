@@ -44,20 +44,21 @@ void *initializeKernelBinary() {
   loadModules(&endOfKernelBinary, moduleAddresses);
 
   clearBSS(&bss, &endOfKernel - &bss);
+	create_memory(0x2000000 - 0x1000000);
+	createScheduler();
+  create_sem_manager();
   return getStackBase();
 }
 
+
 int main() {
-
-
-  create_sem_manager();
 	load_idt();
-	create_memory(0x2000000 - 0x1000000);
+  ((EntryPoint)sampleCodeModuleAddress)();
+  /*
   clearScanCode();
-	createScheduler();
 	_sti();
 	_hlt();
-  ((EntryPoint)sampleCodeModuleAddress)();
+  */
 	//new_process((uint64_t)sampleCodeModuleAddress, 0, NULL);
 	return 0;
 }
