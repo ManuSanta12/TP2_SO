@@ -59,7 +59,7 @@ uint8_t sys_semWait(char*name, int pid);
 
 uint8_t sys_semClose(char * name);
 
-int sys_newProcess(uint64_t rip, int argc, char *argv[]);
+int sys_newProcess(void* rip, int argc, char *argv[]);
 
 uint64_t sys_getPid();
 

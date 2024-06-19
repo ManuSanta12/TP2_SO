@@ -58,7 +58,7 @@ int main() {
 	_sti();
 	_hlt();
   ((EntryPoint)sampleCodeModuleAddress)();
-	//new_process((uint64_t)sampleCodeModuleAddress, 0, NULL);
+	//new_process(sampleCodeModuleAddress, 0, NULL);
   while(1);
 	return 0;
 }
