@@ -82,8 +82,8 @@ void run_shell(){
 }
 
 void shell (){
-	new_process(run_shell, 0, NULL);
-	new_process(&printer,0,NULL);
+	char* argv[] = {"shell"};
+	new_process(run_shell, 1, argv);
 }
 
 static void runCommandInBackground(void (*cmd)()) {

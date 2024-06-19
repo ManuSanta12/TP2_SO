@@ -229,18 +229,17 @@ pid_t new_process(fun foo, int argc, char *argv[])
 {
     Node *newProcess = memory_manager_malloc(sizeof(Node));
     newProcess->process.pid = scheduler->processAmount++;
-    if(newProcess->process.pid==0){
-        newProcess->process.priority = MAX_PRIORITY;
-        newProcess->process.quantumsLeft = priorities[MAX_PRIORITY];
-    }else{
-        newProcess->process.priority = DEFAULT_PRIORITY;
-        newProcess->process.quantumsLeft = priorities[DEFAULT_PRIORITY];
-    }
+    newProcess->process.priority = DEFAULT_PRIORITY;
+    newProcess->process.quantumsLeft = priorities[DEFAULT_PRIORITY];
     newProcess->process.blockedQueue = newQueue();
     newProcess->process.newPriority = -1;
     newProcess->process.status = READY;
     newProcess->process.argc = argc;
     newProcess->process.argv = copy_argv(argc, argv);
+    if(strcmp(newProcess->process.argv[0], "shell")==0){
+        newProcess->process.priority = MAX_PRIORITY;
+        newProcess->process.quantumsLeft = priorities[MAX_PRIORITY];
+    }
     newProcess->process.context = new_context(foo,argc,argv);
 
     // STDIN, STDOUT, STDERR, PIPEOUT, PIPEIN
