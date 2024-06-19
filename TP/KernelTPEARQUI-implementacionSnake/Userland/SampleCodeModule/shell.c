@@ -67,6 +67,10 @@ static void runCommandInBackground(void (*cmd)());
 static void (*commands_ptr[MAX_COMMANDS])() = {cmd_undefined, cmd_help, cmd_time, cmd_clear, cmd_snake, cmd_inforeg, cmd_zeroDiv,cmd_invOpcode,cmd_charsizeplus,cmd_charsizeminus, cmd_memory_manager,cmd_memory_tester,cmd_phylos,cmd_loop, cmd_cat, cmd_filter, cmd_wc, cmd_ps,cmd_nice};
 int runInBackground = 0; 
 
+static void printer(){
+	prints("AA",3);
+}
+
 void run_shell(){
 	char c;
 	prints("$ User> ",9);
@@ -78,7 +82,8 @@ void run_shell(){
 }
 
 void shell (){
-	new_process(&run_shell, 0, NULL);
+	new_process(run_shell, 0, NULL);
+	new_process(&printer,0,NULL);
 }
 
 static void runCommandInBackground(void (*cmd)()) {

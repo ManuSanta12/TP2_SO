@@ -40,7 +40,7 @@ void dummyProcess()
 {
     while (1)
     {
-        //_hlt();
+        _hlt();
     }
 }
 
@@ -403,9 +403,7 @@ context* contextSwitch(context* rsp)
     if(init==0){
         return rsp;
     }
-    if(scheduler->processAmount==1){
-        return scheduler->active->process.context;
-    }
+    
     //scheduler->active->process.rsp=rsp;
     Node* aux = scheduler->active;
     // C1.1 y C1.3 (Todos)
@@ -419,7 +417,7 @@ context* contextSwitch(context* rsp)
         }
         else
         { // C1.3.2 y C1.3.3
-            //prepareDummy(scheduler->placeholderProcessPid);
+            prepareDummy(scheduler->placeholderProcessPid);
             return rsp;
         }
         return scheduler->active->process.context;
