@@ -30,6 +30,7 @@ typedef struct scheduler{
     unsigned int processReadyCount;
     pid_t placeholderProcessPid;
     unsigned int proccessBeingRun;
+    uint16_t quantumsLeft;
 }schedulerCDT;
 
 typedef schedulerCDT* schedulerADT;
@@ -50,11 +51,12 @@ void createScheduler()
     scheduler->processAmount = 0;
     scheduler->processReadyCount = 0;
     scheduler->proccessBeingRun = 0;
+    scheduler->quantumsLeft = 0;
     scheduler->active=NULL;
     scheduler->expired=NULL;
     
     //scheduler->placeholderProcessPid = new_process((uint64_t)dummyProcess, 0, NULL);
-    
+    /*
     for (int i = 0; i <= 2; i++)
     {
         scheduler->active->process.fileDescriptors[i].mode = OPEN;
@@ -68,7 +70,7 @@ void createScheduler()
     scheduler->active->process.status = BLOCKED;
     
     scheduler->processReadyCount--;
-    
+    */
     init = 1;
     
 }
@@ -204,8 +206,10 @@ char **copy_argv(int argc, char **argv)
 }
 
 static void start(fun f, int argc, char *argv[]) {
+    scheduler->proccessBeingRun++;
     int status = f(argc, argv);
     killProcess(status,0);
+    scheduler->proccessBeingRun--;
 }
 
 static context* new_context(fun foo, int argc, char**argv){
@@ -234,6 +238,7 @@ pid_t new_process(fun foo, int argc, char *argv[])
     newProcess->process.blockedQueue = newQueue();
     newProcess->process.newPriority = -1;
     newProcess->process.status = READY;
+    scheduler->processReadyCount++;
     newProcess->process.argc = argc;
     newProcess->process.argv = copy_argv(argc, argv);
     
@@ -263,6 +268,7 @@ pid_t new_process(fun foo, int argc, char *argv[])
     {
         newProcess->next = NULL;
         scheduler->active = newProcess;
+        scheduler->quantumsLeft = priorities[scheduler->active->process.priority];
     }
     else
     {
@@ -390,9 +396,7 @@ int prepareDummy(pid_t pid)
     }
     return 0;
 }
-void nohagonada(){
-    return;
-}
+
 
 context* contextSwitch(context* rsp)
 {
@@ -402,91 +406,35 @@ context* contextSwitch(context* rsp)
     if(scheduler->processAmount==0){
         return rsp;
     }
-    /*
-    
-    //scheduler->active->process.rsp=rsp;
-    Node* aux = scheduler->active;
-    // C1.1 y C1.3 (Todos)
-    if (!scheduler->proccessBeingRun)
-    {
-        scheduler->proccessBeingRun = 1;
-        // C1.1 o C1.3.1: NO HAY NADA CORRIENDOSE Y TENGO ALGO PARA CORRER
-        if (scheduler->processReadyCount > 0)
-        {
-            nextProcess();
-        }
-        else
-        { // C1.3.2 y C1.3.3
-            //prepareDummy(scheduler->placeholderProcessPid);
-            return rsp;
-        }
-        return scheduler->active->process.context;
-        //return 0;
-    }
-
-    Node *currentProcess = scheduler->active;
-    //currentProcess->process.rsp = rsp;
-    // Si no tengo procesos en ready, es decir, estan todos bloqueados tengo que correr el placeholderProcess
-    if (scheduler->processReadyCount == 0)
-    {
-        prepareDummy(scheduler->placeholderProcessPid);
-        return scheduler->active->process.context;
-    }
-
-    if (currentProcess->process.status != BLOCKED && currentProcess->process.quantumsLeft > 0)
-    {
-        currentProcess->process.quantumsLeft--;
-        return rsp;
-    }
-
-    // Acomodo el que termino de correr (no me interesa el status) en su lugar en la lista de expirados
-    // teniendo en cuenta su prioridad.
-    if (currentProcess->process.quantumsLeft == 0)
-    {
-        if (currentProcess->process.newPriority != -1)
-        {
-            currentProcess->process.priority = currentProcess->process.newPriority;
-            currentProcess->process.newPriority = -1;
-        }
-        currentProcess->process.quantumsLeft = priorities[currentProcess->process.priority];
-
-        Node *currentExpired = scheduler->expired;
-        Node *previousExpired = NULL;
-        while (currentExpired != NULL && currentProcess->process.priority >= currentExpired->process.priority)
-        {
-            previousExpired = currentExpired;
-            currentExpired = currentExpired->next;
-        }*/
-        /*
-            Debo colocar el current_process en el lugar indicado dentro de los expirados pero teniendo muy en cuenta
-            que antes de cambiar el next de este nodo tengo que hacerlo en el active para evitar problemas.
-            En cualquiera de ambos casos active tendra que ser igual a active->next porque paso el current_process a expirados.
-        */
-       /*
-        scheduler->active = scheduler->active->next;
-        if (previousExpired == NULL)
-        {
-            currentProcess->next = scheduler->expired;
-            scheduler->expired = currentProcess;
-        }
-        else
-        {
-            previousExpired->next = currentProcess;
-            currentProcess->next = currentExpired;
-        }
-        if (scheduler->active == NULL)
-        {
-            scheduler->active = scheduler->expired;
-            scheduler->expired = NULL;
-        }
-    }*/
     if(scheduler->active->process.run==0){
         scheduler->active->process.run = 1;
+        return scheduler->active->process.context;    
+    }   
+    scheduler->active->process.context=rsp;
+    if(scheduler->expired==NULL){
+        scheduler->expired=NULL;
     }
-    else{
-        scheduler->active->process.context = rsp;
-    }
+    
+    if(scheduler->active != NULL && scheduler->quantumsLeft>0){
+        scheduler->quantumsLeft--;
         return scheduler->active->process.context;
+    }
+    if(scheduler->expired==NULL){
+        return scheduler->active->process.context;
+    }
+    else
+    {
+        Node* aux = scheduler->expired;
+        while(aux != NULL){
+            if(aux->process.status==READY){
+                scheduler->active = aux;
+                scheduler->quantumsLeft =priorities[scheduler->active->process.priority];
+            }
+            aux = aux->next;
+        }
+    }
+
+    return scheduler->active->process.context;
 }
 
 int killProcess(int returnValue, char autokill)
