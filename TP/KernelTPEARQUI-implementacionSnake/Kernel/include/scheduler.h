@@ -9,6 +9,7 @@
 
 #define READY 0
 #define BLOCKED 1
+#define TERMINATED 2
 #define FDS 10
 #define OPEN 1
 #define CLOSED 0
