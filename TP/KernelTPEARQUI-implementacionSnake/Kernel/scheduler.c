@@ -236,10 +236,7 @@ pid_t new_process(fun foo, int argc, char *argv[])
     newProcess->process.status = READY;
     newProcess->process.argc = argc;
     newProcess->process.argv = copy_argv(argc, argv);
-    if(strcmp(newProcess->process.argv[0], "shell")==0){
-        newProcess->process.priority = MAX_PRIORITY;
-        newProcess->process.quantumsLeft = priorities[MAX_PRIORITY];
-    }
+    
     newProcess->process.context = new_context(foo,argc,argv);
 
     // STDIN, STDOUT, STDERR, PIPEOUT, PIPEIN
@@ -405,6 +402,7 @@ context* contextSwitch(context* rsp)
     if(scheduler->processAmount==0){
         return rsp;
     }
+    /*
     
     //scheduler->active->process.rsp=rsp;
     Node* aux = scheduler->active;
@@ -458,12 +456,13 @@ context* contextSwitch(context* rsp)
         {
             previousExpired = currentExpired;
             currentExpired = currentExpired->next;
-        }
+        }*/
         /*
             Debo colocar el current_process en el lugar indicado dentro de los expirados pero teniendo muy en cuenta
             que antes de cambiar el next de este nodo tengo que hacerlo en el active para evitar problemas.
             En cualquiera de ambos casos active tendra que ser igual a active->next porque paso el current_process a expirados.
         */
+       /*
         scheduler->active = scheduler->active->next;
         if (previousExpired == NULL)
         {
@@ -480,7 +479,8 @@ context* contextSwitch(context* rsp)
             scheduler->active = scheduler->expired;
             scheduler->expired = NULL;
         }
-    }
+    }*/
+    
     return scheduler->active->process.context;
 }
 

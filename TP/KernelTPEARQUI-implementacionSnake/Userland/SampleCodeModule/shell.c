@@ -72,6 +72,11 @@ static void printer(){
 }
 
 void run_shell(){
+	char* argv[] = {"shell"};
+	new_process(run_shell, 1, argv);
+}
+
+void shell (){
 	char c;
 	prints("$ User> ",9);
 
@@ -79,11 +84,6 @@ void run_shell(){
 		c = getChar();
 		printLine(c);
 	};
-}
-
-void shell (){
-	char* argv[] = {"shell"};
-	new_process(run_shell, 1, argv);
 }
 
 static void runCommandInBackground(void (*cmd)()) {

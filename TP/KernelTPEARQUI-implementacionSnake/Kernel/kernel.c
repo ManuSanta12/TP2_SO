@@ -55,10 +55,10 @@ int main() {
 	create_memory(0x2000000 - 0x1000000);
   clearScanCode();
 	createScheduler();
-	_sti();
-	_hlt();
-  ((EntryPoint)sampleCodeModuleAddress)();
-	//new_process(sampleCodeModuleAddress, 0, NULL);
+  //((EntryPoint)sampleCodeModuleAddress)();
+	new_process(sampleCodeModuleAddress, 0, NULL);
+  _sti();
+  _hlt();
   while(1){
     _hlt();
   }
