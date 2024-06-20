@@ -480,7 +480,12 @@ context* contextSwitch(context* rsp)
             scheduler->expired = NULL;
         }
     }*/
-    
+    if(scheduler->active->process.run==0){
+        scheduler->active->process.run = 1;
+    }
+    else{
+        return scheduler->active->process.context = rsp;
+    }
     return scheduler->active->process.context;
 }
 

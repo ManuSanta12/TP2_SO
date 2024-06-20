@@ -139,6 +139,7 @@ typedef struct
     unsigned int argc;
     char **argv;
     context* context;
+    uint8_t run;
 } PCB;
 
 
