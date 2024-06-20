@@ -5,10 +5,9 @@
 #include <lib.h>
 #include <pipe.h>
 
-extern uint64_t loadProcess(uint64_t, uint64_t , uint64_t , uint64_t ); // implement on assembler
-extern void _int20h;                                                                 // implement int20h con assembler
-extern void execute_next(uint64_t);
-extern void execute_from_rip(uint64_t);
+extern void _int20h;// implement int20h con assembler
+extern void forced_schedule(void);
+
 #define SCHEDULER_ADDRESS 0x60000
 // tck and ppriorities
 #define STACK_SIZE 4096
@@ -412,8 +411,9 @@ int killProcess(int returnValue, char autokill)
 {
     scheduler->active->process.status = TERMINATED;
     scheduler->quantumsLeft=0;
-    scheduler->processReadyCount--;
-    contextSwitch(scheduler->active->process.context);
+    scheduler->processReadyCount--;   
+    forced_schedule();
+    return returnValue; 
     /*
     Node *currentProcess = scheduler->active;
 

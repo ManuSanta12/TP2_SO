@@ -12,7 +12,7 @@ EXTERN syscall_dispatcher
 EXTERN contextSwitch
 GLOBAL exception_divideByZero
 GLOBAL exception_invalidOpCode
-
+GLOBAL forced_schedule
 GLOBAL regdata_exc
 GLOBAL inforeg
 GLOBAL hasInforeg
@@ -222,6 +222,14 @@ interrupt_timerTick:
 	popState              
     iretq                 
 
+
+forced_schedule:
+	pushState
+	mov rdi, rsp
+	call contextSwitch
+	mov rsp, rax   
+	popState
+	iretq
 
 exception_divideByZero:
 	saveRegistersException
