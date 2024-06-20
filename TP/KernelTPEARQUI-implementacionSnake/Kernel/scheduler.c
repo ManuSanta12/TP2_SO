@@ -204,10 +204,8 @@ char **copy_argv(int argc, char **argv)
 }
 
 static void start(fun f, int argc, char *argv[]) {
-    scheduler->proccessBeingRun++;
     int status = f(argc, argv);
     killProcess(status,0);
-    scheduler->proccessBeingRun--;
 }
 
 static context* new_context(fun foo, int argc, char**argv){
@@ -236,7 +234,6 @@ pid_t new_process(fun foo, int argc, char *argv[])
     newProcess->process.blockedQueue = newQueue();
     newProcess->process.newPriority = -1;
     newProcess->process.status = READY;
-    scheduler->processReadyCount++;
     newProcess->process.argc = argc;
     newProcess->process.argv = copy_argv(argc, argv);
     
@@ -393,7 +390,9 @@ int prepareDummy(pid_t pid)
     }
     return 0;
 }
-
+void nohagonada(){
+    return;
+}
 
 context* contextSwitch(context* rsp)
 {
@@ -403,13 +402,9 @@ context* contextSwitch(context* rsp)
     if(scheduler->processAmount==0){
         return rsp;
     }
-     if(scheduler->active->process.run==0){
-        scheduler->active->process.run = 1;
-    }
-    else{
-        scheduler->active->process.context = rsp;
-    }
+    /*
     
+    //scheduler->active->process.rsp=rsp;
     Node* aux = scheduler->active;
     // C1.1 y C1.3 (Todos)
     if (!scheduler->proccessBeingRun)
@@ -422,7 +417,7 @@ context* contextSwitch(context* rsp)
         }
         else
         { // C1.3.2 y C1.3.3
-            prepareDummy(scheduler->placeholderProcessPid);
+            //prepareDummy(scheduler->placeholderProcessPid);
             return rsp;
         }
         return scheduler->active->process.context;
@@ -461,13 +456,13 @@ context* contextSwitch(context* rsp)
         {
             previousExpired = currentExpired;
             currentExpired = currentExpired->next;
-        }
+        }*/
         /*
             Debo colocar el current_process en el lugar indicado dentro de los expirados pero teniendo muy en cuenta
             que antes de cambiar el next de este nodo tengo que hacerlo en el active para evitar problemas.
             En cualquiera de ambos casos active tendra que ser igual a active->next porque paso el current_process a expirados.
         */
-       
+       /*
         scheduler->active = scheduler->active->next;
         if (previousExpired == NULL)
         {
@@ -484,9 +479,14 @@ context* contextSwitch(context* rsp)
             scheduler->active = scheduler->expired;
             scheduler->expired = NULL;
         }
+    }*/
+    if(scheduler->active->process.run==0){
+        scheduler->active->process.run = 1;
     }
-   
-    return scheduler->active->process.context;
+    else{
+        scheduler->active->process.context = rsp;
+    }
+        return scheduler->active->process.context;
 }
 
 int killProcess(int returnValue, char autokill)
