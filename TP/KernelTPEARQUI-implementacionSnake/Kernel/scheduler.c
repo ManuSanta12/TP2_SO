@@ -245,6 +245,7 @@ pid_t new_process(fun foo, int argc, char *argv[])
     newProcess->process.context = new_context(foo,argc,argv);
 
     // STDIN, STDOUT, STDERR, PIPEOUT, PIPEIN
+    /*
     if (scheduler->active != NULL)
     {
         for (int i = 0; i <= scheduler->active->process.lastFd; i++)
@@ -253,7 +254,7 @@ pid_t new_process(fun foo, int argc, char *argv[])
         }
         newProcess->process.lastFd = scheduler->active->process.lastFd;
         newProcess->process.pipe = scheduler->active->process.pipe;
-    }
+    }*/
     /*
     uint64_t rsp = (uint64_t)memory_manager_malloc(4 * 1024);
     if (rsp == 0)
@@ -279,6 +280,9 @@ pid_t new_process(fun foo, int argc, char *argv[])
         }
         else
         {
+            newProcess->next = scheduler->expired;
+            scheduler->expired = newProcess;
+            /*
             Node *current = scheduler->expired;
             Node *previous = NULL;
             // Si el numero del que quiero insertar es mayor que el current entonces tengo que insertarlo despues
@@ -304,7 +308,7 @@ pid_t new_process(fun foo, int argc, char *argv[])
                 {
                     scheduler->expired = newProcess;
                 }
-            }
+            }*/
         }
     }
     scheduler->processReadyCount++;

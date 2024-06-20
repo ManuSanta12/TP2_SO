@@ -10,7 +10,8 @@ typedef struct node{
     struct node * next;
 }node;
 
-void run_test(){
+
+void memorty_test(){
     //this test will allocate nodes of a list and then it whill free them. 
     //It will show the state of the list and the state of the memory between steps.
     prints("\nCreando lista...\n",100);
@@ -55,4 +56,9 @@ void run_test(){
     }
     printc('\n');
     print_meminfo();
+}
+
+
+void run_test(){
+    new_process(memorty_test, 0, NULL);
 }
