@@ -18,11 +18,13 @@ GLOBAL sys_mem
 GLOBAL sys_memInfo
 GLOBAL sys_memMalloc
 GLOBAL sys_memFree
-GLOBAL sys_sem_open
-GLOBAL sys_sem_close
-GLOBAL sys_sem_post
-GLOBAL sys_sem_wait
-GLOBAL sys_yieldProcess
+GLOBAL sys_semInit
+GLOBAL sys_semPost
+GLOBAL sys_semWait
+GLOBAL sys_newProcess
+GLOBAL sys_getPid
+GLOBAL sys_semClose
+GLOBAL sys_sleepTime
 GLOBAL sys_nice
 GLOBAL sys_pipe
 GLOBAL sys_dup2
@@ -37,9 +39,7 @@ GLOBAL sys_waitpid
 GLOBAL sys_kill
 GLOBAL sys_block
 GLOBAL sys_unblock
-
-
-
+GLOBAL sys_getPriority
 section .text
 
 ; Pasaje de parametros en C:
@@ -144,97 +144,109 @@ sys_memFree:
     int 80h
     ret
 
-sys_sem_open:
+sys_semInit:
     mov rax, 0x12
     int 80h
     ret
-
-sys_sem_close:
+sys_semPost:
     mov rax, 0x13
     int 80h
     ret
-
-sys_sem_post:
+sys_semWait:
     mov rax, 0x14
     int 80h
     ret
-
-sys_sem_wait:
+sys_newProcess:
     mov rax, 0x15
     int 80h
     ret
-
-sys_yieldProcess:
+sys_getPid:
     mov rax, 0x16
     int 80h
     ret
 
-sys_nice:
+sys_semClose:
     mov rax, 0x17
     int 80h
     ret
 
-sys_pipe:
+sys_sleepTime:
     mov rax, 0x18
     int 80h
     ret
 
-sys_dup2:
+sys_nice:
     mov rax, 0x19
     int 80h
     ret
 
-sys_open:
+sys_pipe:
     mov rax, 0x1A
     int 80h
     ret
 
-sys_close:
+sys_dup2:
     mov rax, 0x1B
     int 80h
     ret
 
-sys_ps:
+sys_open:
     mov rax, 0x1C
     int 80h
     ret
 
-sys_changeProcessStatus:
+sys_close:
     mov rax, 0x1D
     int 80h
     ret
 
-sys_getCurrentPid:
+sys_ps:
     mov rax, 0x1E
     int 80h
     ret
 
-sys_exec:
+sys_changeProcessStatus:
     mov rax, 0x1F
     int 80h
     ret
 
-sys_exit:
+sys_getCurrentPid:
     mov rax, 0x20
     int 80h
     ret
 
-sys_waitpid:
+sys_exec:
     mov rax, 0x21
     int 80h
     ret
 
-sys_kill:
+sys_exit:
     mov rax, 0x22
     int 80h
     ret
 
-sys_block:
+sys_waitpid:
     mov rax, 0x23
     int 80h
     ret
 
-sys_unblock:
+sys_kill:
     mov rax, 0x24
     int 80h
     ret
+
+sys_block:
+    mov rax, 0x25
+    int 80h
+    ret
+
+sys_unblock:
+    mov rax, 0x26
+    int 80h
+    ret
+
+sys_getPriority:
+    mov rax, 0x27
+    int 80h
+    ret
+

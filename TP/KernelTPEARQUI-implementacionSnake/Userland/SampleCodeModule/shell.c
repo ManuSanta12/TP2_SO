@@ -6,19 +6,18 @@
 #include "snake.h"
 #include "shell.h"
 #include "mem_tester.h"
-#include "uniqueTypes.h"
+#include "phylos.h"
+#include "sinc.h"
 
-
-#define MAX_COMMANDS 13
+#define MAX_BUFFER 254
+#define MAX_COMMANDS 19
 
 char line[MAX_BUFFER+1] = {0}; //asi me aseguro que al menos va haber un cero
 char parameter[MAX_BUFFER+1] = {0};
 char command[MAX_BUFFER+1] = {0};
 int linePos = 0;
 char lastc;
-const char * commands[] = {"undefined","help","time","clear","snake","inforeg","zerodiv","invopcode","sizeplus","sizeminus","mem","memtest", "ps"};
-int runInBackground = 0; 
-
+const char * commands[] = {"undefined","help","time","clear","snake","inforeg","zerodiv","invopcode","sizeplus","sizeminus","mem","memtest","phylos","loop", "cat", "filter", "wc", "ps","nice"};
 
 void showCommands(){
 	prints("\n-time-               muestra la hora actual en pantalla",MAX_BUFFER);
@@ -31,7 +30,13 @@ void showCommands(){
 	prints("\n-sizeminus-          disminuye el tamanio de letra",MAX_BUFFER);
 	prints("\n-mem-                muestra la informacion de la memory manager actual",MAX_BUFFER);
 	prints("\n-memtest-            corre un programa de testeo para el memory manager",MAX_BUFFER);
+	prints("\n-phylos-             corre una simulacion al problema de filosofos",MAX_BUFFER);
+	prints("\n-loop-               imprime pid cada 2 segundos",MAX_BUFFER);
+	prints("\n-cat-                imprime el STDIN tal como lo recibe", MAX_BUFFER);
+	prints("\n-wc-                 cuenta la cantidad de lineas del input", MAX_BUFFER);
+	prints("\n-filter-             filtra las vocales del input", MAX_BUFFER);
 	prints("\n-ps-                 muestra en pantalla la inforacion de proceso actual", MAX_BUFFER);
+	prints("\n-nice-               aumenta la prioridad del proceso deseado  ", MAX_BUFFER);
 	printc('\n');
 }
 
@@ -50,11 +55,17 @@ static void cmd_charsizeplus();
 static void cmd_charsizeminus();
 static void cmd_memory_manager();
 static void cmd_memory_tester();
+static void cmd_phylos();
+static void cmd_loop();
+static void cmd_cat();
+static void cmd_wc();
+static void cmd_filter();
 static void cmd_ps();
+static void cmd_nice();
 static void runCommandInBackground(void (*cmd)());
 
-static void (*commands_ptr[MAX_COMMANDS])() = {cmd_undefined, cmd_help, cmd_time, cmd_clear, cmd_snake, cmd_inforeg, cmd_zeroDiv,cmd_invOpcode,cmd_charsizeplus,cmd_charsizeminus, cmd_memory_manager,cmd_memory_tester, cmd_ps};
-
+static void (*commands_ptr[MAX_COMMANDS])() = {cmd_undefined, cmd_help, cmd_time, cmd_clear, cmd_snake, cmd_inforeg, cmd_zeroDiv,cmd_invOpcode,cmd_charsizeplus,cmd_charsizeminus, cmd_memory_manager,cmd_memory_tester,cmd_phylos,cmd_loop, cmd_cat, cmd_filter, cmd_wc, cmd_ps,cmd_nice};
+int runInBackground = 0; 
 
 void shell (){
 	char c;
@@ -64,6 +75,10 @@ void shell (){
 		c = getChar();
 		printLine(c);
 	};
+}
+
+static void runCommandInBackground(void (*cmd)()) {
+    pid_t pid = sys_exec((uint64_t)cmd, 0, NULL);
 }
 
 static void printLine(char c){
@@ -86,12 +101,10 @@ static void newLine(){
 
 
 	int i = checkLine();
-
-    if (runInBackground) {
-        runCommandInBackground(commands_ptr[i]);
-    } else {
-        (*commands_ptr[i])();
-    }
+	// if (runInBackground){
+	// 	runCommandInBackground(commands_ptr[i]);
+	// }
+	(*commands_ptr[i])();
 
 	for (int i = 0; line[i] != '\0' ; i++){
 		line[i] = 0;
@@ -107,43 +120,40 @@ static void newLine(){
 	}
 }
 
-static int checkLine() {
-    int i = 0;
-    int j = 0;
-    int k = 0;
-    runInBackground = 0; // Reset background flag
 
+//separa comando de parametro
+static int checkLine(){
+	int i = 0;
+	int j = 0;
+	int k = 0;
+	runInBackground = 0; // Reset background flag
     // Check if the command starts with "BG" to determine if it should run in background
-    if (linePos >= 2 && line[0] == 'B' && line[1] == 'G') {
-        runInBackground = 1; // Set background flag
-        j += 2; // Move past "BG"
-    }
+    // if (linePos >= 2 && line[0] == 'B' && line[1] == 'G') {
+    //     runInBackground = 1; // Set background flag
+    //     j += 2; // Move past "BG"
+    // }
 
-    // Extract command and parameters
-    for (; j < linePos && line[j] != ' '; j++) {
-        command[k++] = line[j];
-    }
+	for ( j = 0 ; j < linePos && line[j] != ' ' ; j ++){
+		command[j] = line[j];
+	}
+	if (j < linePos){
+		j++;
+		while (j < linePos){
+			parameter[k++] = line[j++];
+		}
+	}
 
-    if (j < linePos) {
-        j++;
-        while (j < linePos) {
-            parameter[k++] = line[j++];
-        }
-    }
 
-    // Match command with predefined commands
-    for (i = 1; i < MAX_COMMANDS; i++) {
-        if (strcmp(command, commands[i]) == 0) {
-            return i;
-        }
-    }
 
-    return 0;
+	for (i = 1 ; i < MAX_COMMANDS ; i++ ){
+		if (strcmp(command,commands[i]) == 0){
+			return i;
+		}
+	}
+
+	return 0;
 }
 
-void runCommandInBackground(void (*cmd)()) {
-    pid_t pid = sys_exec((uint64_t)cmd, 0, NULL);
-}
 
 static void cmd_help(){
 	prints("\n---HELP---\n",MAX_BUFFER);
@@ -170,6 +180,7 @@ static void cmd_snake(){
 
 static void cmd_clear(){
 	clear_scr();
+	//run_sinc();
 }
 
 static void cmd_inforeg(){
@@ -200,9 +211,39 @@ static void cmd_memory_tester(){
 	run_test();
 }
 
+static void cmd_phylos(){
+	run_phylos();
+}
+
+static void cmd_loop(){
+	run_loop();
+}
+
+static void cmd_wc(){
+	run_wc();
+}
+static void cmd_cat(){
+	//run_cat();
+	run_sinc();
+}
+static void cmd_filter(){
+	run_filter();
+}
 static void cmd_ps(){
 	getProcessesInfo();
 }
 
+static void cmd_nice(){
+	if(strlen(parameter)==0){
+		prints("\nIngresar el pid del proceso por parametro\n",MAX_BUFFER);
+		return;
+	}
+	pid_t pid = charToInt(parameter);
+	int ret = up_priority(pid);
+	if(ret==-1){
+		prints("\nNo se pudo actualizar la prioridad\n", MAX_BUFFER);
+	} else{
+		prints("\nPrioridad aumentada!\n", MAX_BUFFER);
+	}
 
-
+}

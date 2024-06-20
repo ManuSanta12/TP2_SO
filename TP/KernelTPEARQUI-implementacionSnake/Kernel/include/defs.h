@@ -98,6 +98,8 @@ typedef struct
     status_t status;
     unsigned int quantumsLeft;
     uint64_t rsp;
+    uint64_t rip; //rip donde comienza el proceso
+    uint8_t run; //si ya corrio una vez o no
     uint64_t stackBase;
     BlockedQueueADT blockedQueue;
     fd_t fileDescriptors[FDS];

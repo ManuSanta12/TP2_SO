@@ -2,11 +2,14 @@
 #include <stdio.h>
 #include <exc_test.h>
 #include "./include/usr_stdlib.h"
-
+#include <uniqueTypes.h>
 
 #define STDIN 0
 #define STDOUT 1
 #define STDERR 2
+#define EOF (-1)
+
+int r=10;
 
 static char buffer[64] = { '0' };
 
@@ -112,9 +115,6 @@ void printBin(uint64_t value){
     printBase(value, (uint32_t) 2);
 }
 
-
-
-
 static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base){
     char *p = buffer;
     char *p1, *p2;
@@ -215,6 +215,7 @@ void inforeg(){
 
 
 
+
 void test_invopcode(){
 	ex_invopcode();
 }
@@ -265,10 +266,44 @@ void mm_free(void * ap){
 	sys_memFree((void *)ap);
 }
 
+uint8_t sem_init(char*name,int value){
+	return sys_semInit(name,value);
+}
+
+uint8_t sem_post(char*name){
+	return sys_semPost(name);
+}
+
+uint8_t sem_wait(char*name, int pid){
+	return sys_semWait(name, pid);
+}
+
+uint8_t sem_close(char*name){
+	return sys_semClose(name);
+}
+
+int new_process(uint64_t rip, int argc, char *argv[]){
+	return sys_newProcess(rip, argc, argv);
+}
+
+
+
+void dummy(){
+	prints("\nsoy el dummy\n",MAX_BUFFER);
+	prints("\n mi pid es: ", 100);
+	printDec(get_pid());
+	printc('\n');
+	r=5;
+	return;
+}
+
+
 void getProcessesInfo()
 {
-    processInfo *current = sys_ps();
-	printDec(current->pid);
+    processInfo *current = NULL;
+	//new_process((uint64_t)run_loop, 0, NULL);
+	current = sys_ps();
+	//printDec(current->pid);
     while (current != NULL)
     {
 		printc('\n');
@@ -286,4 +321,143 @@ void getProcessesInfo()
         sys_memFree(current);
         current = current->next;
     }
+}
+
+uint64_t get_pid(){
+	return sys_getPid();
+}
+
+void run_loop(){
+	prints("\n Presionar q para finalizar\n",30);
+	char c=' ';
+	int a = 1;
+	while((c=getChar())!='q'){
+		prints("\n Hola soy el proceso: ",30);
+		printDec(get_pid());
+		wait(2000);
+		printc('\n');
+		a++;
+	}
+}
+
+
+void sleep(int sec){
+	sys_sleepTime(sec);
+}
+
+
+static int isVocal(char c){
+	  if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u' ||
+        c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U') {
+        return 1; 
+    }
+    return 0; 
+}
+
+int run_filter() {
+ 	prints("\nfiltrando vocales:", 50);
+	char c;
+	while ((c = getChar()) != EOF) {
+		if (isVocal(c)){
+	 		printc(c);
+			wait(40);
+		}
+	}
+	printc('\n');
+	return 0;
+}
+
+int run_wc() {
+	char c;
+	int inputLines = 0;
+	while ((int) (c = getChar()) != EOF)
+		inputLines += (c == '\n');
+	prints("\nCantidad de lineas:", MAX_BUFFER);
+	printc(inputLines);
+	printc('\n');
+	return 0;
+}
+
+int run_cat() {
+	char c;
+	while ((c = getChar()) != EOF)
+		printc(c);
+	return 0;
+	/*
+	printc('\n');
+	printDec(r);
+	printc('\n');*/
+}
+
+
+
+static void reverse(char str[], int length) {
+    int start = 0;
+    int end = length - 1;
+    while (start < end) {
+        char temp = str[start];
+        str[start] = str[end];
+        str[end] = temp;
+        start++;
+        end--;
+    }
+}
+
+char* itoa(int num, char* str, int base) {
+    int i = 0;
+    int isNegative = 0;
+
+    if (num == 0) {
+        str[i++] = '0';
+        str[i] = '\0';
+        return str;
+    }
+
+    if (num < 0 && base == 10) {
+        isNegative = 1;
+        num = -num;
+    }
+    while (num != 0) {
+        int rem = num % base;
+        str[i++] = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
+        num = num / base;
+    }
+    if (isNegative) {
+        str[i++] = '-';
+    }
+    str[i] = '\0'; 
+    reverse(str, i);
+
+    return str;
+}
+
+int atoi(const char* str) {
+    int result = 0; 
+    int sign = 1;  
+    int i = 0;     
+
+    if (str[0] == '-') {
+        sign = -1;
+        i++; 
+    }
+
+    for (; str[i] != '\0'; ++i) {
+        if (isDigit(str[i])) {
+            result = result * 10 + str[i] - '0';
+        } else {
+            break;
+        }
+    }
+
+    return sign * result;
+}
+
+
+
+int up_priority(pid_t pid){
+	priority_t prio = sys_getPriority(pid);
+	//prints("\n old prio: \n",MAX_BUFFER);
+	//printDec(prio);
+	//printc('\n');
+    return sys_nice(pid, prio+1);
 }

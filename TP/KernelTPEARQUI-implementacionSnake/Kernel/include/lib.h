@@ -11,9 +11,8 @@ char *cpuVendor(char *result);
 uint64_t getSeconds();
 uint64_t getMinutes();
 uint64_t getHours();
-
+int strcmp(const char *str1, const char *str2);
 unsigned int strlen(const char *str);
 char * strcpy(const char * str);
-int strcmp(const char *str1, const char *str2);
 
 #endif

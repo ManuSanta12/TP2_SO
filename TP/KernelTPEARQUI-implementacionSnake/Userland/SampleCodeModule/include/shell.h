@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "usr_stdlib.h"
 
+#define MAX_BUFFER 254
 
 void shell();
 

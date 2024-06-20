@@ -1,5 +1,7 @@
 GLOBAL loadProcess
 GLOBAL _int20h
+GLOBAL execute_next
+GLOBAL execute_from_rip
 EXTERN contextSwitch
 
 section .text
@@ -25,6 +27,7 @@ _start:
 ; rcx -> argv
 
 loadProcess:
+   
     enter 0, 0
 
     ; Muevo el rsp que me pasan por parametro a el registro rsp
@@ -60,3 +63,12 @@ loadProcess:
 _int20h:
     int 20h
     ret
+
+execute_next:
+    mov rsp, rdi
+    popState
+    iretq
+
+execute_from_rip:
+    mov rax, rdi 
+    jmp rax 

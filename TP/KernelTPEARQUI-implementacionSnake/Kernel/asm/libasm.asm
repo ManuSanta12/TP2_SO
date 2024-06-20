@@ -2,6 +2,7 @@ GLOBAL cpuVendor
 GLOBAL getSeconds
 GLOBAL getHours
 GLOBAL getMinutes
+GLOBAL getTime
 GLOBAL outSpeaker
 GLOBAL inSpeaker
 section .text
@@ -68,7 +69,34 @@ getHours:
 	pop rbp
     ret		
 
+getTime:
+    push rbp
+    mov rbp, rsp
 
+    mov al, 0Bh
+    out 70h, al
+    in  al, 71h
+    or al, 6h
+    out 71h, al
+
+    mov al, 0
+    out 70h, al
+    in al, 71h
+    mov [rdx], al
+
+    mov al, 2
+    out 70h, al
+    in al, 71h
+    mov [rsi], al
+    
+    mov al, 4
+    out 70h, al
+    in al, 71h
+    mov [rdi], al
+
+    mov rsp, rbp
+    pop rbp
+    ret
 inSpeaker:
 	push rbp
 	mov rbp, rsp

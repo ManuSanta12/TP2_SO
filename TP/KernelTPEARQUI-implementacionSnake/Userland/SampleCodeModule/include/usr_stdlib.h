@@ -6,6 +6,8 @@
 #include <stddef.h>
 #include <uniqueTypes.h>
 
+#define MAX_BUFFER 254
+
 /* Prints a char in screen */
 void printc (char c);
 
@@ -47,6 +49,8 @@ void test_invopcode();
 void test_zerodiv();
 //void sizePlus();
 //void sizeMinus();
+void dummy();
+
 int print_mem(uint64_t mem);
 
 void increaseScale();
@@ -65,8 +69,37 @@ void mm_free(void * ap);
 
 void print_meminfo();
 
+uint8_t sem_init(char*name,int value);
+
+uint8_t sem_post(char*name);
+
+uint8_t sem_wait(char*name, int pid);
+
+uint8_t sem_close(char*name);
+
+void run_loop();
+
+uint64_t get_pid();
+
+int run_filter();
+
+int run_wc();
+
+int run_cat();
+
+char* itoa(int num, char* str, int base);
+
+int atoi(const char* str);
+
+void sleep(int sec);
+
+int new_process(uint64_t rip, int argc, char *argv[]);
+
 void getProcessesInfo();
 
+int up_priority(pid_t pid);
+    
+char get_char_block();
 
 
 #endif

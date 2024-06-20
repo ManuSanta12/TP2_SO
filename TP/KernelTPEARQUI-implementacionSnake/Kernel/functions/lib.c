@@ -52,11 +52,18 @@ void * memcpy(void * destination, const void * source, uint64_t length)
 }
 
 unsigned int log(uint64_t n, int base) {
-	unsigned int count = 0;
-	while (n /= base)
-		count++;
-	return count;
+    unsigned int count = 0;
+    double result = (double)n;
+    while (result > 1) {
+        result /= base;
+        count++;
+    }
+    if (n > base && n % base != 0) {
+        count++;
+    }
+    return count;
 }
+
 unsigned int strlen(const char *str) {
     unsigned int len = 0;
     while (str[len] != '\0') {
