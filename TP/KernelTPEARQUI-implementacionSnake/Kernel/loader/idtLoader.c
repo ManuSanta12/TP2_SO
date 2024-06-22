@@ -35,7 +35,7 @@ extern void interrupt_syscall();
 static void setup_IDT_entry (int index, uint64_t offset);
 
 void load_idt() {
-  _cli();
+  // _cli();
 
   //Interrupciones de Hardware
   setup_IDT_entry (0x21, (uint64_t)&interrupt_keyboard); //keyboard -> keyboard.c
@@ -54,7 +54,7 @@ void load_idt() {
   picMasterMask(0xFC);
   picSlaveMask(0xFF);
         
-  _sti();
+  // _sti();
 }
 
 static void setup_IDT_entry (int index, uint64_t offset) {

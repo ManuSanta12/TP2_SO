@@ -97,20 +97,7 @@ SECTION .text
 	mov [regdata_exc+136], rax ;17
 %endmacro
 
-%macro irqHandlerMaster 1
-	pushState
 
-	mov rdi, %1 ; pasaje de parametro
-	mov rsi, rsp	; pointer a backup registros
-	call irqDispatcher
-
-	; signal pic EOI (End of Interrupt)
-	mov al, 20h
-	out 20h, al
-
-	popState
-	iretq
-%endmacro
 
 _hlt:
 	sti
@@ -149,13 +136,16 @@ picSlaveMask:
 interrupt_keyboard:
 	pushState
 
-	xor rax, rax
-	in al, 60h 		; 60 es el puerto del teclado AL : 8 bits
-	mov rdi, rax 	; recepcion del primer parametro
+	mov rdi, 1 ; pasaje de parametro
+	mov rsi, rsp	; pointer a backup registros
+	call keyboard_handler
 
-	cmp al, 0x2A 	;left shift pressed
-	jne .continue1
-	mov byte [left_shift], 1
+	; signal pic EOI (End of Interrupt)
+	mov al, 20h
+	out 20h, al
+
+	popState
+	iretq
 
 .continue1:
 	cmp al, 0xAA 	;left shift realesed
@@ -208,23 +198,22 @@ interrupt_keyboard:
 
 
 interrupt_timerTick:
-    pushState             ; Guarda el estado de la CPU
+    pushState
 
-    ; El valor de RIP justo antes de la interrupción está en (rsp + pushState_size + 8)
-    ; pushState_size es el tamaño de todos los registros que has guardado en pushState
-    ; En este caso, has guardado 15 registros (8 bytes cada uno) -> 15 * 8 = 120
-    ; También hay 8 bytes del valor de RFLAGS
-    ; Así que el valor de RIP está en (rsp + 128)
-    mov rdi, rsp          ; Mueve el valor de rsp a rdi
-    ;mov rsi, [rsp + 128]  ; Mueve el valor de rip (guardado) a rsi
+    mov rdi,0
+    mov rsi,rsp
+    call irqDispatcher
+    
+    mov rdi, rsp
+    call contextSwitch
+    mov rsp, rax
 
-    call timer_handler    ; Llama a la función timer_handler
+    ; signal pic EOI (End of Interrupt)
+    mov al, 20h
+    out 20h, al
 
-    call contextSwitch    ; Llama a contextSwitch(rsp, rip)
-
-    endOfHardwareInterrupt
-	popState              ; Restaura el estado de la CPU
-    iretq                 ; Retorna de la interrupción
+    popState
+    iretq
 
 
 exception_divideByZero:
