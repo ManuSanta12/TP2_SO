@@ -63,5 +63,5 @@ void hola(){
 }
 
 void run_test(){
-    new_process(hola, 0, NULL);
+    new_process(memory_test, 0, NULL);
 }
