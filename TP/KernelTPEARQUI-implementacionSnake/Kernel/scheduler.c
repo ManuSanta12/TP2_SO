@@ -271,7 +271,13 @@ pid_t new_process(fun foo, int argc, char *argv[])
     }
     newProcess->next = scheduler->processes;
     scheduler->processes = newProcess;
-
+    Node* current = scheduler->processes;
+    status_t st =0;
+    /*
+    while(current!=NULL){
+        st=current->process.status;
+        current = current->next;
+    }*/
 
     return newProcess->process.pid;
 }
@@ -371,6 +377,7 @@ context* contextSwitch(context* rsp)
     if(scheduler->processAmount==0){
         return rsp;
     }
+    status_t active_st = scheduler->active->process.status;
 
     if(scheduler->active->process.run==0){
         scheduler->active->process.run = 1;
@@ -394,6 +401,8 @@ context* contextSwitch(context* rsp)
         int i=0;
         int a = scheduler->processAmount;
         while(aux != NULL && i < scheduler->processAmount){
+            status_t st = aux->process.status;
+            pid_t aux_pid = aux->process.pid;
             if(aux->process.status==READY && scheduler->active->process.pid!=aux->process.pid){
                 scheduler->active = aux;
                 scheduler->quantumsLeft =priorities[scheduler->active->process.priority];
