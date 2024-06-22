@@ -49,7 +49,6 @@ void *initializeKernelBinary() {
 
 int main() {
 
-
   create_sem_manager();
 	load_idt();
 	create_memory(0x2000000 - 0x1000000);

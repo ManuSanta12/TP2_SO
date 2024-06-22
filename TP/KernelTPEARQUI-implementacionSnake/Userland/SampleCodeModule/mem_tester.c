@@ -58,7 +58,10 @@ void memory_test(){
     print_meminfo();
 }
 
+void hola(){
+    prints("\nhola\n", 100);
+}
 
 void run_test(){
-    new_process(memory_test, 0, NULL);
+    new_process(hola, 0, NULL);
 }

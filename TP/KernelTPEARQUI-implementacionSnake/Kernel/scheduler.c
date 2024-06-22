@@ -11,6 +11,7 @@ extern void forced_schedule(void);
 #define SCHEDULER_ADDRESS 0x60000
 // tck and ppriorities
 #define STACK_SIZE 4096
+#define MAX_PROCESSES 100
 #define MIN_PRIORITY 1
 #define MAX_PRIORITY 9
 #define EOF -1
@@ -20,21 +21,20 @@ priority_t priorities[NUMBER_OF_PRIORITIES] = {9, 8, 7, 6, 5, 4, 3, 2, 1};
 
 // Queues
 uint8_t init=0;
-typedef struct scheduler{
-    Queue active;
-    Queue processes;
 
-    // Schelduler states
-    int processAmount;
-    unsigned int processReadyCount;
-    pid_t placeholderProcessPid;
-    unsigned int proccessBeingRun;
-    uint16_t quantumsLeft;
-}schedulerCDT;
+uint32_t active;
+PCB processes[MAX_PROCESSES];
 
-typedef schedulerCDT* schedulerADT;
+// Schelduler states
+int processAmount;
+unsigned int processReadyCount;
+pid_t placeholderProcessPid;
+unsigned int proccessBeingRun;
+uint16_t quantumsLeft;
 
-schedulerADT scheduler;
+//typedef schedulerCDT* schedulerADT;
+
+//schedulerADT scheduler;
 
 void dummyProcess()
 {
@@ -46,29 +46,29 @@ void dummyProcess()
 
 void createScheduler()
 {
-    scheduler = (schedulerADT)SCHEDULER_ADDRESS;
-    scheduler->processAmount = 0;
-    scheduler->processReadyCount = 0;
-    scheduler->proccessBeingRun = 0;
-    scheduler->quantumsLeft = 0;
-    scheduler->active=NULL;
-    scheduler->processes=NULL;
+    //scheduler = (schedulerADT)SCHEDULER_ADDRESS;
+    processAmount = 0;
+    processReadyCount = 0;
+    proccessBeingRun = 0;
+    quantumsLeft = 0;
+    active=-1;
+    //process1es={};
     
-    //scheduler->placeholderProcessPid = new_process((uint64_t)dummyProcess, 0, NULL);
+    //placeholderProcessPid = new_process((uint64_t)dummyProcess, 0, NULL);
     /*
     for (int i = 0; i <= 2; i++)
     {
-        scheduler->active->process.fileDescriptors[i].mode = OPEN;
+        active->process.fileDescriptors[i].mode = OPEN;
     }
     // PIPEOUT, PIPEIN
     for (int i = 3; i <= 4; i++)
     {
-        scheduler->active->process.fileDescriptors[i].mode = CLOSED;
+        active->process.fileDescriptors[i].mode = CLOSED;
     }
-    scheduler->active->process.lastFd = 4;
-    scheduler->active->process.status = BLOCKED;
+    active->process.lastFd = 4;
+    active->process.status = BLOCKED;
     
-    scheduler->processReadyCount--;
+    processReadyCount--;
     */
     init = 1;
     
@@ -76,7 +76,7 @@ void createScheduler()
 
  PCB *getProcess(pid_t pid)
 {
-    Node *current = scheduler->active;
+    Node *current = active;
     while (current != NULL)
     {
         if (current->process.pid == pid)
@@ -88,7 +88,7 @@ void createScheduler()
             current = current->next;
         }
     }
-    current = scheduler->processes;
+    current = processes;
     while (current != NULL)
     {
         if (current->process.pid == pid)
@@ -110,16 +110,17 @@ priority_t get_priority(pid_t pid){
 
 uint64_t getCurrentPid()
 {
-    if (scheduler->active != NULL)
+    
+    if (active != -1)
     {
-        return scheduler->active->process.pid;
+        return processes[active].pid;
     }
     return -1;
 }
 
 int blockProcess(pid_t pid)
 {
-    Node *current = scheduler->active;
+    Node *current = active;
     char found = 0;
 
     while (!found && current != NULL)
@@ -134,7 +135,7 @@ int blockProcess(pid_t pid)
             current = current->next;
         }
     }
-    current = scheduler->processes;
+    current = processes;
     while (!found && current != NULL)
     {
         if (current->process.pid == pid)
@@ -149,7 +150,7 @@ int blockProcess(pid_t pid)
     }
     if (found)
     {
-        scheduler->processReadyCount--;
+        processReadyCount--;
         _int20h;
         return 0;
     }
@@ -158,7 +159,7 @@ int blockProcess(pid_t pid)
 
 int unblockProcess(pid_t pid)
 {
-    Node *current = scheduler->active;
+    Node *current = active;
     char found = 0;
 
     while (!found && current != NULL)
@@ -173,7 +174,7 @@ int unblockProcess(pid_t pid)
             current = current->next;
         }
     }
-    current = scheduler->processes;
+    current = processes;
     while (!found && current != NULL)
     {
         if (current->process.pid == pid)
@@ -188,7 +189,7 @@ int unblockProcess(pid_t pid)
     }
     if (found)
     {
-        scheduler->processReadyCount++;
+        processReadyCount++;
         return 0;
     }
     return -1;
@@ -204,11 +205,18 @@ char **copy_argv(int argc, char **argv)
     return new_argv;
 }
 
+
 static void start(fun f, int argc, char *argv[]) {
-    scheduler->proccessBeingRun++;
     int status = f(argc, argv);
-    killProcess(status,0);
-    scheduler->proccessBeingRun--;
+    pid_t pid;
+    for(int i=0;i<processAmount;i++){
+        pid = processes[i].pid;
+    }
+    processes[active].status = TERMINATED;
+    quantumsLeft=0;
+    processReadyCount--; 
+    forced_schedule();
+    proccessBeingRun--;
 }
 
 static context* new_context(fun foo, int argc, char**argv){
@@ -230,61 +238,51 @@ static context* new_context(fun foo, int argc, char**argv){
 
 pid_t new_process(fun foo, int argc, char *argv[])
 {
-    Node *newProcess = memory_manager_malloc(sizeof(Node));
-    newProcess->process.pid = scheduler->processAmount++;
-    newProcess->process.priority = DEFAULT_PRIORITY;
-    newProcess->process.quantumsLeft = priorities[DEFAULT_PRIORITY];
-    newProcess->process.blockedQueue = newQueue();
-    newProcess->process.newPriority = -1;
-    newProcess->process.status = READY;
-    scheduler->processReadyCount++;
-    newProcess->process.argc = argc;
-    newProcess->process.argv = copy_argv(argc, argv);
+    PCB newProcess;
+    int a =0;
+    newProcess.pid = processAmount++;
+    a = processAmount;
+    newProcess.priority = DEFAULT_PRIORITY;
+    newProcess.quantumsLeft = priorities[DEFAULT_PRIORITY];
+    newProcess.blockedQueue = newQueue();
+    newProcess.newPriority = -1;
+    newProcess.status = READY;
+    //ReadyCount++;
+    newProcess.argc = argc;
+    newProcess.argv = copy_argv(argc, argv);
     
-    newProcess->process.context = new_context(foo,argc,argv);
+    newProcess.context = new_context(foo,argc,argv);
 
     // STDIN, STDOUT, STDERR, PIPEOUT, PIPEIN
     /*
-    if (scheduler->active != NULL)
+    if (active != NULL)
     {
-        for (int i = 0; i <= scheduler->active->process.lastFd; i++)
+        for (int i = 0; i <= active->process.lastFd; i++)
         {
-            newProcess->process.fileDescriptors[i].mode = scheduler->active->process.fileDescriptors[i].mode;
+            newProcess->process.fileDescriptors[i].mode = active->process.fileDescriptors[i].mode;
         }
-        newProcess->process.lastFd = scheduler->active->process.lastFd;
-        newProcess->process.pipe = scheduler->active->process.pipe;
-    }*/
-    /*
-    uint64_t rsp = (uint64_t)memory_manager_malloc(4 * 1024);
-    if (rsp == 0)
-    {
-        return -1;
-    }
-    newProcess->process.stackBase = rsp;
-    uint64_t newRsp = (uint64_t)loadProcess(rip, rsp + 4 * 1024, newProcess->process.argc, (uint64_t)newProcess->process.argv);
-    newProcess->process.rsp = newRsp;
-    */
-    if(scheduler->active==NULL){
-        newProcess->next = NULL;
-        scheduler->active = newProcess;
-        scheduler->quantumsLeft = priorities[scheduler->active->process.priority];
-    }
-    newProcess->next = scheduler->processes;
-    scheduler->processes = newProcess;
-    Node* current = scheduler->processes;
-    status_t st =0;
-    /*
-    while(current!=NULL){
-        st=current->process.status;
-        current = current->next;
+        newProcess->process.lastFd = active->process.lastFd;
+        newProcess->process.pipe = active->process.pipe;
     }*/
 
-    return newProcess->process.pid;
+    if(active==-1){
+        active = 0;
+    }
+    processes[processAmount-1]=newProcess;
+    
+    pid_t pid;
+    status_t st;
+    for(int i=0;i<processAmount;i++){
+        //pid = processes[i].pid;
+        //st = processes[i].status;
+    }
+    return newProcess.pid;
 }
 
 void nextProcess()
 {
-    Node *current = scheduler->active;
+    /*
+    Node *current = active;
     Node *previous = NULL;
     while (current != NULL && current->process.status == BLOCKED)
     {
@@ -296,17 +294,17 @@ void nextProcess()
         if (previous != NULL)
         {
             previous->next = current->next;
-            current->next = scheduler->active;
-            scheduler->active = current;
+            current->next = active;
+            active = current;
         }
     }
     else
     {
-        Node *aux = scheduler->active;
-        scheduler->active = scheduler->processes;
-        scheduler->processes = aux;
+        Node *aux = active;
+        active = processes;
+        processes = aux;
 
-        current = scheduler->active;
+        current = active;
         previous = NULL;
         while (current != NULL && current->process.status == BLOCKED)
         {
@@ -316,15 +314,17 @@ void nextProcess()
         if (previous != NULL && current != NULL)
         {
             previous->next = current->next;
-            current->next = scheduler->active;
-            scheduler->active = current;
+            current->next = active;
+            active = current;
         }
     }
+    */
 }
 
 int prepareDummy(pid_t pid)
 {
-    Node *current = scheduler->active;
+    /*
+    Node *current = active;
     Node *previous = NULL;
     while (current != NULL && current->process.pid != pid)
     {
@@ -337,13 +337,13 @@ int prepareDummy(pid_t pid)
         if (previous != NULL)
         {
             previous->next = current->next;
-            current->next = scheduler->active;
-            scheduler->active = current;
+            current->next = active;
+            active = current;
         }
     }
     else
     {
-        current = scheduler->processes;
+        current = processes;
         previous = NULL;
         while (current != NULL && current->process.pid != pid)
         {
@@ -356,15 +356,15 @@ int prepareDummy(pid_t pid)
         }
         if (previous == NULL)
         {
-            scheduler->processes = current->next;
+            processes = current->next;
         }
         else
         {
             previous->next = current->next;
         }
-        current->next = scheduler->active;
-        scheduler->active = current;
-    }
+        current->next = active;
+        active = current;
+    }*/
     return 0;
 }
 
@@ -374,67 +374,54 @@ context* contextSwitch(context* rsp)
     if(init==0){
         return rsp;
     }
-    if(scheduler->processAmount==0){
+    if(processAmount==0){
         return rsp;
     }
-    status_t active_st = scheduler->active->process.status;
+    //status_t active_st = active->process.status;
 
-    if(scheduler->active->process.run==0){
-        scheduler->active->process.run = 1;
-        return scheduler->active->process.context;    
+    if(processes[active].run==0){
+        processes[active].run = 1;
+        return processes[active].context;    
     }   
 
-    scheduler->active->process.context=rsp;
+    processes[active].context=rsp;
     //sigo corriendo el mismo
-    if(scheduler->active != NULL && scheduler->quantumsLeft>0){
-        scheduler->quantumsLeft--;
-        return scheduler->active->process.context;
+    if(active != NULL && quantumsLeft>0){
+        quantumsLeft--;
+        return processes[active].context;
     }
-
-    //voy a buscar otro, si no hay vuelvo al mismo.
-    if(scheduler->processes==NULL){
-        return scheduler->active->process.context;
-    }
-    else
-    {
-        Queue aux = scheduler->processes;
-        int i=0;
-        int a = scheduler->processAmount;
-        while(aux != NULL && i < scheduler->processAmount){
-            status_t st = aux->process.status;
-            pid_t aux_pid = aux->process.pid;
-            if(aux->process.status==READY && scheduler->active->process.pid!=aux->process.pid){
-                scheduler->active = aux;
-                scheduler->quantumsLeft =priorities[scheduler->active->process.priority];
-                return scheduler->active->process.context;
-            }
-            i++;
-            aux = aux->next;
+    pid_t pid;
+    for(int i=0;i<processAmount;i++){
+        if(processes[i].status==READY && processes[active].pid!=processes[i].pid){
+            active = i;
+            quantumsLeft =priorities[processes[active].priority];
+            return processes[active].context;
         }
     }
+    
 
-    return scheduler->active->process.context;
+    return processes[active].context;
 }
 
 int killProcess(int returnValue, char autokill)
 {
-    scheduler->active->process.status = TERMINATED;
-    scheduler->quantumsLeft=0;
-    scheduler->processReadyCount--;   
+    processes[active].status = TERMINATED;
+    quantumsLeft=0;
+    processReadyCount--; 
     forced_schedule();
     return returnValue; 
     /*
-    Node *currentProcess = scheduler->active;
+    Node *currentProcess = active;
 
     pid_t blockedPid;
     while ((blockedPid = dequeuePid(currentProcess->process.blockedQueue)) != -1)
     {
         unblockProcess(blockedPid);
     }
-    scheduler->active = currentProcess->next;
+    active = currentProcess->next;
     if (currentProcess->process.status != BLOCKED)
     {
-        scheduler->processReadyCount--;
+        processReadyCount--;
     }
     for (int i = 0; i < currentProcess->process.argc; i++)
     {
@@ -452,7 +439,7 @@ int killProcess(int returnValue, char autokill)
     free_memory_manager(currentProcess);
     if (autokill)
     {
-       scheduler->proccessBeingRun = 0;
+       proccessBeingRun = 0;
         _int20h;
     }
     return returnValue;
@@ -477,7 +464,7 @@ int changePriority(pid_t pid, int priorityValue){
 
 int yieldProcess()
 {
-    scheduler->active->process.quantumsLeft = 0;
+    processes[active].quantumsLeft = 0;
     _int20h;
     return 0;
 }
@@ -486,8 +473,8 @@ processInfo *getProccessesInfo()
 {
     processInfo *first = NULL;
     processInfo *current = NULL;
-    Queue currentNode = scheduler->active;
-    pid_t firstPid = scheduler->active->process.pid;
+    Queue currentNode = active;
+    pid_t firstPid =  processes[active].pid;
     while (currentNode != NULL)
     {
         if (current != NULL)
@@ -509,7 +496,7 @@ processInfo *getProccessesInfo()
         current->status = currentNode->process.status;
         currentNode = currentNode->next;
     }
-    currentNode = scheduler->processes;
+    currentNode = processes;
     /**/
     while (currentNode != NULL)
     {
@@ -533,9 +520,10 @@ processInfo *getProccessesInfo()
 }
 
 int kill_by_pid(pid_t pid){
-    Node * current = scheduler->active;
+    /*
+    Node * current = active;
     if(current->process.pid == pid){
-        scheduler->active = current->next;
+        active = current->next;
         free_memory_manager(current);
         return 1;
     }
@@ -549,9 +537,9 @@ int kill_by_pid(pid_t pid){
         current=current->next;
     }
 
-    current = scheduler->processes;
+    current = processes;
     if(current->process.pid == pid){
-        scheduler->processes = current->next;
+        processes = current->next;
         free_memory_manager(current);
         return 1;
     }
@@ -563,7 +551,7 @@ int kill_by_pid(pid_t pid){
             return 1;
         }
         current=current->next;
-    }
+    }*/
     return 0;
     
 }
