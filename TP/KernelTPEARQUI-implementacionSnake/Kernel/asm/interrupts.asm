@@ -224,11 +224,11 @@ interrupt_timerTick:
 
 
 forced_schedule:
-	;pushState
+	pushState
 	mov rdi, rsp
 	call contextSwitch
 	mov rsp, rax   
-	;popState
+	popState
 	iretq
 
 exception_divideByZero:

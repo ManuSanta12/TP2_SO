@@ -27,14 +27,11 @@ PCB processes[MAX_PROCESSES];
 
 // Schelduler states
 int processAmount;
-unsigned int processReadyCount;
 pid_t placeholderProcessPid;
-unsigned int proccessBeingRun;
 uint16_t quantumsLeft;
 
 //typedef schedulerCDT* schedulerADT;
 
-//schedulerADT scheduler;
 
 void dummyProcess()
 {
@@ -48,8 +45,6 @@ void createScheduler()
 {
     //scheduler = (schedulerADT)SCHEDULER_ADDRESS;
     processAmount = 0;
-    processReadyCount = 0;
-    proccessBeingRun = 0;
     quantumsLeft = 0;
     active=-1;
     //process1es={};
@@ -150,7 +145,6 @@ int blockProcess(pid_t pid)
     }
     if (found)
     {
-        processReadyCount--;
         _int20h;
         return 0;
     }
@@ -189,7 +183,6 @@ int unblockProcess(pid_t pid)
     }
     if (found)
     {
-        processReadyCount++;
         return 0;
     }
     return -1;
@@ -214,9 +207,7 @@ static void start(fun f, int argc, char *argv[]) {
     }
     processes[active].status = TERMINATED;
     quantumsLeft=0;
-    processReadyCount--; 
     forced_schedule();
-    proccessBeingRun--;
 }
 
 static context* new_context(fun foo, int argc, char**argv){
@@ -407,7 +398,6 @@ int killProcess(int returnValue, char autokill)
 {
     processes[active].status = TERMINATED;
     quantumsLeft=0;
-    processReadyCount--; 
     forced_schedule();
     return returnValue; 
     /*
