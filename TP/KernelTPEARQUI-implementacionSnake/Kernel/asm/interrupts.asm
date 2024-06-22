@@ -136,16 +136,13 @@ picSlaveMask:
 interrupt_keyboard:
 	pushState
 
-	mov rdi, 1 ; pasaje de parametro
-	mov rsi, rsp	; pointer a backup registros
-	call keyboard_handler
+	xor rax, rax
+	in al, 60h 		; 60 es el puerto del teclado AL : 8 bits
+	mov rdi, rax 	; recepcion del primer parametro
 
-	; signal pic EOI (End of Interrupt)
-	mov al, 20h
-	out 20h, al
-
-	popState
-	iretq
+	cmp al, 0x2A 	;left shift pressed
+	jne .continue1
+	mov byte [left_shift], 1
 
 .continue1:
 	cmp al, 0xAA 	;left shift realesed
