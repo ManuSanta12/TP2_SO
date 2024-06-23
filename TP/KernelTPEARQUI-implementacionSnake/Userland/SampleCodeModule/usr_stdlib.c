@@ -21,7 +21,7 @@ int scr_width;
 static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
 
 void printc (char c){
-	sys_write(STDOUT, c);
+	sys_write(STDOUT, c, 1);
 }
 
 void prints (const char * str, int lenght){

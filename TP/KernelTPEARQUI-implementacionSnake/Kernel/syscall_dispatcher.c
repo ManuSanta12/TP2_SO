@@ -18,7 +18,6 @@
 extern uint8_t hasInforeg;
 extern const uint64_t inforeg[17];
 
-
 extern Color RED;
 extern Color WHITE;
 extern Color BLACK;
@@ -28,7 +27,7 @@ int size = 0;
 #define SYS_CALLS_QTY 43
 
 static uint64_t sys_read(uint64_t fd, char *buff);
-static uint64_t sys_write(uint64_t fd, char buffer);
+static uint64_t sys_write(uint64_t fd, char buffer, uint64_t count);
 static uint64_t sys_getHours();
 static uint64_t sys_getMinutes();
 static uint64_t sys_getSeconds();
@@ -45,10 +44,10 @@ static uint64_t sys_mute();
 static MemoryInfo *sys_memInfo();
 static void *sys_memMalloc(uint64_t size);
 static void sys_memFree(uint64_t ap);
-static uint8_t sys_semInit(char*name,int value);
-static uint8_t sys_semPost(char* name);
-static uint8_t sys_semWait(char* name,int pid);
-static uint8_t sys_semClose(char* name);
+static uint8_t sys_semInit(char *name, int value);
+static uint8_t sys_semPost(char *name);
+static uint8_t sys_semWait(char *name, int pid);
+static uint8_t sys_semClose(char *name);
 static pid_t sys_newProcess(uint64_t rip, int argc, char *argv[]);
 static uint64_t sys_getPid();
 static uint64_t sys_sleepTime(int sec);
@@ -74,24 +73,51 @@ static int sys_unblock(pid_t pid);
 // llena buff con el caracter leido del teclado
 static uint64_t sys_read(uint64_t fd, char *buff)
 {
-  if (fd != 0)
-  {
-    return -1;
-  }
 
-  *buff = getCharFromKeyboard();
+  PCB *pcb = getProcess(getCurrentPid());
+  if (pcb->lastFd <= fd)
+    return 0;
+
+  if (pcb->fileDescriptors[fd].mode == OPEN)
+  {
+    *buff = getCharFromKeyboard();
+    return 1;
+  }
+  if (pcb->fileDescriptors[PIPEOUT].mode == OPEN)
+  {
+    return pipeReadData(pcb->pipe, buff, 1);
+  }
   return 0;
 }
 
-static uint64_t sys_write(uint64_t fd, char buffer)
+static uint64_t sys_write(uint64_t fd, char buffer, uint64_t count)
 {
-  if (fd != 1)
+  PCB *pcb = getProcess(getCurrentPid());
+  if (pcb->lastFd < fd)
+    return;
+  if (pcb->fileDescriptors[fd].mode == OPEN)
   {
-    return -1;
+    // uint64_t i = 0;
+    // while (i < count)
+    // {
+      switch (fd)
+      {
+      case STDOUT:
+        dv_print(buffer, WHITE, BLACK);
+        break;
+      case STDERR:
+        dv_print(buffer, RED, BLACK); // Asumimos que ERROR_FORMAT usa rojo
+        break;
+      }
+    // }
   }
-
-  dv_print(buffer, WHITE, BLACK);
-  return 1;
+  else if (pcb->fileDescriptors[PIPEIN].mode == OPEN)
+  {
+    pipeWriteData(pcb->pipe, buffer, count);
+  }
+  return 1; // Retorna la cantidad de bytes escritos, que siempre es 1
+  //   dv_print(buffer, WHITE, BLACK);
+  // return 1;
 }
 
 static uint64_t sys_clear()
@@ -175,34 +201,41 @@ static void *sys_memMalloc(uint64_t size)
 
 static void sys_memFree(uint64_t ap) { free_memory_manager((void *)ap); }
 
-static uint8_t sys_semInit(char*name,int value){
-  return sem_init(name,value);
+static uint8_t sys_semInit(char *name, int value)
+{
+  return sem_init(name, value);
 }
 
-static uint8_t sys_semPost(char* name){
+static uint8_t sys_semPost(char *name)
+{
   return sem_post(name);
 }
 
-static uint8_t sys_semWait(char* name,int pid){
+static uint8_t sys_semWait(char *name, int pid)
+{
   return sem_wait(name, pid);
 }
 
-static uint8_t sys_semClose(char* name){
+static uint8_t sys_semClose(char *name)
+{
   return sem_close(name);
 }
 
-static pid_t sys_newProcess(uint64_t rip, int argc, char *argv[]){
+static pid_t sys_newProcess(uint64_t rip, int argc, char *argv[])
+{
   return new_process(rip, argc, argv);
 }
 
-static uint64_t sys_getPid(){
+static uint64_t sys_getPid()
+{
   return getCurrentPid();
 }
 
-static uint64_t sys_sleepTime(int sec){
+static uint64_t sys_sleepTime(int sec)
+{
   sleep_time(sec);
 }
-//MERGE DESDE ACA
+// MERGE DESDE ACA
 static int sys_nice(pid_t pid, int newPriority)
 {
   if (pid <= 0)
@@ -254,7 +287,8 @@ static processInfo *sys_ps()
   return getProccessesInfo();
 }
 
-static priority_t sys_getPriority(int pid){
+static priority_t sys_getPriority(int pid)
+{
   // return get_priority(pid);
 }
 
@@ -316,7 +350,6 @@ static pid_t sys_waitpid(pid_t pid)
   return pid;
 }
 
-
 static int sys_kill(pid_t pid)
 {
   /*
@@ -357,26 +390,55 @@ static int sys_unblock(pid_t pid)
 
 static uint64_t (*syscall_handlers[])(uint64_t, uint64_t, uint64_t, uint64_t,
                                       uint64_t) = {
-    (void *)sys_read,         (void *)sys_write,       (void *)sys_clear,
-    (void *)sys_getHours,     (void *)sys_getMinutes,  (void *)sys_getSeconds,
-    (void *)sys_getScrHeight, (void *)sys_getScrWidth, (void *)sys_fillRect,
-    (void *)sys_wait,         (void *)sys_inforeg,     (void *)sys_pixelPlus,
-    (void *)sys_pixelMinus,   (void *)sys_playSound,   (void *)sys_mute,
-    (void *)sys_memInfo,      (void *)sys_memMalloc,   (void *)sys_memFree, 
-    (void*)sys_semInit,       (void*)sys_semPost,      (void*)sys_semWait,
-    (void*)sys_newProcess,    (void*)sys_getPid,       (void*)sys_semClose, 
-    (void *)sys_sleepTime,    (void *)sys_nice,        (void *)sys_pipe,         
-    (void *)sys_dup2,         (void *)sys_open,        (void *)sys_close,        
-    (void *)sys_ps,           (void *)sys_changeProcessStatus,
-    (void *)sys_getCurrentPid,(void *)sys_exec,        (void *)sys_exit, 
-    (void *)sys_waitpid,      (void *)sys_kill,        (void *)sys_block, 
-    (void *)sys_unblock ,     (void*)sys_getPriority,  };
+    (void *)sys_read,
+    (void *)sys_write,
+    (void *)sys_clear,
+    (void *)sys_getHours,
+    (void *)sys_getMinutes,
+    (void *)sys_getSeconds,
+    (void *)sys_getScrHeight,
+    (void *)sys_getScrWidth,
+    (void *)sys_fillRect,
+    (void *)sys_wait,
+    (void *)sys_inforeg,
+    (void *)sys_pixelPlus,
+    (void *)sys_pixelMinus,
+    (void *)sys_playSound,
+    (void *)sys_mute,
+    (void *)sys_memInfo,
+    (void *)sys_memMalloc,
+    (void *)sys_memFree,
+    (void *)sys_semInit,
+    (void *)sys_semPost,
+    (void *)sys_semWait,
+    (void *)sys_newProcess,
+    (void *)sys_getPid,
+    (void *)sys_semClose,
+    (void *)sys_sleepTime,
+    (void *)sys_nice,
+    (void *)sys_pipe,
+    (void *)sys_dup2,
+    (void *)sys_open,
+    (void *)sys_close,
+    (void *)sys_ps,
+    (void *)sys_changeProcessStatus,
+    (void *)sys_getCurrentPid,
+    (void *)sys_exec,
+    (void *)sys_exit,
+    (void *)sys_waitpid,
+    (void *)sys_kill,
+    (void *)sys_block,
+    (void *)sys_unblock,
+    (void *)sys_getPriority,
+};
 
 // Devuelve la syscall correspondiente
 //                                rdi           rsi           rdx rd10 r8 r9
 uint64_t syscall_dispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t r10,
-                         uint64_t r8, uint64_t rax) {
-  if (rax < SYS_CALLS_QTY && syscall_handlers[rax] != 0) {
+                            uint64_t r8, uint64_t rax)
+{
+  if (rax < SYS_CALLS_QTY && syscall_handlers[rax] != 0)
+  {
     return syscall_handlers[rax](rdi, rsi, rdx, r10, r8);
   }
 
