@@ -97,9 +97,9 @@ static uint64_t sys_write(uint64_t fd, char buffer, uint64_t count)
     return;
   if (pcb->fileDescriptors[fd].mode == OPEN)
   {
-    // uint64_t i = 0;
-    // while (i < count)
-    // {
+    uint64_t i = 0;
+    while (i < count)
+    {
       switch (fd)
       {
       case STDOUT:
@@ -109,7 +109,8 @@ static uint64_t sys_write(uint64_t fd, char buffer, uint64_t count)
         dv_print(buffer, RED, BLACK); // Asumimos que ERROR_FORMAT usa rojo
         break;
       }
-    // }
+      i++;
+    }
   }
   else if (pcb->fileDescriptors[PIPEIN].mode == OPEN)
   {
