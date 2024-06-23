@@ -67,6 +67,8 @@ void* mm_malloc(uint64_t size);
 
 void mm_free(void * ap);
 
+unsigned int charBelongs(char *s, char c); 
+
 void print_meminfo();
 
 uint8_t sem_init(char*name,int value);

@@ -27,8 +27,8 @@ int size = 0;
 
 #define SYS_CALLS_QTY 43
 
-static uint64_t sys_read(uint64_t fd, char *buff);
-static uint64_t sys_write(uint64_t fd, char buffer);
+static uint64_t sys_read(uint64_t fd, char *buff, uint64_t count);
+static uint64_t sys_write(uint64_t fd, char buffer, uint64_t count);
 static uint64_t sys_getHours();
 static uint64_t sys_getMinutes();
 static uint64_t sys_getSeconds();
@@ -72,26 +72,54 @@ static int sys_block(pid_t pid);
 static int sys_unblock(pid_t pid);
 
 // llena buff con el caracter leido del teclado
-static uint64_t sys_read(uint64_t fd, char *buff)
+static uint64_t sys_read(uint64_t fd, char *buff, uint64_t count)
 {
-  if (fd != 0)
-  {
-    return -1;
-  }
 
-  *buff = getCharFromKeyboard();
+  PCB *pcb = getProcess(getCurrentPid());
+  if (pcb->lastFd <= fd)
+    return 0;
+
+  if (pcb->fileDescriptors[fd].mode == OPEN)
+  {
+    *buff = getCharFromKeyboard();
+    return 1;
+  }
+  if (pcb->fileDescriptors[PIPEOUT].mode == OPEN)
+  {
+    return pipeReadData(pcb->pipe, buff, count);
+  }
   return 0;
 }
 
-static uint64_t sys_write(uint64_t fd, char buffer)
+static uint64_t sys_write(uint64_t fd, char buffer, uint64_t count)
 {
-  if (fd != 1)
+  PCB *pcb = getProcess(getCurrentPid());
+  if (pcb->lastFd < fd)
+    return;
+  if (pcb->fileDescriptors[fd].mode == OPEN)
   {
-    return -1;
+    uint64_t i = 0;
+    while (i < count)
+    {
+      switch (fd)
+      {
+      case STDOUT:
+        dv_print(buffer, WHITE, BLACK);
+        break;
+      case STDERR:
+        dv_print(buffer, RED, BLACK); // Asumimos que ERROR_FORMAT usa rojo
+        break;
+      }
+      i++;
+    }
   }
-
-  dv_print(buffer, WHITE, BLACK);
-  return 1;
+  else if (pcb->fileDescriptors[PIPEIN].mode == OPEN)
+  {
+    pipeWriteData(pcb->pipe, buffer, count);
+  }
+  return 1; // Retorna la cantidad de bytes escritos, que siempre es 1
+  //   dv_print(buffer, WHITE, BLACK);
+  // return 1;
 }
 
 static uint64_t sys_clear()

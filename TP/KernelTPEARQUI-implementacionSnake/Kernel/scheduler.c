@@ -5,7 +5,7 @@
 #include <lib.h>
 #include <pipe.h>
 
-extern void _int20h;// implement int20h con assembler
+extern void _int20h; // implement int20h con assembler
 extern void forced_schedule(void);
 
 // tck and ppriorities
@@ -19,7 +19,7 @@ extern void forced_schedule(void);
 #define DEFAULT_PRIORITY 4
 priority_t priorities[NUMBER_OF_PRIORITIES] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
 
-uint8_t init=0;
+uint8_t init = 0;
 
 uint32_t active;
 PCB processes[MAX_PROCESSES];
@@ -29,8 +29,7 @@ int processAmount;
 pid_t placeholderProcessPid;
 uint16_t quantumsLeft;
 
-//typedef schedulerCDT* schedulerADT;
-
+// typedef schedulerCDT* schedulerADT;
 
 void dummyProcess()
 {
@@ -42,13 +41,15 @@ void dummyProcess()
 
 void createScheduler()
 {
-    //scheduler = (schedulerADT)SCHEDULER_ADDRESS;
+    // scheduler = (schedulerADT)SCHEDULER_ADDRESS;
     processAmount = 0;
     quantumsLeft = 0;
-    active=-1;
-    //process1es={};
-    
-    //placeholderProcessPid = new_process((uint64_t)dummyProcess, 0, NULL);
+    active = -1;
+
+
+    // process1es={};
+
+    // placeholderProcessPid = new_process((uint64_t)dummyProcess, 0, NULL);
     /*
     for (int i = 0; i <= 2; i++)
     {
@@ -61,14 +62,13 @@ void createScheduler()
     }
     active->process.lastFd = 4;
     active->process.status = BLOCKED;
-    
+
     processReadyCount--;
     */
     init = 1;
-    
 }
 
- PCB *getProcess(pid_t pid)
+PCB *getProcess(pid_t pid)
 {
     Node *current = active;
     while (current != NULL)
@@ -97,9 +97,12 @@ void createScheduler()
     return NULL;
 }
 
-priority_t get_priority(pid_t pid){
-    for(int i = 0; i<processAmount && i<MAX_PROCESSES;i++){
-        if(processes[i].pid==pid){
+priority_t get_priority(pid_t pid)
+{
+    for (int i = 0; i < processAmount && i < MAX_PROCESSES; i++)
+    {
+        if (processes[i].pid == pid)
+        {
             return processes[i].priority;
         }
     }
@@ -108,7 +111,7 @@ priority_t get_priority(pid_t pid){
 
 uint64_t getCurrentPid()
 {
-    
+
     if (active != -1)
     {
         return processes[active].pid;
@@ -201,21 +204,22 @@ char **copy_argv(int argc, char **argv)
     return new_argv;
 }
 
-
-static void start(fun f, int argc, char *argv[]) {
+static void start(fun f, int argc, char *argv[])
+{
     int status = f(argc, argv);
     pid_t pid;
     processes[active].status = TERMINATED;
-    quantumsLeft=0;
+    quantumsLeft = 0;
     forced_schedule();
 }
 
-static context* new_context(fun foo, int argc, char**argv){
+static context *new_context(fun foo, int argc, char **argv)
+{
     context *context = memory_manager_malloc(sizeof(context));
 
     context->rdi = (uint64_t)foo;
     context->rsi = (uint64_t)argc;
-    context->rdx = (uint64_t)argv;  
+    context->rdx = (uint64_t)argv;
     context->rip = (uint64_t)&start;
 
     context->cs = CS;
@@ -227,7 +231,7 @@ static context* new_context(fun foo, int argc, char**argv){
     return context;
 }
 
-pid_t new_process(fun foo, int bg, char*argv[],int argc)
+pid_t new_process(fun foo, int bg, char *argv[], int argc)
 {
     PCB newProcess;
     newProcess.pid = processAmount++;
@@ -238,12 +242,25 @@ pid_t new_process(fun foo, int bg, char*argv[],int argc)
     newProcess.status = READY;
     newProcess.argc = argc;
     newProcess.argv = copy_argv(argc, argv);
-    
-    if(bg){
-        //BG process
-        newProcess.priority=1;
+
+
+    for (int i = 0; i <= 2; i++)
+    {
+        newProcess.fileDescriptors[i].mode = OPEN;
     }
-    newProcess.context = new_context(foo,argc,argv);
+    // PIPEOUT, PIPEIN
+    for (int i = 3; i <= 4; i++)
+    {
+        newProcess.fileDescriptors[i].mode = CLOSED;
+    }
+
+
+    if (bg)
+    {
+        // BG process
+        newProcess.priority = 1;
+    }
+    newProcess.context = new_context(foo, argc, argv);
 
     // STDIN, STDOUT, STDERR, PIPEOUT, PIPEIN
     /*
@@ -257,11 +274,12 @@ pid_t new_process(fun foo, int bg, char*argv[],int argc)
         newProcess->process.pipe = active->process.pipe;
     }*/
 
-    if(active==-1){
+    if (active == -1)
+    {
         active = 0;
     }
-    processes[processAmount-1]=newProcess;
-    
+    processes[processAmount - 1] = newProcess;
+
     return newProcess.pid;
 }
 
@@ -354,54 +372,60 @@ int prepareDummy(pid_t pid)
     return 0;
 }
 
-
-context* contextSwitch(context* rsp)
+context *contextSwitch(context *rsp)
 {
-    if(init==0){
+    if (init == 0)
+    {
         return rsp;
     }
-    if(processAmount==0){
+    if (processAmount == 0)
+    {
         return rsp;
     }
-    //status_t active_st = active->process.status;
+    // status_t active_st = active->process.status;
 
-    if(processes[active].run==0){
+    if (processes[active].run == 0)
+    {
         processes[active].run = 1;
-        return processes[active].context;    
-    }   
+        return processes[active].context;
+    }
 
-    processes[active].context=rsp;
-    //sigo corriendo el mismo
-    if(quantumsLeft>0){
+    processes[active].context = rsp;
+    // sigo corriendo el mismo
+    if (quantumsLeft > 0)
+    {
         quantumsLeft--;
         return processes[active].context;
     }
     pid_t pid;
-    int k=0;
-    for(int i=active;k<processAmount;i++){
-        if(i>=processAmount){
-            i=0;
+    int k = 0;
+    for (int i = active; k < processAmount; i++)
+    {
+        if (i >= processAmount)
+        {
+            i = 0;
         }
-        if(processes[i].status==READY && processes[active].pid!=processes[i].pid){
+        if (processes[i].status == READY && processes[active].pid != processes[i].pid)
+        {
             active = i;
-            quantumsLeft =priorities[processes[active].priority];
+            quantumsLeft = priorities[processes[active].priority];
             return processes[active].context;
         }
         k++;
     }
-    
 
     return processes[active].context;
 }
 
 int killProcess(int returnValue, char autokill)
 {
-    if(processes[active].pid == SHELL_PID){
+    if (processes[active].pid == SHELL_PID)
+    {
         return -1;
     }
     processes[active].status = TERMINATED;
-    quantumsLeft=0;
-    return returnValue; 
+    quantumsLeft = 0;
+    return returnValue;
     /*
     Node *currentProcess = active;
 
@@ -438,13 +462,16 @@ int killProcess(int returnValue, char autokill)
 }*/
 }
 
-int changePriority(pid_t pid, int priorityValue){
+int changePriority(pid_t pid, int priorityValue)
+{
     if (priorityValue < 0 || priorityValue > 8)
     {
         return -1;
     }
-    for(int i = 0; i<processAmount && i<MAX_PRIORITY; i++){
-        if(processes[i].pid == pid){
+    for (int i = 0; i < processAmount && i < MAX_PRIORITY; i++)
+    {
+        if (processes[i].pid == pid)
+        {
             processes[i].priority = priorityValue;
             return 0;
         }
@@ -463,15 +490,18 @@ processInfo *getProcessesInfo()
 {
     processInfo *first = NULL;
     processInfo *current = NULL;
-    pid_t firstPid =  processes[active].pid;
-    
+    pid_t firstPid = processes[active].pid;
+
     processInfo *previous = NULL;
 
-    for(int i = 0; i < processAmount && i < MAX_PROCESSES; i++) {
-        if(processes[i].status != TERMINATED) {
+    for (int i = 0; i < processAmount && i < MAX_PROCESSES; i++)
+    {
+        if (processes[i].status != TERMINATED)
+        {
             // Crear un nuevo nodo para la lista
             current = (processInfo *)memory_manager_malloc(sizeof(processInfo));
-            if(current == NULL) {
+            if (current == NULL)
+            {
                 return NULL;
             }
 
@@ -480,9 +510,12 @@ processInfo *getProcessesInfo()
             current->status = processes[i].status;
             current->next = NULL;
 
-            if(first == NULL) {
+            if (first == NULL)
+            {
                 first = current;
-            } else {
+            }
+            else
+            {
                 previous->next = current;
             }
 
@@ -492,7 +525,8 @@ processInfo *getProcessesInfo()
     return first;
 }
 
-int kill_by_pid(pid_t pid){
+int kill_by_pid(pid_t pid)
+{
     /*
     Node * current = active;
     if(current->process.pid == pid){
@@ -526,5 +560,4 @@ int kill_by_pid(pid_t pid){
         current=current->next;
     }*/
     return 0;
-    
 }

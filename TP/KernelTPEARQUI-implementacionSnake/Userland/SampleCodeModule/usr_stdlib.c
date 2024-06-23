@@ -21,7 +21,7 @@ int scr_width;
 static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
 
 void printc (char c){
-	sys_write(STDOUT, c);
+	sys_write(STDOUT, c, 1);
 }
 
 void prints (const char * str, int lenght){
@@ -32,7 +32,7 @@ void prints (const char * str, int lenght){
 
 char getChar(){
 	char c;
-	sys_read(0,&c);
+	sys_read(0,&c, 1);
 	return c;
 }
 
@@ -141,6 +141,18 @@ static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base){
         p2--;
     }
     return digits;
+}
+unsigned int charBelongs(char *s, char c)
+{
+    while (*s != '\0')
+    {
+        if (*s == c)
+        {
+            return 1;
+        }
+        s++;
+    }
+    return 0;
 }
 
 

@@ -11,9 +11,9 @@
  * Pasaje de parametros en C:
    %rdi %rsi %rdx %rcx %r8 %r9
  */
-uint64_t sys_read(uint64_t fd, char* buf);
+uint64_t sys_read(uint64_t fd, char* buf, uint64_t count);
 
-uint64_t sys_write(uint64_t fd, const char buf);
+uint64_t sys_write(uint64_t fd, const char buf, uint64_t count);
 
 uint64_t sys_clear();
 
