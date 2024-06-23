@@ -206,9 +206,6 @@ char **copy_argv(int argc, char **argv)
 static void start(fun f, int argc, char *argv[]) {
     int status = f(argc, argv);
     pid_t pid;
-    for(int i=0;i<processAmount;i++){
-        pid = processes[i].pid;
-    }
     processes[active].status = TERMINATED;
     quantumsLeft=0;
     forced_schedule();
@@ -407,7 +404,7 @@ int killProcess(int returnValue, char autokill)
 {
     processes[active].status = TERMINATED;
     quantumsLeft=0;
-    forced_schedule();
+    //forced_schedule();
     return returnValue; 
     /*
     Node *currentProcess = active;

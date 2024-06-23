@@ -202,10 +202,10 @@ static uint64_t sys_getPid(){
 static uint64_t sys_sleepTime(int sec){
   sleep_time(sec);
 }
-//MERGE DESDE ACA
+
 static int sys_nice(pid_t pid, int newPriority)
 {
-  if (pid <= 0)
+  if (pid < 0)
   {
     return -1;
   }

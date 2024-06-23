@@ -23,6 +23,7 @@ EXTERN timer_handler
 EXTERN keyboard_handler
 EXTERN exception_handler
 EXTERN dv_newline
+EXTERN killProcess
 
 SECTION .text
 
@@ -168,7 +169,7 @@ interrupt_keyboard:
 	cmp byte [left_shift], 1 	; 's' pressed
 	jne .continue3
 	cmp al, 0x1F
-	jne .continue3
+	jne .continue4
 
 	mov [inforeg+2*8], rbx
 	mov [inforeg+3*8], rcx
@@ -205,7 +206,11 @@ interrupt_keyboard:
     popState
 	iretq
 
-
+.continue4:
+	cmp al, 0x2E
+	jne .continue3
+	call killProcess
+	jmp .continue3
 
 interrupt_timerTick:
     pushState            
