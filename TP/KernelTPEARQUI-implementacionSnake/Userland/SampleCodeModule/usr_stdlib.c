@@ -313,9 +313,6 @@ void getProcessesInfo()
 		prints("Priority: ",100);
 		printDec(current->priority);
 		printc('\n');
-		prints("Stack Base: 0x",100);
-		printDec(current->stackBase);
-		printc('\n');
 		prints("Status: ",MAX_BUFFER);
 		prints((current->status) ? "BLOCKED" : "READY", MAX_BUFFER);
         sys_memFree(current);
@@ -327,18 +324,21 @@ uint64_t get_pid(){
 	return sys_getPid();
 }
 
-void run_loop(){
-	prints("\n Presionar q para finalizar\n",30);
-	char c=' ';
-	int a = 1;
-	while((c=getChar())!='q'){
+static void loop(){
+	while(1){
 		prints("\n Hola soy el proceso: ",30);
 		printDec(get_pid());
 		wait(2000);
 		printc('\n');
-		a++;
 	}
+
 }
+
+void run_loop(){
+	new_process(loop, 0, NULL);
+}
+
+
 
 
 void sleep(int sec){
@@ -456,8 +456,5 @@ int atoi(const char* str) {
 
 int up_priority(pid_t pid){
 	priority_t prio = sys_getPriority(pid);
-	//prints("\n old prio: \n",MAX_BUFFER);
-	//printDec(prio);
-	//printc('\n');
     return sys_nice(pid, prio+1);
 }

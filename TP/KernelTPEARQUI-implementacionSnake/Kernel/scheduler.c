@@ -99,8 +99,12 @@ void createScheduler()
 }
 
 priority_t get_priority(pid_t pid){
-    PCB* auxPCB = getProcess(pid);
-    return auxPCB->priority;
+    for(int i = 0; i<processAmount && i<MAX_PROCESSES;i++){
+        if(processes[i].pid==pid){
+            return processes[i].priority;
+        }
+    }
+    return 0;
 }
 
 uint64_t getCurrentPid()
@@ -446,15 +450,13 @@ int changePriority(pid_t pid, int priorityValue){
     {
         return -1;
     }
-    PCB *process = getProcess(pid);
-    if (process == NULL)
-    {
-        return -1;
+    for(int i = 0; i<processAmount && i<MAX_PRIORITY; i++){
+        if(processes[i].pid == pid){
+            processes[i].priority = priorityValue;
+            return 0;
+        }
     }
-
-    process->newPriority = priorityValue;
-    
-    return 0;
+    return -1;
 }
 
 int yieldProcess()
@@ -464,53 +466,36 @@ int yieldProcess()
     return 0;
 }
 
-processInfo *getProccessesInfo()
+processInfo *getProcessesInfo()
 {
     processInfo *first = NULL;
     processInfo *current = NULL;
-    Queue currentNode = active;
     pid_t firstPid =  processes[active].pid;
-    while (currentNode != NULL)
-    {
-        if (current != NULL)
-        {
-            current->next = (processInfo *)memory_manager_malloc(sizeof(processInfo));
-            current = current->next;
-        }
-        else
-        {
+    
+    processInfo *previous = NULL;
+
+    for(int i = 0; i < processAmount && i < MAX_PROCESSES; i++) {
+        if(processes[i].status != TERMINATED) {
+            // Crear un nuevo nodo para la lista
             current = (processInfo *)memory_manager_malloc(sizeof(processInfo));
+            if(current == NULL) {
+                return NULL;
+            }
+
+            current->pid = processes[i].pid;
+            current->priority = processes[i].priority;
+            current->status = processes[i].status;
+            current->next = NULL;
+
+            if(first == NULL) {
+                first = current;
+            } else {
+                previous->next = current;
+            }
+
+            previous = current;
         }
-        current->pid = currentNode->process.pid;
-        if (current->pid == firstPid)
-        {
-            first = current;
-        }
-        current->priority = currentNode->process.priority;
-        //current->stackBase = currentNode->process.stackBase;
-        current->status = currentNode->process.status;
-        currentNode = currentNode->next;
     }
-    currentNode = processes;
-    /**/
-    while (currentNode != NULL)
-    {
-        if (current != NULL)
-        {
-            current->next = (processInfo *)memory_manager_malloc(sizeof(processInfo));
-            current = current->next;
-        }
-        else
-        {
-            current = (processInfo *)memory_manager_malloc(sizeof(processInfo));
-        }
-        current->pid = currentNode->process.pid;
-        current->priority = currentNode->process.priority;
-        //current->stackBase = currentNode->process.stackBase;
-        current->status = currentNode->process.status;
-        currentNode = currentNode->next;
-    }
-    current->next = NULL;
     return first;
 }
 

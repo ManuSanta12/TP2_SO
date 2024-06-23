@@ -42,19 +42,10 @@ int16_t phylos_pids[MAX_QTY];
 
 int run_phylos() {
 
-    printc('\n');
-    prints("creando semaforo...",100);
-    printc('\n');
-    
     if (sem_init(MUTEX_SEM_NAME, 1) == -1){
-        prints("retorne -1",100);
         
         return -1;
     } 
-    printc('\n');
-    prints("semaforo creado!",100);
-    printc('\n');
-
     for (int i = 0; i < MAX_QTY; i++) {
        
         phylos_states[i] = NONE;
@@ -65,8 +56,7 @@ int run_phylos() {
         add_phylo(i);
     }
   
-
-    char command = '\0';
+    char command = ' ';
     while ((command = getChar())!= QUIT) {
         //printc('\n');
        // prints("Me metí al while",100);
@@ -129,9 +119,8 @@ int run_phylos() {
     itoa(index, philo_number_buffer, 10);
     char *params[] = {"philosopher", philo_number_buffer, NULL};
     int16_t file_descriptors[] = {DEV_NULL, STDOUT, STDERR};
-    phylos_pids[index] = new_process(&phylo, 3,params);
+    phylos_pids[index] = new_process(phylo, 3,params);
     if (phylos_pids[index] != -1)
-        prints("hola",11);
         phylos_qty++;
     show_phylos();
     sem_post(MUTEX_SEM_NAME);

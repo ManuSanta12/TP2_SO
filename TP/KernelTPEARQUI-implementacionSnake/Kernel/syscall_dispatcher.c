@@ -251,7 +251,7 @@ static int sys_close(int fd)
 
 static processInfo *sys_ps()
 {
-  return getProccessesInfo();
+  return getProcessesInfo();
 }
 
 static priority_t sys_getPriority(int pid){
@@ -319,21 +319,6 @@ static pid_t sys_waitpid(pid_t pid)
 
 static int sys_kill(pid_t pid)
 {
-  /*
-  if (pid <= 0)
-  {
-    return -1;
-  }
-
-  int x = prepareDummy(pid);
-  if (x == -1)
-  {
-    return -1;
-  }
-
-  sys_exit(0, 0);
-  return 0;
-  */
   return kill_by_pid(pid);
 }
 

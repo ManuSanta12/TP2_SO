@@ -62,7 +62,7 @@ static void cmd_wc();
 static void cmd_filter();
 static void cmd_ps();
 static void cmd_nice();
-static void runCommandInBackground(void (*cmd)());
+static void runCommandInBackground(void* cmd);
 
 static void (*commands_ptr[MAX_COMMANDS])() = {cmd_undefined, cmd_help, cmd_time, cmd_clear, cmd_snake, cmd_inforeg, cmd_zeroDiv,cmd_invOpcode,cmd_charsizeplus,cmd_charsizeminus, cmd_memory_manager,cmd_memory_tester,cmd_phylos,cmd_loop, cmd_cat, cmd_filter, cmd_wc, cmd_ps,cmd_nice};
 int runInBackground = 0; 
@@ -86,8 +86,8 @@ void shell (){
 	};
 }
 
-static void runCommandInBackground(void (*cmd)()) {
-    pid_t pid = sys_exec((uint64_t)cmd, 0, NULL);
+static void runCommandInBackground(void* cmd) {
+    pid_t pid = sys_exec(cmd, 0, NULL);
 }
 
 static void printLine(char c){
@@ -136,11 +136,10 @@ static int checkLine(){
 	int j = 0;
 	int k = 0;
 	runInBackground = 0; // Reset background flag
-    // Check if the command starts with "BG" to determine if it should run in background
-    // if (linePos >= 2 && line[0] == 'B' && line[1] == 'G') {
-    //     runInBackground = 1; // Set background flag
-    //     j += 2; // Move past "BG"
-    // }
+    if (linePos >= 2 && line[0] == 'B' && line[1] == 'G') {
+         runInBackground = 1; 
+         j += 2; 
+    }
 
 	for ( j = 0 ; j < linePos && line[j] != ' ' ; j ++){
 		command[j] = line[j];
@@ -232,7 +231,6 @@ static void cmd_wc(){
 	run_wc();
 }
 static void cmd_cat(){
-	//run_cat();
 	run_sinc();
 }
 static void cmd_filter(){

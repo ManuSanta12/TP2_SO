@@ -32,7 +32,7 @@ context* contextSwitch(context* rsp);
 int killProcess(int returnValue, char autokill);
 int changePriority(pid_t pid, int priorityValue);
 int yieldProcess();
-processInfo * getProccessesInfo();
+processInfo * getProcessesInfo();
 priority_t get_priority(pid_t pid);
 int kill_by_pid(pid_t pid);
 
