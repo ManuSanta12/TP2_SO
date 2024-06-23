@@ -33,6 +33,6 @@ void run_sinc(){
         printDec(a);
         i++;
     }*/
-    new_process(dummy, 0, NULL);
+    new_process(dummy, 0, NULL,0);
     //new_process((uint64_t)p1, 0, NULL);
 }

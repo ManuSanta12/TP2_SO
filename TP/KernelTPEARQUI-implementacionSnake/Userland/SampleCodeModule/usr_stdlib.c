@@ -282,8 +282,8 @@ uint8_t sem_close(char*name){
 	return sys_semClose(name);
 }
 
-int new_process(void* rip, int argc, char *argv[]){
-	return sys_newProcess(rip, argc, argv);
+int new_process(void* rip, int bg, char*argv[],int argc){
+	return sys_newProcess(rip, bg, argv,argc);
 }
 
 
@@ -328,14 +328,14 @@ static void loop(){
 	while(1){
 		prints("\n Hola soy el proceso: ",30);
 		printDec(get_pid());
-		wait(2000);
 		printc('\n');
+		wait(4000);
 	}
 
 }
 
-void run_loop(){
-	new_process(loop, 0, NULL);
+void run_loop(int bg){
+	new_process(loop, bg, NULL,0);
 }
 
 

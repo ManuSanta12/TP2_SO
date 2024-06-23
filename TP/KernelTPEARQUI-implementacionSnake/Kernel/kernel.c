@@ -55,7 +55,7 @@ int main() {
   clearScanCode();
 	createScheduler();
   //((EntryPoint)sampleCodeModuleAddress)();
-	new_process(sampleCodeModuleAddress, 0, NULL);
+	new_process(sampleCodeModuleAddress, 0, NULL,0);
   _sti();
   _hlt();
   while(1){

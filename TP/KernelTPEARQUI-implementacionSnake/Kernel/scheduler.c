@@ -8,8 +8,8 @@
 extern void _int20h;// implement int20h con assembler
 extern void forced_schedule(void);
 
-#define SCHEDULER_ADDRESS 0x60000
 // tck and ppriorities
+#define SHELL_PID 0
 #define STACK_SIZE 4096
 #define MAX_PROCESSES 100
 #define MIN_PRIORITY 1
@@ -17,9 +17,8 @@ extern void forced_schedule(void);
 #define EOF -1
 #define NUMBER_OF_PRIORITIES 9
 #define DEFAULT_PRIORITY 4
-priority_t priorities[NUMBER_OF_PRIORITIES] = {9, 8, 7, 6, 5, 4, 3, 2, 1};
+priority_t priorities[NUMBER_OF_PRIORITIES] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
 
-// Queues
 uint8_t init=0;
 
 uint32_t active;
@@ -228,21 +227,22 @@ static context* new_context(fun foo, int argc, char**argv){
     return context;
 }
 
-pid_t new_process(fun foo, int argc, char *argv[])
+pid_t new_process(fun foo, int bg, char*argv[],int argc)
 {
     PCB newProcess;
-    int a =0;
     newProcess.pid = processAmount++;
-    a = processAmount;
     newProcess.priority = DEFAULT_PRIORITY;
     newProcess.quantumsLeft = priorities[DEFAULT_PRIORITY];
     newProcess.blockedQueue = newQueue();
     newProcess.newPriority = -1;
     newProcess.status = READY;
-    //ReadyCount++;
     newProcess.argc = argc;
     newProcess.argv = copy_argv(argc, argv);
     
+    if(bg){
+        //BG process
+        newProcess.priority=1;
+    }
     newProcess.context = new_context(foo,argc,argv);
 
     // STDIN, STDOUT, STDERR, PIPEOUT, PIPEIN
@@ -262,12 +262,6 @@ pid_t new_process(fun foo, int argc, char *argv[])
     }
     processes[processAmount-1]=newProcess;
     
-    pid_t pid;
-    status_t st;
-    for(int i=0;i<processAmount;i++){
-        //pid = processes[i].pid;
-        //st = processes[i].status;
-    }
     return newProcess.pid;
 }
 
@@ -378,7 +372,7 @@ context* contextSwitch(context* rsp)
 
     processes[active].context=rsp;
     //sigo corriendo el mismo
-    if(active != NULL && quantumsLeft>0){
+    if(quantumsLeft>0){
         quantumsLeft--;
         return processes[active].context;
     }
@@ -402,9 +396,11 @@ context* contextSwitch(context* rsp)
 
 int killProcess(int returnValue, char autokill)
 {
+    if(processes[active].pid == SHELL_PID){
+        return -1;
+    }
     processes[active].status = TERMINATED;
     quantumsLeft=0;
-    //forced_schedule();
     return returnValue; 
     /*
     Node *currentProcess = active;

@@ -67,14 +67,6 @@ static void runCommandInBackground(void* cmd);
 static void (*commands_ptr[MAX_COMMANDS])() = {cmd_undefined, cmd_help, cmd_time, cmd_clear, cmd_snake, cmd_inforeg, cmd_zeroDiv,cmd_invOpcode,cmd_charsizeplus,cmd_charsizeminus, cmd_memory_manager,cmd_memory_tester,cmd_phylos,cmd_loop, cmd_cat, cmd_filter, cmd_wc, cmd_ps,cmd_nice};
 int runInBackground = 0; 
 
-static void printer(){
-	prints("AA",3);
-}
-
-void run_shell(){
-	char* argv[] = {"shell"};
-	new_process(run_shell, 1, argv);
-}
 
 void shell (){
 	char c;
@@ -136,20 +128,29 @@ static int checkLine(){
 	int j = 0;
 	int k = 0;
 	runInBackground = 0; // Reset background flag
-    if (linePos >= 2 && line[0] == 'B' && line[1] == 'G') {
-         runInBackground = 1; 
-         j += 2; 
+    if (linePos >= 2 && line[0] == 'B') {
+		prints("\nCorriendo en background\n",30);
+        runInBackground = 1; 
     }
 
-	for ( j = 0 ; j < linePos && line[j] != ' ' ; j ++){
+	for (; j < linePos && line[j] != ' ' ; j ++){
 		command[j] = line[j];
 	}
+	int m=0;
+	if(runInBackground){
+		while (command[m] != '\0') {
+        	command[m] = command[m + 1];
+        	m++;
+    }
+	}
+
 	if (j < linePos){
 		j++;
 		while (j < linePos){
 			parameter[k++] = line[j++];
 		}
 	}
+
 
 
 
@@ -188,7 +189,6 @@ static void cmd_snake(){
 
 static void cmd_clear(){
 	clear_scr();
-	//run_sinc();
 }
 
 static void cmd_inforeg(){
@@ -224,7 +224,7 @@ static void cmd_phylos(){
 }
 
 static void cmd_loop(){
-	run_loop();
+	run_loop(runInBackground);
 }
 
 static void cmd_wc(){

@@ -77,7 +77,7 @@ uint8_t sem_wait(char*name, int pid);
 
 uint8_t sem_close(char*name);
 
-void run_loop();
+void run_loop(int bg);
 
 uint64_t get_pid();
 
@@ -93,7 +93,7 @@ int atoi(const char* str);
 
 void sleep(int sec);
 
-int new_process(void* rip, int argc, char *argv[]);
+int new_process(void* rip, int bg, char*argv[],int argc);
 
 void getProcessesInfo();
 

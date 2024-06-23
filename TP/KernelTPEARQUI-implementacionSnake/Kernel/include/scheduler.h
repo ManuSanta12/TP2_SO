@@ -25,7 +25,7 @@ PCB *getProcess(pid_t pid);
 uint64_t getCurrentPid();
 int blockProcess(pid_t pid);
 int unblockProcess(pid_t pid);
-pid_t new_process(fun foo, int argc, char *argv[]);
+pid_t new_process(fun foo, int bg, char*argv[],int argc);
 void nextProcess();
 int prepareDummy(pid_t pid);
 context* contextSwitch(context* rsp);
