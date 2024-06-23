@@ -189,7 +189,7 @@ pid_t new_process(uint64_t rip, int argc, char *argv[])
     newProcess->process.argc = argc;
     newProcess->process.argv = copy_argv(argc, argv);
 
-    // STDIN, STDOUT, STDERR, PIPEOUT, PIPEIN
+    // STDIN, STDOUT, STDERR, PIPEOUT, PIPEIN 
     if (active != NULL)
     {
         for (int i = 0; i <= active->process.lastFd; i++)
@@ -454,6 +454,7 @@ int killProcess(int returnValue, char autokill)
     }
     return returnValue;
 }
+
 
 int changePriority(pid_t pid, int priorityValue)
 {
