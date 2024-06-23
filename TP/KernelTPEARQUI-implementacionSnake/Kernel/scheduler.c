@@ -481,7 +481,8 @@ int changePriority(pid_t pid, int priorityValue)
 
 int yieldProcess()
 {
-    quantumsLeft = 0;
+    processes[active].quantumsLeft = 0;
+    _int20h;
     return 0;
 }
 
