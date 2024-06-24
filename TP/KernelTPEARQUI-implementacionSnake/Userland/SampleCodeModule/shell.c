@@ -306,7 +306,7 @@ static void cmd_wc()
 }
 static void cmd_cat()
 {
-	run_sinc();
+	run_cat();
 }
 static void cmd_filter()
 {
