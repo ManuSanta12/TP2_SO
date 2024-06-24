@@ -11,7 +11,7 @@ typedef struct node{
 }node;
 
 
-void memory_test(){
+void run_test(){
     //this test will allocate nodes of a list and then it whill free them. 
     //It will show the state of the list and the state of the memory between steps.
     prints("\nCreando lista...\n",100);
@@ -58,10 +58,10 @@ void memory_test(){
     print_meminfo();
 }
 
-void hola(){
-    prints("\nhola\n", 100);
-}
+// void hola(){
+//     prints("\nhola\n", 100);
+// }
 
-void run_test(){
-    new_process(hola, 0, NULL,0);
-}
+// void run_test(){
+//     new_process(hola, 0, NULL,0);
+// }

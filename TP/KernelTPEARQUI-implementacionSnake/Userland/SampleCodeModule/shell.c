@@ -149,16 +149,18 @@ static void newLine()
 
 void pipeManager()
 {
-	prints("Comando 1: ", MAX_BUFFER);
-	for (int i = 0; i < cmd1Index; i++)
-	{
-		prints(command[i], MAX_BUFFER);
-	}
-	prints("\nComando 2: ", MAX_BUFFER);
-	for (int i = cmd1Index; i < cmd2Index; i++)
-	{
-		prints(command[i], MAX_BUFFER);
-	}
+	// prints("Comando 1: ", MAX_BUFFER);
+	// for (int i = 0; i < cmd1Index; i++)
+	// {
+	// 	prints(command[i], MAX_BUFFER);
+	// }
+	// prints("\nComando 2: ", MAX_BUFFER);
+	// for (int i = cmd1Index; i < cmd2Index; i++)
+	// {
+	// 	prints(command[i], MAX_BUFFER);
+	// }
+
+
 	// sys_pipe(fds);
     // sys_close(fds[1]);
     // sys_dup2(fds[0], STDOUT);

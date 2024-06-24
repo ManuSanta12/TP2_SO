@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define MAX_BUFFER 512
+// #define MAX_BUFFER 512
 #define READY 0
 #define BLOCKED 1
 
