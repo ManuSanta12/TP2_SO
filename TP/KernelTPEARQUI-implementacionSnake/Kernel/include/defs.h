@@ -126,12 +126,7 @@ typedef struct
 {
     pid_t pid;
     priority_t priority;
-    int newPriority;
     status_t status;
-    unsigned int quantumsLeft;
-    //uint64_t rsp;
-    //uint64_t rip; //rip donde comienza el proceso
-    //uint64_t stackBase;
     BlockedQueueADT blockedQueue;
     fd_t fileDescriptors[FDS];
     Pipe *pipe;

@@ -7,7 +7,6 @@
 
 extern void _int20h;// implement int20h con assembler
 extern void forced_schedule(void);
-#define K_PROCESS_STACK_SIZE (1024 * 4)
 // tck and ppriorities
 #define SHELL_PID 0
 #define STACK_SIZE 4096
@@ -42,30 +41,10 @@ void dummyProcess()
 
 void createScheduler()
 {
-    //scheduler = (schedulerADT)SCHEDULER_ADDRESS;
     processAmount = 0;
     quantumsLeft = 0;
     active=-1;
-    //process1es={};
-    
-    //placeholderProcessPid = new_process((uint64_t)dummyProcess, 0, NULL);
-    /*
-    for (int i = 0; i <= 2; i++)
-    {
-        active->process.fileDescriptors[i].mode = OPEN;
-    }
-    // PIPEOUT, PIPEIN
-    for (int i = 3; i <= 4; i++)
-    {
-        active->process.fileDescriptors[i].mode = CLOSED;
-    }
-    active->process.lastFd = 4;
-    active->process.status = BLOCKED;
-    
-    processReadyCount--;
-    */
     init = 1;
-    
 }
 
  PCB *getProcess(pid_t pid)
@@ -211,7 +190,7 @@ static void start(fun f, int argc, char *argv[]) {
 }
 
 static context* new_context(PCB* proc, fun foo, int argc, char**argv){
-    context *con =  (context *)((uint64_t)proc + K_PROCESS_STACK_SIZE - sizeof(context));
+    context *con =  (context *)((uint64_t)proc + STACK_SIZE - sizeof(context));
 
     con->rdi = (uint64_t)foo;
     con->rsi = (uint64_t)argc;
@@ -232,15 +211,12 @@ pid_t new_process(fun foo, int bg, char*argv[],int argc)
     PCB newProcess;
     newProcess.pid = processAmount++;
     newProcess.priority = DEFAULT_PRIORITY;
-    newProcess.quantumsLeft = priorities[DEFAULT_PRIORITY];
     newProcess.blockedQueue = newQueue();
-    newProcess.newPriority = -1;
     newProcess.status = READY;
     newProcess.argc = argc;
     newProcess.argv = copy_argv(argc, argv);
     
     if(bg){
-        //BG process
         newProcess.priority=1;
     }
     newProcess.context = new_context(&newProcess,foo,argc,argv);
@@ -260,99 +236,19 @@ pid_t new_process(fun foo, int bg, char*argv[],int argc)
     if(active==-1){
         active = 0;
     }
-    processes[processAmount-1]=newProcess;
-    
+    if(processAmount>=MAX_PROCESSES){
+        for(int i = 0; i<MAX_PROCESSES; i++){
+            if(processes[i].status == TERMINATED){
+                processes[i] = newProcess;
+                return newProcess.pid;
+            }
+        }
+    } else {
+        processes[processAmount-1]=newProcess;
+    }
     return newProcess.pid;
 }
 
-void nextProcess()
-{
-    /*
-    Node *current = active;
-    Node *previous = NULL;
-    while (current != NULL && current->process.status == BLOCKED)
-    {
-        previous = current;
-        current = current->next;
-    }
-    if (current != NULL)
-    {
-        if (previous != NULL)
-        {
-            previous->next = current->next;
-            current->next = active;
-            active = current;
-        }
-    }
-    else
-    {
-        Node *aux = active;
-        active = processes;
-        processes = aux;
-
-        current = active;
-        previous = NULL;
-        while (current != NULL && current->process.status == BLOCKED)
-        {
-            previous = current;
-            current = current->next;
-        }
-        if (previous != NULL && current != NULL)
-        {
-            previous->next = current->next;
-            current->next = active;
-            active = current;
-        }
-    }
-    */
-}
-
-int prepareDummy(pid_t pid)
-{
-    /*
-    Node *current = active;
-    Node *previous = NULL;
-    while (current != NULL && current->process.pid != pid)
-    {
-        previous = current;
-        current = current->next;
-    }
-
-    if (current != NULL)
-    {
-        if (previous != NULL)
-        {
-            previous->next = current->next;
-            current->next = active;
-            active = current;
-        }
-    }
-    else
-    {
-        current = processes;
-        previous = NULL;
-        while (current != NULL && current->process.pid != pid)
-        {
-            previous = current;
-            current = current->next;
-        }
-        if (current == NULL)
-        {
-            return -1;
-        }
-        if (previous == NULL)
-        {
-            processes = current->next;
-        }
-        else
-        {
-            previous->next = current->next;
-        }
-        current->next = active;
-        active = current;
-    }*/
-    return 0;
-}
 
 
 context* contextSwitch(context* rsp)
@@ -363,7 +259,6 @@ context* contextSwitch(context* rsp)
     if(processAmount==0){
         return rsp;
     }
-    //status_t active_st = active->process.status;
 
     if(processes[active].run==0){
         processes[active].run = 1;
@@ -371,6 +266,7 @@ context* contextSwitch(context* rsp)
     }   
 
     processes[active].context=rsp;
+
     //sigo corriendo el mismo
     if(quantumsLeft>0){
         quantumsLeft--;
@@ -402,40 +298,7 @@ int killProcess(int returnValue, char autokill)
     processes[active].status = TERMINATED;
     quantumsLeft=0;
     return returnValue; 
-    /*
-    Node *currentProcess = active;
-
-    pid_t blockedPid;
-    while ((blockedPid = dequeuePid(currentProcess->process.blockedQueue)) != -1)
-    {
-        unblockProcess(blockedPid);
-    }
-    active = currentProcess->next;
-    if (currentProcess->process.status != BLOCKED)
-    {
-        processReadyCount--;
-    }
-    for (int i = 0; i < currentProcess->process.argc; i++)
-    {
-        free_memory_manager(currentProcess->process.argv[i]);
-    }
-    free_memory_manager(currentProcess->process.argv);
-    freeQueue(currentProcess->process.blockedQueue);
-    //free_memory_manager((void *)currentProcess->process.stackBase);
-    if (currentProcess->process.pipe != NULL)
-    {
-        char msg[1] = {EOF};
-        //(currentProcess->process.pipe, msg, 1);
-        // pipeClose(currentProcess->process.pipe);
-    }
-    free_memory_manager(currentProcess);
-    if (autokill)
-    {
-       proccessBeingRun = 0;
-        _int20h;
-    }
-    return returnValue;
-}*/
+    
 }
 
 int changePriority(pid_t pid, int priorityValue){
@@ -444,7 +307,7 @@ int changePriority(pid_t pid, int priorityValue){
         return -1;
     }
     for(int i = 0; i<processAmount && i<MAX_PRIORITY; i++){
-        if(processes[i].pid == pid){
+        if(processes[i].pid == pid && processes[i].status!=TERMINATED){
             processes[i].priority = priorityValue;
             return 0;
         }
@@ -454,8 +317,7 @@ int changePriority(pid_t pid, int priorityValue){
 
 int yieldProcess()
 {
-    processes[active].quantumsLeft = 0;
-    _int20h;
+    quantumsLeft = 0;
     return 0;
 }
 
@@ -493,38 +355,11 @@ processInfo *getProcessesInfo()
 }
 
 int kill_by_pid(pid_t pid){
-    /*
-    Node * current = active;
-    if(current->process.pid == pid){
-        active = current->next;
-        free_memory_manager(current);
-        return 1;
-    }
-    while(current!=NULL){
-        if(current->next->process.pid == pid){
-            Node* aux = current->next;
-            current->next = current->next->next;
-            free_memory_manager(aux);
-            return 1;
+    for(int i =0; i<processAmount && i<MAX_PROCESSES;i++){
+        if(processes[i].pid == pid){
+            processes[i].status=TERMINATED;
         }
-        current=current->next;
     }
-
-    current = processes;
-    if(current->process.pid == pid){
-        processes = current->next;
-        free_memory_manager(current);
-        return 1;
-    }
-    while(current!=NULL){
-        if(current->next->process.pid == pid){
-            Node* aux = current->next;
-            current->next = current->next->next;
-            free_memory_manager(aux);
-            return 1;
-        }
-        current=current->next;
-    }*/
     return 0;
     
 }

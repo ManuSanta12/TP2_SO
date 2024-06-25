@@ -3,12 +3,74 @@
 #include <sys_calls.h>
 #include "shell.h"
 #include "mem_tester.h"
-
+#include <utilTest.h>
 
 typedef struct node{
     int value;
     struct node * next;
 }node;
+
+#define MAX_BLOCKS 128
+
+typedef struct MM_rq {
+  void *address;
+  uint32_t size;
+} mm_rq;
+
+
+uint64_t test_mm(uint64_t argc, char *argv[]) {
+  prints("\nEmpezando prueba...\n", 100);
+  mm_rq mm_rqs[MAX_BLOCKS];
+  uint8_t rq;
+  uint32_t total;
+  uint64_t max_memory;
+
+  if (argc != 1)
+    return -1;
+
+  if ((max_memory = satoi(argv[0])) <= 0)
+    return -1;
+
+  while (1) {
+    rq = 0;
+    total = 0;
+
+    // Request as many blocks as we can
+    while (rq < MAX_BLOCKS && total < max_memory) {
+      mm_rqs[rq].size = GetUniform(max_memory - total - 1) + 1;
+      mm_rqs[rq].address = mm_malloc(mm_rqs[rq].size);
+
+      if (mm_rqs[rq].address) {
+        total += mm_rqs[rq].size;
+        rq++;
+      }
+    }
+
+    // Set
+    uint32_t i;
+    for (i = 0; i < rq; i++)
+      if (mm_rqs[i].address)
+        memset(mm_rqs[i].address, i, mm_rqs[i].size);
+
+    // Check
+    for (i = 0; i < rq; i++)
+      if (mm_rqs[i].address)
+        if (!memcheck(mm_rqs[i].address, i, mm_rqs[i].size)) {
+          prints("test_mm ERROR\n",100);
+          return -1;
+        }
+
+    // Free
+    for (i = 0; i < rq; i++){
+      if (mm_rqs[i].address)
+        mm_free(mm_rqs[i].address);
+    }
+
+    prints("\n Prueba realizada con exito\n",100);
+    return 0;
+    }
+    
+}
 
 
 void memory_test(){
@@ -17,7 +79,7 @@ void memory_test(){
     prints("\nCreando lista...\n",100);
     node* new = mm_malloc(sizeof(node));
     if(new==NULL){
-        prints("malloc failed", 100);
+        prints("mm_malloc failed", 100);
     }
     new->value=10;
     node* new2 = mm_malloc(sizeof(node));
@@ -58,10 +120,12 @@ void memory_test(){
     print_meminfo();
 }
 
-void hola(){
-    prints("\nhola\n", 100);
-}
 
+
+static void test_wrapper(){
+    char * argv[] = {"100000"};
+    test_mm(1,argv);
+}
 void run_test(){
-    new_process(hola, 0, NULL,0);
+    new_process(test_wrapper, 0, NULL,0);
 }
