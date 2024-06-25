@@ -109,7 +109,7 @@ int blockProcess(pid_t pid)
 int unblockProcess(pid_t pid)
 {
    for(int i=0; i<processAmount && i<MAX_PROCESSES;i++){
-        if(processes[i].pid==pid && processes[i].status!=TERMINATED){
+        if(processes[i].pid==pid){
             processes[i].status = READY;
             return 0;
         }
@@ -302,7 +302,7 @@ processInfo *getProcessesInfo()
 }
 
 int kill_by_pid(pid_t pid){
-    if(pid==0){
+    if(pid==SHELL_PID){
         return -1;
     }
     for(int i =0; i<processAmount && i<MAX_PROCESSES;i++){
