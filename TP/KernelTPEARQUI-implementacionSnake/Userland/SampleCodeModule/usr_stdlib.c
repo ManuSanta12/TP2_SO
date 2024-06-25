@@ -458,3 +458,15 @@ int up_priority(pid_t pid){
 	priority_t prio = sys_getPriority(pid);
     return sys_nice(pid, prio+1);
 }
+
+int kill_process(pid_t pid){
+	return sys_kill(pid);
+}
+
+int block_process(pid_t pid){
+	return sys_block(pid);
+}
+
+int unblock_process(pid_t pid){
+	return sys_unblock(pid);
+}

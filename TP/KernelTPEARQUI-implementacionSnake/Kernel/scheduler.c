@@ -97,75 +97,22 @@ uint64_t getCurrentPid()
 
 int blockProcess(pid_t pid)
 {
-    Node *current = active;
-    char found = 0;
-
-    while (!found && current != NULL)
-    {
-        if (current->process.pid == pid)
-        {
-            found = 1;
-            current->process.status = BLOCKED;
+    for(int i=0; i<processAmount && i<MAX_PROCESSES;i++){
+        if(processes[i].pid==pid && processes[i].status!=TERMINATED){
+            processes[i].status = BLOCKED;
+            return 0;
         }
-        else
-        {
-            current = current->next;
-        }
-    }
-    current = processes;
-    while (!found && current != NULL)
-    {
-        if (current->process.pid == pid)
-        {
-            found = 1;
-            current->process.status = BLOCKED;
-        }
-        else
-        {
-            current = current->next;
-        }
-    }
-    if (found)
-    {
-        _int20h;
-        return 0;
     }
     return -1;
 }
 
 int unblockProcess(pid_t pid)
 {
-    Node *current = active;
-    char found = 0;
-
-    while (!found && current != NULL)
-    {
-        if (current->process.pid == pid)
-        {
-            found = 1;
-            current->process.status = READY;
+   for(int i=0; i<processAmount && i<MAX_PROCESSES;i++){
+        if(processes[i].pid==pid && processes[i].status!=TERMINATED){
+            processes[i].status = READY;
+            return 0;
         }
-        else
-        {
-            current = current->next;
-        }
-    }
-    current = processes;
-    while (!found && current != NULL)
-    {
-        if (current->process.pid == pid)
-        {
-            found = 1;
-            current->process.status = READY;
-        }
-        else
-        {
-            current = current->next;
-        }
-    }
-    if (found)
-    {
-        return 0;
     }
     return -1;
 }
@@ -355,6 +302,9 @@ processInfo *getProcessesInfo()
 }
 
 int kill_by_pid(pid_t pid){
+    if(pid==0){
+        return -1;
+    }
     for(int i =0; i<processAmount && i<MAX_PROCESSES;i++){
         if(processes[i].pid == pid){
             processes[i].status=TERMINATED;

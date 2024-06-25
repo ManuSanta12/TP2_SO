@@ -101,5 +101,12 @@ int up_priority(pid_t pid);
     
 char get_char_block();
 
+int block_process(pid_t pid);
+
+int unblock_process(pid_t pid);
+
+int kill_process(pid_t pid);
+
+
 
 #endif
