@@ -221,11 +221,11 @@ context* contextSwitch(context* rsp)
     }
     pid_t pid;
     int k=0;
-    for(int i=active;k<processAmount;i++){
+    for(int i=active+1;k<processAmount;i++){
         if(i>=processAmount){
             i=0;
         }
-        if(processes[i].status==READY && processes[active].pid!=processes[i].pid){
+        if(processes[i].status==READY){
             active = i;
             quantumsLeft =priorities[processes[active].priority];
             return processes[active].context;

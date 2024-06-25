@@ -216,14 +216,12 @@ interrupt_timerTick:
     pushState            
 
     call timer_handler    
-
-
-
-    mov rdi, rsp
+    
+	mov rdi, rsp
 	call contextSwitch
 	mov rsp, rax    
-
-    endOfHardwareInterrupt
+    
+	endOfHardwareInterrupt
 	popState              
     iretq                 
 
