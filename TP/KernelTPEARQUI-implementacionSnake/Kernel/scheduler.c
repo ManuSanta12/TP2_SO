@@ -7,7 +7,7 @@
 
 extern void _int20h;// implement int20h con assembler
 extern void forced_schedule(void);
-
+#define K_PROCESS_STACK_SIZE (1024 * 4)
 // tck and ppriorities
 #define SHELL_PID 0
 #define STACK_SIZE 4096
@@ -210,21 +210,21 @@ static void start(fun f, int argc, char *argv[]) {
     forced_schedule();
 }
 
-static context* new_context(fun foo, int argc, char**argv){
-    context *context = memory_manager_malloc(sizeof(context));
+static context* new_context(PCB* proc, fun foo, int argc, char**argv){
+    context *con =  (context *)((uint64_t)proc + K_PROCESS_STACK_SIZE - sizeof(context));
 
-    context->rdi = (uint64_t)foo;
-    context->rsi = (uint64_t)argc;
-    context->rdx = (uint64_t)argv;  
-    context->rip = (uint64_t)&start;
+    con->rdi = (uint64_t)foo;
+    con->rsi = (uint64_t)argc;
+    con->rdx = (uint64_t)argv;  
+    con->rip = (uint64_t)&start;
 
-    context->cs = CS;
-    context->eflags = EFLAGS;
-    context->ss = SS;
+    con->cs = CS;
+    con->eflags = EFLAGS;
+    con->ss = SS;
 
-    context->rsp = (uint64_t)context;
+    con->rsp = (uint64_t)con;
 
-    return context;
+    return con;
 }
 
 pid_t new_process(fun foo, int bg, char*argv[],int argc)
@@ -243,7 +243,7 @@ pid_t new_process(fun foo, int bg, char*argv[],int argc)
         //BG process
         newProcess.priority=1;
     }
-    newProcess.context = new_context(foo,argc,argv);
+    newProcess.context = new_context(&newProcess,foo,argc,argv);
 
     // STDIN, STDOUT, STDERR, PIPEOUT, PIPEIN
     /*
