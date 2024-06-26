@@ -218,7 +218,7 @@ static int sys_pipe(int pipefd[2])
   PCB *pcb = getProcess(getCurrentPid());
   pcb->fileDescriptors[PIPEIN].mode = OPEN;
   pcb->fileDescriptors[PIPEOUT].mode = OPEN;
-  pcb->pipe = pipeOpen();
+  //pcb->pipe = pipeOpen();
   pipefd[0] = PIPEIN;
   pipefd[1] = PIPEOUT;
   return 0;

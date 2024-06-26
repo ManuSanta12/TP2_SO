@@ -129,7 +129,7 @@ typedef struct
     status_t status;
     BlockedQueueADT blockedQueue;
     fd_t fileDescriptors[FDS];
-    Pipe *pipe;
+    //Pipe *pipe;
     unsigned int lastFd;
     unsigned int argc;
     char **argv;

@@ -28,16 +28,7 @@ int processAmount;
 pid_t placeholderProcessPid;
 uint16_t quantumsLeft;
 
-//typedef schedulerCDT* schedulerADT;
 
-
-void dummyProcess()
-{
-    while (1)
-    {
-        _hlt();
-    }
-}
 
 void createScheduler()
 {
@@ -183,8 +174,8 @@ pid_t new_process(fun foo, int bg, char*argv[],int argc)
     if(active==-1){
         active = 0;
     }
-    if(processAmount>=MAX_PROCESSES){
-        for(int i = 0; i<MAX_PROCESSES; i++){
+    if(processAmount>MAX_PROCESSES){
+        for(int i = 1; i<MAX_PROCESSES; i++){
             if(processes[i].status == TERMINATED){
                 processes[i] = newProcess;
                 return newProcess.pid;
@@ -243,6 +234,7 @@ int killProcess(int returnValue, char autokill)
         return -1;
     }
     processes[active].status = TERMINATED;
+    free_memory_manager(processes[active].context);
     quantumsLeft=0;
     return returnValue; 
     
@@ -308,6 +300,7 @@ int kill_by_pid(pid_t pid){
     for(int i =0; i<processAmount && i<MAX_PROCESSES;i++){
         if(processes[i].pid == pid){
             processes[i].status=TERMINATED;
+            free_memory_manager(processes[i].context);
         }
     }
     return 0;
