@@ -171,5 +171,4 @@ static BlockADT merge(BlockADT block, BlockADT buddy) {
     mem->freeBlocks--;
     return leftBlock;
 }
-
 #endif

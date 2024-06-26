@@ -10,7 +10,7 @@ extern void forced_schedule(void);
 // tck and ppriorities
 #define SHELL_PID 0
 #define STACK_SIZE 4096
-#define MAX_PROCESSES 100
+#define MAX_PROCESSES 4096
 #define MIN_PRIORITY 1
 #define MAX_PRIORITY 9
 #define EOF -1
@@ -149,7 +149,7 @@ pid_t new_process(fun foo, int bg, char*argv[],int argc)
     PCB newProcess;
     newProcess.pid = processAmount++;
     newProcess.priority = DEFAULT_PRIORITY;
-    newProcess.blockedQueue = newQueue();
+    //newProcess.blockedQueue = newQueue();
     newProcess.status = READY;
     newProcess.argc = argc;
     newProcess.argv = copy_argv(argc, argv);
@@ -206,7 +206,7 @@ context* contextSwitch(context* rsp)
     processes[active].context=rsp;
 
     //sigo corriendo el mismo
-    if(quantumsLeft>0){
+    if(quantumsLeft>0 && processes[active].status==READY){
         quantumsLeft--;
         return processes[active].context;
     }
@@ -234,7 +234,7 @@ int killProcess(int returnValue, char autokill)
         return -1;
     }
     processes[active].status = TERMINATED;
-    free_memory_manager(processes[active].context);
+    //free_memory_manager(processes[active].context);
     quantumsLeft=0;
     return returnValue; 
     
@@ -300,7 +300,7 @@ int kill_by_pid(pid_t pid){
     for(int i =0; i<processAmount && i<MAX_PROCESSES;i++){
         if(processes[i].pid == pid){
             processes[i].status=TERMINATED;
-            free_memory_manager(processes[i].context);
+            //free_memory_manager(processes[i].context);
         }
     }
     return 0;
