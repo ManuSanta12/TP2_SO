@@ -123,7 +123,7 @@ void memory_test(){
 
 
 static void test_wrapper(){
-    char * argv[] = {"10000000"};
+    char * argv[] = {"16770000"};
     test_mm(1,argv);
 }
 void run_test(){
