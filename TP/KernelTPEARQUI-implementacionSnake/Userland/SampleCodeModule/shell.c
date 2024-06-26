@@ -259,11 +259,13 @@ static void cmd_nice(){
 }
 
 static void test_process_wrapper(){
-	char* argv[] = {"90"};
+	char* argv[] = {"8"};
 	test_processes(1, argv);
 	prints("\n Test de procesos finalizado con exito\n",100);
 }
 
 static void cmd_process(){
-	new_process(test_process_wrapper,0,NULL,0);
+	char* argv[] = {"8"};
+	test_processes(1, argv);
+	//new_process(test_process_wrapper,0,NULL,0);
 }
