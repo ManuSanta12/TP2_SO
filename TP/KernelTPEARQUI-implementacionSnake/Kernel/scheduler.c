@@ -213,7 +213,7 @@ context* contextSwitch(context* rsp)
     pid_t pid;
     int k=0;
     for(int i=active+1;k<processAmount;i++){
-        if(i>=processAmount){
+        if(i>=MAX_PROCESSES || i>=processAmount){
             i=0;
         }
         if(processes[i].status==READY){
@@ -234,7 +234,8 @@ int killProcess(int returnValue, char autokill)
         return -1;
     }
     processes[active].status = TERMINATED;
-    //free_memory_manager(processes[active].context);
+    free_memory_manager(processes[active].context);
+    free_memory_manager(processes[active].argv);
     quantumsLeft=0;
     return returnValue; 
     
@@ -300,7 +301,8 @@ int kill_by_pid(pid_t pid){
     for(int i =0; i<processAmount && i<MAX_PROCESSES;i++){
         if(processes[i].pid == pid){
             processes[i].status=TERMINATED;
-            //free_memory_manager(processes[i].context);
+            free_memory_manager(processes[i].context);
+            free_memory_manager(processes[active].argv);
         }
     }
     return 0;

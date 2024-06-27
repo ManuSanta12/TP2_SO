@@ -84,7 +84,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
         }
     }
     prints("\n Afuera del while alive\n", 100);
-    //getProcessesInfo();
+    getProcessesInfo();
     return 0;
   }
 }
