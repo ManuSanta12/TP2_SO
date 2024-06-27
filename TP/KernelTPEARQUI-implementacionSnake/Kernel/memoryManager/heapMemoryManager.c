@@ -1,27 +1,20 @@
-#ifndef SIMPLE_MEMORY_MANAGER
-#define SIMPLE_MEMORY_MANAGER
+#ifndef BUDY_MM
 
-#include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
+#include <memoryManager.h>
 
-#define START_ADDRESS ((void*)0x600000)
-#define MEMORY_SIZE (128 * 1024 * 1024) // 128MB
+#define START_ADDRESS 0x600000
 #define BLOCK_SIZE (8 * 1024) // 8KB
-#define BLOCK_COUNT (MEMORY_SIZE / BLOCK_SIZE)
+#define MAX_BLOCKS 16384
 
 void* memory = START_ADDRESS;
-void* pointerArray[BLOCK_COUNT];
+void* pointerArray[MAX_BLOCKS];
 size_t blockCount;
+size_t memSize;
 
-typedef struct {
-    size_t totalMemory;
-    size_t occupiedMemory;
-    size_t freeMemory;
-    size_t blocksUsed;
-} MemoryInfo;
 
 void create_memory(size_t size) {
+    memSize = size;
     blockCount = size/BLOCK_SIZE;
     for (size_t i = 0; i < blockCount; i++) {
         pointerArray[i] = (void*)((void*)memory + i * BLOCK_SIZE);
@@ -50,7 +43,7 @@ void free_memory_manager(void* ptr) {
     }
 
     void* start = (void*)memory;
-    void* end = start + MEMORY_SIZE;
+    void* end = start + memSize;
     void* address = (void*)ptr;
 
     if (address < start || address >= end) {
@@ -67,7 +60,7 @@ void free_memory_manager(void* ptr) {
             index = index - 1;
         }
 
-        while (index < BLOCK_COUNT - 1 && pointerArray[index + 1] != NULL) {
+        while (index < blockCount - 1 && pointerArray[index + 1] != NULL) {
             pointerArray[index] = NULL;
             index = index + 1;
         }
@@ -75,26 +68,26 @@ void free_memory_manager(void* ptr) {
 }
 
 
-MemoryInfo mem_info() {
-    MemoryInfo info;
-    info.totalMemory = MEMORY_SIZE;
+MemoryInfo *mem_info(){
+
+    MemoryInfo* info;
+    info->totalMemory = memSize;
 
     size_t freeBlocks = 0;
-    for (size_t i = 0; i < BLOCK_COUNT; i++) {
+    for (size_t i = 0; i < blockCount; i++) {
         if (pointerArray[i] != NULL) {
             freeBlocks++;
         }
     }
-
-    info.occupiedMemory = (BLOCK_COUNT - freeBlocks) * BLOCK_SIZE;
-    info.freeMemory = freeBlocks * BLOCK_SIZE;
-    info.blocksUsed = BLOCK_COUNT - freeBlocks;
+    info->memoryAlgorithmName = "Simple manager";
+    info->occupiedMemory = (blockCount - freeBlocks) * BLOCK_SIZE;
+    info->freeMemory = info->totalMemory - info->occupiedMemory;
+    info->blocksUsed = blockCount - freeBlocks;
 
     return info;
 }
 
 #endif
-
 
 
 
