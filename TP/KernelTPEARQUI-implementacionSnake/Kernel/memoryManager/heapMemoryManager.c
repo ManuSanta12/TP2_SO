@@ -12,7 +12,7 @@
 
 void* memory = START_ADDRESS;
 void* pointerArray[BLOCK_COUNT];
-
+size_t blockCount;
 
 typedef struct {
     size_t totalMemory;
@@ -21,8 +21,9 @@ typedef struct {
     size_t blocksUsed;
 } MemoryInfo;
 
-void create_memory() {
-    for (size_t i = 0; i < BLOCK_COUNT; i++) {
+void create_memory(size_t size) {
+    blockCount = size/BLOCK_SIZE;
+    for (size_t i = 0; i < blockCount; i++) {
         pointerArray[i] = (void*)((void*)memory + i * BLOCK_SIZE);
     }
 }
@@ -32,7 +33,7 @@ void* memory_manager_malloc(size_t size) {
         return NULL;
     }
 
-    for (size_t i = 0; i < BLOCK_COUNT; i++) {
+    for (size_t i = 0; i < blockCount; i++) {
         if (pointerArray[i] != NULL) {
             void* block = pointerArray[i];
             pointerArray[i] = NULL;

@@ -18,7 +18,7 @@ char parameter[MAX_BUFFER+1] = {0};
 char command[MAX_BUFFER+1] = {0};
 int linePos = 0;
 char lastc;
-const char * commands[] = {"undefined","help","time","clear","snake","inforeg","zerodiv","invopcode","sizeplus","sizeminus","mem","memtest","phylos","loop", "cat", "filter", "wc", "ps","nice","processTest"};
+const char * commands[] = {"undefined","help","time","clear","snake","inforeg","zerodiv","invopcode","sizeplus","sizeminus","mem","memtest","phylos","loop", "cat", "filter", "wc", "ps","nice","protest"};
 
 void showCommands(){
 	prints("\n-time-               muestra la hora actual en pantalla",MAX_BUFFER);
@@ -38,7 +38,7 @@ void showCommands(){
 	prints("\n-filter-             filtra las vocales del input", MAX_BUFFER);
 	prints("\n-ps-                 muestra en pantalla la inforacion de proceso actual", MAX_BUFFER);
 	prints("\n-nice-               aumenta la prioridad del proceso deseado  ", MAX_BUFFER);
-	prints("\n-processTest-        testeo de generacion de procesos", MAX_BUFFER);
+	prints("\n-protest-            testeo de generacion de procesos", MAX_BUFFER);
 	printc('\n');
 }
 
