@@ -38,6 +38,7 @@ void* memory_manager_malloc(size_t size) {
 }
 
 void free_memory_manager(void* ptr) {
+    /*
     if (ptr == NULL) {
         return;
     }
@@ -64,7 +65,20 @@ void free_memory_manager(void* ptr) {
             pointerArray[index] = NULL;
             index = index + 1;
         }
+    }*/
+    for(int i=0; i<blockCount;i++){
+        if(pointerArray[i]==ptr){
+            return;//Ya estaba libre.
+        }
     }
+    for(int j=0;j<blockCount;j++){
+        if(pointerArray[j]==NULL){
+            pointerArray[j]=ptr;
+            
+            return;
+        }
+    }
+
 }
 
 
@@ -81,15 +95,13 @@ MemoryInfo *mem_info(){
     }
     info->memoryAlgorithmName = "Simple manager";
     info->occupiedMemory = (blockCount - freeBlocks) * BLOCK_SIZE;
-    info->freeMemory = info->totalMemory - info->occupiedMemory;
+    info->freeMemory = freeBlocks*BLOCK_SIZE;
     info->blocksUsed = blockCount - freeBlocks;
 
     return info;
 }
 
 #endif
-
-
 
 // #include <memoryManager.h>
 
