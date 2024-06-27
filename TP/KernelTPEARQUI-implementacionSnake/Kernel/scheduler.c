@@ -10,7 +10,7 @@ extern void forced_schedule(void);
 // tck and ppriorities
 #define SHELL_PID 0
 #define STACK_SIZE 4096
-#define MAX_PROCESSES 4096
+#define MAX_PROCESSES 100
 #define MIN_PRIORITY 1
 #define MAX_PRIORITY 9
 #define EOF -1
