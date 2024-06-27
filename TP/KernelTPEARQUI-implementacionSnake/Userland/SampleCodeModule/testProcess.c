@@ -83,7 +83,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
           p_rqs[rq].state = RUNNING;
         }
     }
-    prints("\n Afuera del while alive\n", 100);
+    prints("\nPrueba realizada con exito\n", 100);  
     getProcessesInfo();
     return 0;
   }

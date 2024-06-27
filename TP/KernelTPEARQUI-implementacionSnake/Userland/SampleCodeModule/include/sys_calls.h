@@ -73,9 +73,10 @@ int sys_nice(pid_t pid, int newPriority);
 
 int sys_kill(pid_t pid);
 
-static int sys_block(pid_t pid);
+int sys_block(pid_t pid);
 
-static int sys_unblock(pid_t pid);
+int sys_unblock(pid_t pid);
 
+void sys_yield();
 
-#endif  
+#endif

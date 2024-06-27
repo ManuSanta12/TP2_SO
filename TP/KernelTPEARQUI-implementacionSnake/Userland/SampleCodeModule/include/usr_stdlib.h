@@ -107,6 +107,6 @@ int unblock_process(pid_t pid);
 
 int kill_process(pid_t pid);
 
-
+void yield();
 
 #endif

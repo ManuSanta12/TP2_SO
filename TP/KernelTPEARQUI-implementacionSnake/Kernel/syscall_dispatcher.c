@@ -25,7 +25,7 @@ extern Color BLACK;
 
 int size = 0;
 
-#define SYS_CALLS_QTY 43
+#define SYS_CALLS_QTY 44
 
 static uint64_t sys_read(uint64_t fd, char *buff);
 static uint64_t sys_write(uint64_t fd, char buffer);
@@ -70,6 +70,7 @@ static pid_t sys_waitpid(pid_t pid);
 static int sys_kill(pid_t pid);
 static int sys_block(pid_t pid);
 static int sys_unblock(pid_t pid);
+static void sys_yield();
 
 // llena buff con el caracter leido del teclado
 static uint64_t sys_read(uint64_t fd, char *buff)
@@ -340,6 +341,10 @@ static int sys_unblock(pid_t pid)
   return unblockProcess(pid);
 }
 
+static void sys_yield(){
+	yieldProcess();
+}
+
 static uint64_t (*syscall_handlers[])(uint64_t, uint64_t, uint64_t, uint64_t,
                                       uint64_t) = {
     (void *)sys_read,         (void *)sys_write,       (void *)sys_clear,
@@ -355,7 +360,7 @@ static uint64_t (*syscall_handlers[])(uint64_t, uint64_t, uint64_t, uint64_t,
     (void *)sys_ps,           (void *)sys_changeProcessStatus,
     (void *)sys_getCurrentPid,(void *)sys_exec,        (void *)sys_exit, 
     (void *)sys_waitpid,      (void *)sys_kill,        (void *)sys_block, 
-    (void *)sys_unblock ,     (void*)sys_getPriority,  };
+    (void *)sys_unblock ,     (void*)sys_getPriority,  (void*)sys_yield  };
 
 // Devuelve la syscall correspondiente
 //                                rdi           rsi           rdx rd10 r8 r9

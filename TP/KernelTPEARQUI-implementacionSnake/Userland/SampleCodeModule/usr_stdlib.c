@@ -301,9 +301,7 @@ void dummy(){
 void getProcessesInfo()
 {
     processInfo *current = NULL;
-	//new_process((uint64_t)run_loop, 0, NULL);
 	current = sys_ps();
-	//printDec(current->pid);
     while (current != NULL)
     {
 		printc('\n');
@@ -315,7 +313,6 @@ void getProcessesInfo()
 		printc('\n');
 		prints("Status: ",MAX_BUFFER);
 		prints((current->status) ? "BLOCKED" : "READY", MAX_BUFFER);
-        sys_memFree(current);
         current = current->next;
     }
 }
@@ -470,3 +467,8 @@ int block_process(pid_t pid){
 int unblock_process(pid_t pid){
 	return sys_unblock(pid);
 }
+
+void yield(){
+	sys_yield();
+}
+

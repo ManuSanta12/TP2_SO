@@ -38,34 +38,6 @@ void* memory_manager_malloc(size_t size) {
 }
 
 void free_memory_manager(void* ptr) {
-    /*
-    if (ptr == NULL) {
-        return;
-    }
-
-    void* start = (void*)memory;
-    void* end = start + memSize;
-    void* address = (void*)ptr;
-
-    if (address < start || address >= end) {
-        return; 
-    }
-
-    size_t index = (address - start) / BLOCK_SIZE;
-
-    if (pointerArray[index] == NULL) {
-        pointerArray[index] = ptr;
-
-        if (index > 0 && pointerArray[index - 1] != NULL) {
-            pointerArray[index - 1] = NULL;
-            index = index - 1;
-        }
-
-        while (index < blockCount - 1 && pointerArray[index + 1] != NULL) {
-            pointerArray[index] = NULL;
-            index = index + 1;
-        }
-    }*/
     for(int i=0; i<blockCount;i++){
         if(pointerArray[i]==ptr){
             return;//Ya estaba libre.

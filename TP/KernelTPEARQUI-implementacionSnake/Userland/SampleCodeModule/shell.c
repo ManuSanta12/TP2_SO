@@ -9,16 +9,17 @@
 #include "phylos.h"
 #include "sinc.h"
 #include <testProcess.h>
+#include <syncTest.h>
 
 #define MAX_BUFFER 254
-#define MAX_COMMANDS 20
+#define MAX_COMMANDS 21
 
 char line[MAX_BUFFER+1] = {0}; //asi me aseguro que al menos va haber un cero
 char parameter[MAX_BUFFER+1] = {0};
 char command[MAX_BUFFER+1] = {0};
 int linePos = 0;
 char lastc;
-const char * commands[] = {"undefined","help","time","clear","snake","inforeg","zerodiv","invopcode","sizeplus","sizeminus","mem","memtest","phylos","loop", "cat", "filter", "wc", "ps","nice","protest"};
+const char * commands[] = {"undefined","help","time","clear","snake","inforeg","zerodiv","invopcode","sizeplus","sizeminus","mem","memtest","phylos","loop", "cat", "filter", "wc", "ps","nice","protest","sinc"};
 
 void showCommands(){
 	prints("\n-time-               muestra la hora actual en pantalla",MAX_BUFFER);
@@ -39,6 +40,8 @@ void showCommands(){
 	prints("\n-ps-                 muestra en pantalla la inforacion de proceso actual", MAX_BUFFER);
 	prints("\n-nice-               aumenta la prioridad del proceso deseado  ", MAX_BUFFER);
 	prints("\n-protest-            testeo de generacion de procesos", MAX_BUFFER);
+	prints("\n-sinc-               testeo de sincronizacion con semaforos", MAX_BUFFER);
+
 	printc('\n');
 }
 
@@ -65,9 +68,11 @@ static void cmd_filter();
 static void cmd_ps();
 static void cmd_nice();
 static void cmd_process();
+static void cmd_sinc();
+
 static void runCommandInBackground(void* cmd);
 
-static void (*commands_ptr[MAX_COMMANDS])() = {cmd_undefined, cmd_help, cmd_time, cmd_clear, cmd_snake, cmd_inforeg, cmd_zeroDiv,cmd_invOpcode,cmd_charsizeplus,cmd_charsizeminus, cmd_memory_manager,cmd_memory_tester,cmd_phylos,cmd_loop, cmd_cat, cmd_filter, cmd_wc, cmd_ps,cmd_nice,cmd_process};
+static void (*commands_ptr[MAX_COMMANDS])() = {cmd_undefined, cmd_help, cmd_time, cmd_clear, cmd_snake, cmd_inforeg, cmd_zeroDiv,cmd_invOpcode,cmd_charsizeplus,cmd_charsizeminus, cmd_memory_manager,cmd_memory_tester,cmd_phylos,cmd_loop, cmd_cat, cmd_filter, cmd_wc, cmd_ps,cmd_nice,cmd_process, cmd_sinc};
 int runInBackground = 0; 
 
 
@@ -265,7 +270,10 @@ static void test_process_wrapper(){
 }
 
 static void cmd_process(){
-	char* argv[] = {"80"};
-	test_processes(1, argv);
-	//new_process(test_process_wrapper,0,NULL,0);
+	new_process(test_process_wrapper,0,NULL,0);
+}
+
+static void cmd_sinc(){
+	char* argv[] = {"1","2","0"};
+	test_sync(3, argv);
 }

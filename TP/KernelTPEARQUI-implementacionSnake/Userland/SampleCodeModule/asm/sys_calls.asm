@@ -40,6 +40,7 @@ GLOBAL sys_kill
 GLOBAL sys_block
 GLOBAL sys_unblock
 GLOBAL sys_getPriority
+GLOBAL sys_yield
 section .text
 
 ; Pasaje de parametros en C:
@@ -250,3 +251,7 @@ sys_getPriority:
     int 80h
     ret
 
+sys_yield:
+    mov rax, 0x28
+    int 80h
+    ret
