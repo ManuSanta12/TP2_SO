@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <usr_stdlib.h>
+#include <syncTest.h>
 
 #define SEM_ID "sem"
 #define TOTAL_PAIR_PROCESSES 2
@@ -30,7 +31,7 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
 
   if (use_sem)
     if (!sem_init(SEM_ID, 1)) {
-      printf("test_sync: ERROR opening semaphore\n");
+      prints("test_sync: ERROR opening semaphore\n", 100);
       return -1;
     }
 
@@ -62,13 +63,13 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
 
     uint64_t i;
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
-    pids[i] = new_process("my_process_inc", 0, argvDec,3);
-    pids[i + TOTAL_PAIR_PROCESSES] = new_process("my_process_inc", 0, argvInc,3);
+      pids[i] = new_process("my_process_inc", 0, argvDec,3);
+      pids[i + TOTAL_PAIR_PROCESSES] = new_process("my_process_inc", 0, argvInc,3);
     }
 
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
-    sem_wait(pids[i], get_pid());
-    sem_wait(pids[i + TOTAL_PAIR_PROCESSES], get_pid());
+      sem_wait(pids[i], get_pid());
+      sem_wait(pids[i + TOTAL_PAIR_PROCESSES], get_pid());
     }
 
     prints("Final value: ", 100);
