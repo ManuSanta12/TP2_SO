@@ -6,7 +6,8 @@ GLOBAL getTime
 GLOBAL outSpeaker
 GLOBAL inSpeaker
 section .text
-	
+GLOBAL _xadd
+GLOBAL _xchg
 
 cpuVendor:
 	push rbp
@@ -121,3 +122,13 @@ outSpeaker:
 	mov rsp, rbp
 	pop rbp
 	ret
+
+_xadd:
+  mov rax, rsi
+  lock xadd [rdi], eax
+  ret
+
+_xchg:
+  mov rax, rsi
+  xchg [rdi], eax
+  ret
