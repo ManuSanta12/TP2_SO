@@ -27,14 +27,21 @@ semManagerADT semManager;
 void queue_pid(semaphore_t *sem, int pid) {
     pidNode *new = memory_manager_malloc(sizeof(pidNode));
     new->pid = pid;
-    new->next = sem->first;
-    sem->first = new;
+    new->next = NULL;
+
     if (sem->first == NULL) {
+        sem->first = new;
+        sem->last = new;
+    } else {
+        sem->last->next = new;
         sem->last = new;
     }
 }
 
 int peek_pid(semaphore_t *sem) {
+    if (sem->first == NULL) {
+        return -1; 
+    }
     return sem->first->pid;
 }
 
@@ -45,6 +52,9 @@ int dequeue_pid(semaphore_t *sem) {
     pidNode *aux = sem->first;
     int pidToReturn = sem->first->pid;
     sem->first = sem->first->next;
+    if (sem->first == NULL) {
+        sem->last = NULL;
+    }
     free_memory_manager(aux);
     return pidToReturn;
 }
@@ -53,7 +63,7 @@ void wait_mutex(int id) {
     while (semManager->semaphores[id]->mutex == 0) {
         yieldProcess();
     }
-    return;
+    semManager->semaphores[id]->mutex--;
 }
 
 void post_mutex(int id) {
@@ -78,24 +88,24 @@ uint8_t sem_init(char *name, int value) {
     }else{
         return 1;
     }*/
-    
-    if (semManager->lastId > MAX_SEMAPHORES) {
+        if (semManager->lastId >= MAX_SEMAPHORES) {
         return -1;
     }
-    for (int i = 0; i<semManager->lastId; i++) {
+    for (int i = 0; i < semManager->lastId; i++) {
         if (strcmp(name, semManager->semaphores[i]->name) == 0) {
             return -1;
         }
     }
 
-
     semaphore_t *new_sem = memory_manager_malloc(sizeof(semaphore_t));
-    if(new_sem==NULL){
+    if (new_sem == NULL) {
         return -1;
     }
     new_sem->name = strcpy(name);
     new_sem->value = value;
-    new_sem->mutex=1;
+    new_sem->mutex = 1;
+    new_sem->first = NULL;
+    new_sem->last = NULL;
     semManager->semaphores[semManager->lastId] = new_sem;
     semManager->lastId++;
 
@@ -104,6 +114,7 @@ uint8_t sem_init(char *name, int value) {
 
 uint8_t sem_post(char *name) {
     // Si no existe un semaforo con ese nombre retorna -1, sino 0
+    //i < semManager->lastId; ??
     for (int i = 0; semManager->semaphores[i] != NULL; i++) {
         if (strcmp(name, semManager->semaphores[i]->name) == 0) {
             wait_mutex(i);
@@ -144,6 +155,7 @@ uint8_t sem_wait(char *name, int pid) {
 uint8_t sem_close(char* name){
      for (int i = 0; semManager->semaphores[i] != NULL; i++) {
         if (strcmp(name, semManager->semaphores[i]->name) == 0) {
+            free_memory_manager(semManager->semaphores[i]->name);
             free_memory_manager(semManager->semaphores[i]);
             int j;
             for (j = i; semManager->semaphores[j + 1] != NULL; j++) {
