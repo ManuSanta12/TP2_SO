@@ -274,6 +274,7 @@ static void cmd_process(){
 }
 
 static void cmd_sinc(){
-	char* argv[] = {"1","2","0"};
-	test_sync(2, argv);
+	//char* argv[] = {"1","2","1"};
+	//test_sync(2, argv);
+	run_sinc();
 }

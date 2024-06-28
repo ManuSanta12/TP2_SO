@@ -139,7 +139,7 @@ uint8_t sem_wait(char *name, int pid) {
                 post_mutex(i);
                 return 0;
             }
-            while (s->value == 0 && peek_pid(s) != pid) {
+            while (s->value == 0 || peek_pid(s) != pid) {
                 yieldProcess();
             }
             wait_mutex(i);

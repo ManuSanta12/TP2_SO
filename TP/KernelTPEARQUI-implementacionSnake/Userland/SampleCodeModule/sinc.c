@@ -3,7 +3,7 @@
 #include "shell.h"
 int a = 0;
 
-/*
+
 void p1(){
     while(1){
         a++;
@@ -18,21 +18,14 @@ void p2(){
         a--;
         sem_post("my_sem");
     }
-}*/
-void p1(){
-    while(1);
 }
+
+
 void run_sinc(){
-    /*
     sem_init("my_sem",0);
-    new_process((uint64_t)p1,0,NULL);
-    new_process((uint64_t)p2,0,NULL);
+    new_process(p1,0,NULL,0);
+    new_process(p2,0,NULL,0);
     int i = 0;
-    while(i<10){
-        sleep(1);
-        printDec(a);
-        i++;
-    }*/
-    new_process(dummy, 0, NULL,0);
-    //new_process((uint64_t)p1, 0, NULL);
+    wait(4000);
+    printDec(a);
 }
