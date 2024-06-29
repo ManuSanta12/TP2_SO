@@ -123,6 +123,7 @@ static void start(fun f, int argc, char *argv[]) {
     int status = f(argc, argv);
     pid_t pid;
     processes[active].status = TERMINATED;
+    unblockProcess(SHELL_PID);
     quantumsLeft=0;
     forced_schedule();
 }
@@ -152,10 +153,12 @@ pid_t new_process(fun foo, int bg, char*argv[],int argc)
     //newProcess.blockedQueue = newQueue();
     newProcess.status = READY;
     newProcess.argc = argc;
-    newProcess.argv = copy_argv(argc, argv);
+    //newProcess.argv = copy_argv(argc, argv);
     
     if(bg){
         newProcess.priority=1;
+    } else {
+        blockProcess(SHELL_PID);
     }
     newProcess.context = new_context(&newProcess,foo,argc,argv);
 
@@ -236,6 +239,7 @@ int killProcess(int returnValue, char autokill)
     processes[active].status = TERMINATED;
     free_memory_manager(processes[active].context);
     free_memory_manager(processes[active].argv);
+    unblockProcess(SHELL_PID);
     quantumsLeft=0;
     return returnValue; 
     
@@ -304,6 +308,9 @@ int kill_by_pid(pid_t pid){
             processes[i].status=TERMINATED;
             free_memory_manager(processes[i].context);
             free_memory_manager(processes[active].argv);
+            unblockProcess(SHELL_PID);  
+            quantumsLeft = 0;
+            return 0;
         }
     }
     return 0;
