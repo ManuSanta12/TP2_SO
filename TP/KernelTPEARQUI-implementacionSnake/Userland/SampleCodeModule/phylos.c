@@ -42,10 +42,10 @@ int16_t phylos_pids[MAX_QTY];
 
 int run_phylos() {
 
-    if (sem_init(MUTEX_SEM_NAME, 1) == -1){
+    // if (sem_init(MUTEX_SEM_NAME, 1) == -1){
         
-        return -1;
-    } 
+    //     return -1;
+    // } 
     for (int i = 0; i < MAX_QTY; i++) {
        
         phylos_states[i] = NONE;
@@ -88,7 +88,7 @@ int run_phylos() {
     for (int i = phylos_qty - 1; i >= 0; i--) {
         remove_phylo(i);
     }
-    sem_close(MUTEX_SEM_NAME);
+    // sem_close(MUTEX_SEM_NAME);
     return 0;
 }
 
@@ -112,10 +112,10 @@ int run_phylos() {
 }
 
  uint8_t add_phylo(int index) {
-    sem_wait(MUTEX_SEM_NAME, get_pid());
+    // sem_wait(MUTEX_SEM_NAME, get_pid());
     char philo_number_buffer[MAX_PHYLO_NUMBER] = {0};
-    if (sem_init(phylo_sem(index), 0) == -1)
-        return -1;
+    // if (sem_init(phylo_sem(index), 0) == -1)
+    //     return -1;
     itoa(index, philo_number_buffer, 10);
     char *params[] = {"philosopher", philo_number_buffer, NULL};
     int16_t file_descriptors[] = {DEV_NULL, STDOUT, STDERR};
@@ -123,26 +123,26 @@ int run_phylos() {
     if (phylos_pids[index] != -1)
         phylos_qty++;
     show_phylos();
-    sem_post(MUTEX_SEM_NAME);
+    // sem_post(MUTEX_SEM_NAME);
     return -1 * !(phylos_pids[index] + 1);
 }
 
  uint8_t remove_phylo(int index) {
-    sem_wait(MUTEX_SEM_NAME, get_pid());
+    // sem_wait(MUTEX_SEM_NAME, get_pid());
     while (phylos_states[left(index)] == EATING && phylos_states[right(index)] == EATING) { 
-        sem_post(MUTEX_SEM_NAME);
-        sem_wait(phylo_sem(index),get_pid());
-        sem_wait(MUTEX_SEM_NAME,get_pid());
+        // sem_post(MUTEX_SEM_NAME);
+        // sem_wait(phylo_sem(index),get_pid());
+        // sem_wait(MUTEX_SEM_NAME,get_pid());
     }
     // killProcess(phylos_pids[index]);
     // waitpid(phylos_pids[index]);
     printc('\n');
-    sem_close(phylo_sem(index));
+    // sem_close(phylo_sem(index));
     phylos_pids[index] = -1;
     phylos_states[index] = NONE;
     phylos_qty--;
     show_phylos();
-    sem_post(MUTEX_SEM_NAME);
+    // sem_post(MUTEX_SEM_NAME);
     return 0;
 }
 
@@ -159,26 +159,26 @@ int run_phylos() {
 }
 
  void take_fork(int i) {
-    sem_wait(MUTEX_SEM_NAME, get_pid());
+    // sem_wait(MUTEX_SEM_NAME, get_pid());
     phylos_states[i] = HUNGRY;
     test(i);
-    sem_post(MUTEX_SEM_NAME);
-    sem_wait(phylo_sem(i), get_pid());
+    // sem_post(MUTEX_SEM_NAME);
+    // sem_wait(phylo_sem(i), get_pid());
 }
 
  void put_fork(int i) {
-    sem_wait(MUTEX_SEM_NAME,get_pid());
+    // sem_wait(MUTEX_SEM_NAME,get_pid());
     phylos_states[i] = THINKING;
     show_phylos();
     test(left(i));
     test(right(i));
-    sem_post(MUTEX_SEM_NAME);
+    // sem_post(MUTEX_SEM_NAME);
 }
 
  void test(int i) {
     if (phylos_states[i] == HUNGRY && phylos_states[left(i)] != EATING && phylos_states[right(i)] != EATING) {
         phylos_states[i] = EATING;
-        sem_post(phylo_sem(i));
+        // sem_post(phylo_sem(i));
         show_phylos();
     }
 }

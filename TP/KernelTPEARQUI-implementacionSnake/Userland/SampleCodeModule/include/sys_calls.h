@@ -51,13 +51,13 @@ void* sys_memMalloc(uint64_t size);
 
 void sys_memFree(void * ap);
 
-uint8_t sys_semInit(char*name,int value);
+uint8_t sys_semInit(int id,int value);
 
-uint8_t sys_semPost(char*name);
+uint8_t sys_semPost(int id, int pid);
 
-uint8_t sys_semWait(char*name, int pid);
+uint8_t sys_semWait(int id, int pid);
 
-uint8_t sys_semClose(char * name);
+uint8_t sys_semClose(int id);
 
 int sys_newProcess(void* rip, int bg, char*argv[],int argc);
 

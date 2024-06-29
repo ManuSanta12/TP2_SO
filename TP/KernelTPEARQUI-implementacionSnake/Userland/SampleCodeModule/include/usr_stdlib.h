@@ -69,13 +69,13 @@ void mm_free(void * ap);
 
 void print_meminfo();
 
-uint8_t sem_init(char*name,int value);
+uint8_t sem_init(int id,int value);
 
-uint8_t sem_post(char*name);
+uint8_t sem_post(int id, int pid);
 
-uint8_t sem_wait(char*name, int pid);
+uint8_t sem_wait(int id, int pid);
 
-uint8_t sem_close(char*name);
+uint8_t sem_close(int id);
 
 void run_loop(int bg);
 

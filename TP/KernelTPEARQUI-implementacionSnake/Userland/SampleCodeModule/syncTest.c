@@ -2,7 +2,7 @@
 #include <usr_stdlib.h>
 #include <syncTest.h>
 
-#define SEM_ID "sem"
+#define SEM_ID 3
 #define TOTAL_PAIR_PROCESSES 2
 
 int64_t global; // shared memory
@@ -80,8 +80,8 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
 
     uint64_t i;
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
-      pids[i] = new_process(my_process_wrapper, 0, argvDec,3);
-      pids[i + TOTAL_PAIR_PROCESSES] = new_process(my_process_wrapper, 0, argvInc,3);
+      pids[i] = new_process(my_process_wrapper, 1, argvDec,3);
+      pids[i + TOTAL_PAIR_PROCESSES] = new_process(my_process_wrapper, 1 ,argvInc,3);
     }
 
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {

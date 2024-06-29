@@ -45,10 +45,10 @@ static uint64_t sys_mute();
 static MemoryInfo *sys_memInfo();
 static void *sys_memMalloc(uint64_t size);
 static void sys_memFree(uint64_t ap);
-static uint8_t sys_semInit(char*name,int value);
-static uint8_t sys_semPost(char* name);
-static uint8_t sys_semWait(char* name,int pid);
-static uint8_t sys_semClose(char* name);
+static uint8_t sys_semInit(int id,int value);
+static uint8_t sys_semPost(int id, int pid);
+static uint8_t sys_semWait(int id,int pid);
+static uint8_t sys_semClose(int id);
 static pid_t sys_newProcess(void* rip, int bg, char*argv[],int argc);
 static uint64_t sys_getPid();
 static uint64_t sys_sleepTime(int sec);
@@ -176,20 +176,20 @@ static void *sys_memMalloc(uint64_t size)
 
 static void sys_memFree(uint64_t ap) { free_memory_manager((void *)ap); }
 
-static uint8_t sys_semInit(char*name,int value){
-  return sem_init(name,value);
+static uint8_t sys_semInit(int id,int value){
+  return sem_init(id,value);
 }
 
-static uint8_t sys_semPost(char* name){
-  return sem_post(name);
+static uint8_t sys_semPost(int id, int pid){
+  return sem_post(id, pid);
 }
 
-static uint8_t sys_semWait(char* name,int pid){
-  return sem_wait(name, pid);
+static uint8_t sys_semWait(int id,int pid){
+  return sem_wait(id, pid);
 }
 
-static uint8_t sys_semClose(char* name){
-  return sem_close(name);
+static uint8_t sys_semClose(int id){
+  return sem_close(id);
 }
 
 static pid_t sys_newProcess(void* rip, int bg, char*argv[],int argc){

@@ -1,120 +1,135 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+#include <defs.h>
 #include <linkedList.h>
 #include <memoryManager.h>
+#include <lib.h>
 
-#define ERROR   -1
-#define SUCCESS 0
+typedef struct LinkedListCDT {
+	ListNode *first;
+	ListNode *last;
+	ListNode *current;
+	int len;
+} LinkedListCDT;
 
-typedef struct node_list_t {
-    void *data;
-    struct node_list_t *next;
-} node_list_t;
-
-typedef struct list_t {
-    struct node_list_t *start;
-    struct node_list_t *end;
-    struct node_list_t *current;
-    // function that will compare node->data with argument "data" for deletion
-    int (*comp_funct)(void *, void *);
-    int size;
-} list_t;
-
-list_t *new_linked_list(int (*comp_funct)(void *, void *)) {
-    list_t *new_list = memory_manager_malloc(sizeof(list_t));
-    new_list->start = NULL;
-    new_list->end = NULL;
-    new_list->comp_funct = comp_funct;
-    new_list->size = 0;
-    return new_list;
+LinkedListADT createLinkedListADT() {
+	LinkedListADT list = (LinkedListADT) memory_manager_malloc(sizeof(LinkedListCDT));
+	list->len = 0;
+	list->first = NULL;
+	list->last = NULL;
+	list->current = NULL;
+	return list;
 }
 
-static node_list_t *delete_helper(list_t *list, node_list_t *node, void *data) {
-    if (node == NULL) {
-        return NULL;
-    }
-    if (list->comp_funct(node->data, data)) {
-        struct node_list_t *ret_node = node->next;
-        free_memory_manager(node);
-        return ret_node;
-    }
-    node->next = delete_helper(list, node->next, data);
-    if (node->next == NULL) {
-        list->end = node;
-    }
-    return node;
+ListNode *appendElement(LinkedListADT list, void *data) {
+	if (list == NULL)
+		return NULL;
+	ListNode *newNode = (ListNode *) memory_manager_malloc(sizeof(ListNode));
+	newNode->data = data;
+	return appendNode(list, newNode);
 }
 
-static node_list_t *create_node(void *data) {
-    node_list_t *new_node = (node_list_t *)memory_manager_malloc(sizeof(node_list_t));
-    new_node->data = data;
-    new_node->next = NULL;
-    return new_node;
+ListNode *appendNode(LinkedListADT list, ListNode *node) {
+	if (list == NULL)
+		return NULL;
+	node->next = NULL;
+	if (list->len > 0)
+		list->last->next = node;
+	else
+		list->first = node;
+	node->prev = list->last;
+	list->last = node;
+	list->len++;
+	return node;
 }
 
-void to_begin(list_t *l) {
-    l->current = l->start;
+ListNode *prependNode(LinkedListADT list, ListNode *node) {
+	if (list == NULL)
+		return NULL;
+	node->prev = NULL;
+	if (list->len > 0)
+		list->first->prev = node;
+	else
+		list->last = node;
+	node->next = list->first;
+	list->first = node;
+	list->len++;
+	return node;
 }
 
-int hasNext(list_t *l) {
-    return l->current != NULL;
+ListNode *getFirst(LinkedListADT list) {
+	if (list == NULL)
+		return NULL;
+	return list->first;
 }
 
-int size(list_t *l) {
-    return l->size;
+int isEmpty(LinkedListADT list) {
+	if (list == NULL)
+		return -1;
+	return !list->len;
 }
 
-void *next(list_t *l) {
-    void *element = l->current->data;
-    l->current = l->current->next;
-    return element;
+int getLength(LinkedListADT list) {
+	if (list == NULL)
+		return -1;
+	return list->len;
 }
 
-void add(list_t *list, void *data) {
-    node_list_t *new_node = create_node(data);
+void *removeNode(LinkedListADT list, ListNode *node) {
+	if (list == NULL || node == NULL)
+		return NULL;
 
-    if (list->start == NULL) {
-        list->start = new_node;
-        list->end = new_node;
-    } else {
-        list->end->next = new_node;
-        list->end = list->end->next;
-    }
+	if (list->first == node)
+		list->first = node->next;
+	else
+		node->prev->next = node->next;
 
-    list->size++;
+	if (list->last == node)
+		list->last = node->prev;
+	else
+		node->next->prev = node->prev;
+
+	list->len--;
+	void *data = node->data;
+	node->next = NULL;
+	node->prev = NULL;
+	// free(node);
+	return data;
 }
 
-int remove(list_t *list, void *data) {
-    list->start = delete_helper(list, list->start, data);
-    list->size--;
-    return SUCCESS;
+// Atención: Usar funciones de agregado/borrado cuando se itera sobre la lista
+// puede causar comportamiento indefinido.
+void begin(LinkedListADT list) {
+	if (list == NULL)
+		return;
+	list->current = list->first;
 }
 
-void *find(list_t *list, void *data, int (*comp_funct)(void *, void *)) {
-    int (*funct)(void *, void *);
-    if (comp_funct == NULL) {
-        funct = list->comp_funct;
-    } else {
-        funct = comp_funct;
-    }
-    node_list_t *node = list->start;
-    while (node != NULL) {
-        if (funct(node->data, data))
-            return node->data;
-        node = node->next;
-    }
-    return NULL;
+int hasNext(LinkedListADT list) {
+	if (list == NULL)
+		return -1;
+	return list->current != NULL;
 }
 
-static void free_list_helper(node_list_ptr node) {
-    if (node == NULL) {
-        return;
-    }
-    free_list_helper(node->next);
-    free_memory_manager(node);
+void *next(LinkedListADT list) {
+	if (!hasNext(list))
+		return NULL;
+	void *data = list->current->data;
+	list->current = list->current->next;
+	return data;
 }
 
-void free_list(list_ptr list) {
-    free_list_helper(list->start);
-    free_memory_manager(list);
+void freeLinkedListADTDeep(LinkedListADT list) {
+	ListNode *current = list->first;
+	ListNode *next;
+	while (current != NULL) {
+		next = current->next;
+		free_memory_manager(current);
+		current = next;
+	}
+	freeLinkedListADT(list);
+}
+
+void freeLinkedListADT(LinkedListADT list) {
+	free_memory_manager(list);
 }

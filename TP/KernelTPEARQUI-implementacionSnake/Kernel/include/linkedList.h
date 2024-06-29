@@ -1,18 +1,26 @@
-#ifndef _LINKED_LIST_H_
-#define _LINKED_LIST_H_
+#ifndef LINKEDLIST_H
+#define LINKEDLIST_H
 
-typedef struct node_list_t *node_list_ptr;
-typedef struct list_t *list_ptr;
+typedef struct LinkedListCDT *LinkedListADT;
 
-list_ptr new_linked_list(int (*comp_funct)(void *, void *));
+typedef struct ListNode {
+	void *data;
+	struct ListNode *prev;
+	struct ListNode *next;
+} ListNode;
 
-void add(list_ptr list, void *data);
-int remove(list_ptr list, void *data);
-void *find(list_ptr list, void *data, int (*comp_funct)(void *, void *));
-void to_begin(list_ptr l);
-int hasNext(list_ptr l);
-void *next(list_ptr l);
-void free_list(list_ptr list);
-int size(list_ptr l);
+LinkedListADT createLinkedListADT();
+ListNode *appendElement(LinkedListADT list, void *data);
+ListNode *appendNode(LinkedListADT list, ListNode *node);
+ListNode *prependNode(LinkedListADT list, ListNode *node);
+void *removeNode(LinkedListADT list, ListNode *node);
+ListNode *getFirst(LinkedListADT list);
+int isEmpty(LinkedListADT list);
+void begin(LinkedListADT list);
+int hasNext(LinkedListADT list);
+void *next(LinkedListADT list);
+void freeLinkedListADTDeep(LinkedListADT list);
+void freeLinkedListADT(LinkedListADT list);
+int getLength(LinkedListADT list);
 
 #endif

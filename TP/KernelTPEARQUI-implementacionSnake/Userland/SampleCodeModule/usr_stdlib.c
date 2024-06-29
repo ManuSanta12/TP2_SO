@@ -266,20 +266,20 @@ void mm_free(void * ap){
 	sys_memFree((void *)ap);
 }
 
-uint8_t sem_init(char*name,int value){
-	return sys_semInit(name,value);
+uint8_t sem_init(int id,int value){
+	return sys_semInit(id,value);
 }
 
-uint8_t sem_post(char*name){
-	return sys_semPost(name);
+uint8_t sem_post(int id, int pid){
+	return sys_semPost(id, pid);
 }
 
-uint8_t sem_wait(char*name, int pid){
-	return sys_semWait(name, pid);
+uint8_t sem_wait(int id, int pid){
+	return sys_semWait(id, pid);
 }
 
-uint8_t sem_close(char*name){
-	return sys_semClose(name);
+uint8_t sem_close(int id){
+	return sys_semClose(id);
 }
 
 int new_process(void* rip, int bg, char*argv[],int argc){
