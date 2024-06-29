@@ -316,3 +316,11 @@ int kill_by_pid(pid_t pid){
     return 0;
     
 }
+
+uint8_t is_alive(pid_t pid){
+    for(int i =0; i<processAmount && i<MAX_PROCESSES;i++){
+        if(pid==processes[i].pid){
+            return processes[i].status!=TERMINATED;
+        }
+    }
+}

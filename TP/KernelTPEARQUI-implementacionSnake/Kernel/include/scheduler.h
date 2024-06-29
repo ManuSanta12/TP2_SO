@@ -35,5 +35,6 @@ int yieldProcess();
 processInfo * getProcessesInfo();
 priority_t get_priority(pid_t pid);
 int kill_by_pid(pid_t pid);
+uint8_t is_alive(pid_t pid);
 
 #endif // SCHEDULER_H
