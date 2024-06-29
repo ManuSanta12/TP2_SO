@@ -238,8 +238,9 @@ static void cmd_loop(){
 static void cmd_wc(){
 	run_wc();
 }
+
 static void cmd_cat(){
-	run_sinc();
+	run_cat();
 }
 static void cmd_filter(){
 	run_filter();

@@ -350,40 +350,63 @@ static int isVocal(char c){
     }
     return 0; 
 }
-
-int run_filter() {
- 	prints("\nfiltrando vocales:", 50);
+static void filter(){
+	prints("\nCorriendo filter, solo se imprimiran las vocales del input\n",MAX_BUFFER);
+	prints("\nShift+c para terminar ejecucion\n",MAX_BUFFER);
 	char c;
 	while ((c = getChar()) != EOF) {
 		if (isVocal(c)){
 	 		printc(c);
-			wait(40);
+			wait(170);
 		}
 	}
 	printc('\n');
 	return 0;
 }
 
-int run_wc() {
+int run_filter() {
+	new_process(filter, 0, NULL, 0);
+}
+
+static void wc(){
+	prints("\nCorriendo wc, se contaran los salto de linea \n",MAX_BUFFER);
+	prints("\nPresionar Shift+q para el resultado\n",MAX_BUFFER);
+	int cont = 0;
 	char c;
-	int inputLines = 0;
-	while ((int) (c = getChar()) != EOF)
-		inputLines += (c == '\n');
-	prints("\nCantidad de lineas:", MAX_BUFFER);
-	printc(inputLines);
+	while ((c = getChar()) != 'Q'){
+		if (isChar(c)||c=='\n'||c==32){
+			if(c=='\n'){
+				cont++;
+			}
+	 		printc(c);
+			wait(170);
+		}
+	}
+	prints("\nCantidad de salto de linea: ",100);
+	printDec(cont);
 	printc('\n');
 	return 0;
 }
 
-int run_cat() {
+int run_wc() {
+	new_process(wc, 0, NULL,0);
+}
+
+static void cat(){
+	prints("\nCorriendo cat, se imprimira el input\n",MAX_BUFFER);
+	prints("\nShift+c para terminar ejecucion\n",MAX_BUFFER);
 	char c;
-	while ((c = getChar()) != EOF)
-		printc(c);
+	while ((c = getChar()) != EOF){
+		if (isChar(c)||c=='\n'||c==32){
+	 		printc(c);
+			wait(170);
+		}
+	}
 	return 0;
-	/*
-	printc('\n');
-	printDec(r);
-	printc('\n');*/
+}
+
+int run_cat() {
+	new_process(cat, 0, NULL, 0);
 }
 
 
