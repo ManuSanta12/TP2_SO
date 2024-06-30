@@ -49,6 +49,7 @@ static uint8_t sys_semInit(int id,int value);
 static uint8_t sys_semPost(int id, int pid);
 static uint8_t sys_semWait(int id,int pid);
 static uint8_t sys_semClose(int id);
+static uint8_t sys_semOpen(int id);
 static pid_t sys_newProcess(void* rip, int bg, char*argv[],int argc);
 static uint64_t sys_getPid();
 static uint64_t sys_sleepTime(int sec);
@@ -190,6 +191,9 @@ static uint8_t sys_semWait(int id,int pid){
 
 static uint8_t sys_semClose(int id){
   return sem_close(id);
+}
+static uint8_t sys_semOpen(int id){
+  return sem_open(id);
 }
 
 static pid_t sys_newProcess(void* rip, int bg, char*argv[],int argc){
@@ -360,7 +364,7 @@ static uint64_t (*syscall_handlers[])(uint64_t, uint64_t, uint64_t, uint64_t,
     (void *)sys_ps,           (void *)sys_changeProcessStatus,
     (void *)sys_getCurrentPid,(void *)sys_exec,        (void *)sys_exit, 
     (void *)sys_waitpid,      (void *)sys_kill,        (void *)sys_block, 
-    (void *)sys_unblock ,     (void*)sys_getPriority,  (void*)sys_yield  };
+    (void *)sys_unblock ,     (void*)sys_getPriority,  (void*)sys_yield, (void *)sys_semOpen };
 
 // Devuelve la syscall correspondiente
 //                                rdi           rsi           rdx rd10 r8 r9

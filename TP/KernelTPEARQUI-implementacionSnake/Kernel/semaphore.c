@@ -124,3 +124,7 @@ int8_t sem_close(int id){
 	semManager->semaphores[id] = NULL;
 	return 0;
 }
+
+int8_t sem_open(uint16_t id) {
+	return -1 * (semManager->semaphores[id] == NULL);
+}

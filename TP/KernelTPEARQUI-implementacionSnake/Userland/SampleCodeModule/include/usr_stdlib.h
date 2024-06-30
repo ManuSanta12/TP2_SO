@@ -77,6 +77,9 @@ uint8_t sem_wait(int id, int pid);
 
 uint8_t sem_close(int id);
 
+uint8_t sem_open(int id);
+
+
 void run_loop(int bg);
 
 uint64_t get_pid();

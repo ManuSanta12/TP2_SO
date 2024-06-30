@@ -281,6 +281,9 @@ uint8_t sem_wait(int id, int pid){
 uint8_t sem_close(int id){
 	return sys_semClose(id);
 }
+uint8_t sem_open(int id){
+	return sys_semOpen(id);
+}
 
 int new_process(void* rip, int bg, char*argv[],int argc){
 	return sys_newProcess(rip, bg, argv,argc);

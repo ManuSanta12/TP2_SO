@@ -24,6 +24,8 @@ GLOBAL sys_semWait
 GLOBAL sys_newProcess
 GLOBAL sys_getPid
 GLOBAL sys_semClose
+GLOBAL sys_semOpen
+
 GLOBAL sys_sleepTime
 GLOBAL sys_nice
 GLOBAL sys_pipe
@@ -253,5 +255,9 @@ sys_getPriority:
 
 sys_yield:
     mov rax, 0x28
+    int 80h
+    ret
+sys_semOpen:
+    mov rax, 0x29
     int 80h
     ret
