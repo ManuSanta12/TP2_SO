@@ -9,8 +9,6 @@ int64_t global; // shared memory
 char * inc="-1";
 void slowInc(int64_t *p, int64_t inc) {
 	uint64_t aux = *p;
-	prints("aux es", 10);
-	printDec(aux);
 	yield(); // This makes the race condition highly probable
 	aux += inc;
 	*p = aux;
@@ -34,7 +32,6 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
 
 	if (use_sem)
 	if (sem_init(SEM_ID, 1)==0) {
-		prints("\n semaforo creado\n", 100);
 	}
 
 	uint64_t i;
@@ -52,7 +49,6 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
 	if (use_sem)
 		sem_close(SEM_ID);
 
-	prints("\n Terminando inc\n", 100);
 	return 0;
 }
 
@@ -89,8 +85,8 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
       sem_wait(pids[i], get_pid());
       sem_wait(pids[i + TOTAL_PAIR_PROCESSES], get_pid());
     }
-	wait(3000);
-    prints("Final value: ", 100);
+	wait(1000);
+    prints("\nFinal value: ", 100);
     printDec(global);
     printc('\n');
     return 0;
