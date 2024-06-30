@@ -38,6 +38,7 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
 	for (i = 0; i < n; i++) {
 	if (use_sem)
 		sem_wait(SEM_ID, get_pid());
+	prints("\n sali del wait\n", 100);
 
 	slowInc(&global, inc);
 

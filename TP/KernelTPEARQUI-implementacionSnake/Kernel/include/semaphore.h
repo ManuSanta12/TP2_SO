@@ -13,13 +13,13 @@ uint8_t create_sem_manager();
 
 int8_t sem_init(int id, int value);
 
-uint8_t sem_post(int id, int pid);
+int8_t sem_post(int id, int pid);
 
-uint8_t sem_wait(int id, int pid);
+int8_t sem_wait(int id, int pid);
 
 void wait_mutex(int id);
 
 void post_mutex(int id);
 
-uint8_t sem_close(int id);
+int8_t sem_close(int id);
 #endif // _SEMAPHORE_H_

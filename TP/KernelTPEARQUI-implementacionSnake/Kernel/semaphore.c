@@ -104,19 +104,19 @@ static int down(semaphore_t *sem, int pid) {
 	return 0;
 }
 
-uint8_t sem_post(int id, int pid) {
+int8_t sem_post(int id, int pid) {
 	if (semManager->semaphores[id] == NULL)
 		return -1;
 	return up(semManager->semaphores[id], pid);
 }
 
-uint8_t sem_wait(int id, int pid) {
+int8_t sem_wait(int id, int pid) {
 	if (semManager->semaphores[id] == NULL)
 		return -1;
 	return down(semManager->semaphores[id], pid);
 }
 
-uint8_t sem_close(int id){
+int8_t sem_close(int id){
 	if (semManager->semaphores[id] == NULL)
 		return -1;
 
