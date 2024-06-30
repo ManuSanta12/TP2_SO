@@ -26,41 +26,41 @@ uint8_t create_sem_manager() {
     return 1;
 }
 
-static semaphore_t* createSem(int initialValue){
+static semaphore_t* create_sem(int initialValue){
     semaphore_t *sem = (semaphore_t *) memory_manager_malloc(sizeof(semaphore_t));
     sem->value = initialValue;
 	sem->mutex = 0;
-	sem->semaphoreQueue = createLinkedListADT();
-	sem->mutexQueue = createLinkedListADT();
+	sem->semaphoreQueue = create_list();
+	sem->mutexQueue = create_list();
 	return sem;
 }
 
 int8_t sem_init(int id, int value) {
 	if (semManager->semaphores[id] != NULL)
 		return -1;
-	semManager->semaphores[id] = createSem(value);
+	semManager->semaphores[id] = create_sem(value);
 	return 0;
 }
 
 
-static void freeSemaphore(semaphore_t *sem) {
-	freeLinkedListADTDeep(sem->semaphoreQueue);
-	freeLinkedListADTDeep(sem->mutexQueue);
+static void free_sem(semaphore_t *sem) {
+	free_linked_list(sem->semaphoreQueue);
+	free_linked_list(sem->mutexQueue);
 	free_memory_manager(sem);
 }
 
-static void acquireMutex(semaphore_t *sem, int pid) {
+static void acquire_mutex(semaphore_t *sem, int pid) {
 	while (_xchg(&(sem->mutex), 1)) {
-		appendElement(sem->mutexQueue, (void *) ((uint64_t) pid));
+		append(sem->mutexQueue, (void *) ((uint64_t) pid));
         blockProcess(pid);
 		yieldProcess();
 	}
 }
 
-static void resumeFirstAvailableProcess(LinkedListADT queue) {
+static void first_avail_process(LinkedListADT queue) {
 	ListNode *current;
-	while ((current = getFirst(queue)) != NULL) {
-		removeNode(queue, current);
+	while ((current = get_first(queue)) != NULL) {
+		remove_node(queue, current);
 		uint16_t pid = (uint16_t) ((uint64_t) current->data);
 		free_memory_manager(current);
 		if (is_alive(pid)) {
@@ -70,36 +70,36 @@ static void resumeFirstAvailableProcess(LinkedListADT queue) {
 	}
 }
 
-static void releaseMutex(semaphore_t *sem) {
-	resumeFirstAvailableProcess(sem->mutexQueue);
+static void release_mutex(semaphore_t *sem) {
+	first_avail_process(sem->mutexQueue);
 	sem->mutex = 0;
 }
 
 static int up(semaphore_t *sem, int pid) {
-	acquireMutex(sem, pid);
+	acquire_mutex(sem, pid);
 	sem->value++;
 	if (sem->value == 0) {
-		releaseMutex(sem);
+		release_mutex(sem);
 		return -1;
 	}
-	resumeFirstAvailableProcess(sem->semaphoreQueue);
-	releaseMutex(sem);
+	first_avail_process(sem->semaphoreQueue);
+	release_mutex(sem);
 	// yield();
 	return 0;
 }
 
 static int down(semaphore_t *sem, int pid) {
-	acquireMutex(sem, pid);
+	acquire_mutex(sem, pid);
 	while (sem->value == 0) {
-		appendElement(sem->semaphoreQueue, (void *) ((uint64_t) pid));
+		append(sem->semaphoreQueue, (void *) ((uint64_t) pid));
         blockProcess(pid);
-		releaseMutex(sem);
+		release_mutex(sem);
 		yieldProcess();
 
-		acquireMutex(sem, pid);
+		acquire_mutex(sem, pid);
 	}
 	sem->value--;
-	releaseMutex(sem);
+	release_mutex(sem);
 
 	return 0;
 }
@@ -120,7 +120,7 @@ int8_t sem_close(int id){
 	if (semManager->semaphores[id] == NULL)
 		return -1;
 
-	freeSemaphore(semManager->semaphores[id]);
+	free_sem(semManager->semaphores[id]);
 	semManager->semaphores[id] = NULL;
 	return 0;
 }

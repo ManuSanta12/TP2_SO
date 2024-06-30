@@ -9,18 +9,18 @@ typedef struct ListNode {
 	struct ListNode *next;
 } ListNode;
 
-LinkedListADT createLinkedListADT();
-ListNode *appendElement(LinkedListADT list, void *data);
-ListNode *appendNode(LinkedListADT list, ListNode *node);
-ListNode *prependNode(LinkedListADT list, ListNode *node);
-void *removeNode(LinkedListADT list, ListNode *node);
-ListNode *getFirst(LinkedListADT list);
-int isEmpty(LinkedListADT list);
+LinkedListADT create_list();
+ListNode *append(LinkedListADT list, void *data);
+ListNode *append_node(LinkedListADT list, ListNode *node);
+ListNode *prepend_node(LinkedListADT list, ListNode *node);
+void *remove_node(LinkedListADT list, ListNode *node);
+ListNode *get_first(LinkedListADT list);
+int is_empty(LinkedListADT list);
 void begin(LinkedListADT list);
 int hasNext(LinkedListADT list);
 void *next(LinkedListADT list);
-void freeLinkedListADTDeep(LinkedListADT list);
-void freeLinkedListADT(LinkedListADT list);
-int getLength(LinkedListADT list);
+void free_linked_list(LinkedListADT list);
+void free_list(LinkedListADT list);
+int get_len(LinkedListADT list);
 
 #endif

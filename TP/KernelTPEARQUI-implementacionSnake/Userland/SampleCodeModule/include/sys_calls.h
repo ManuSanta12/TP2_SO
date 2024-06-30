@@ -59,7 +59,7 @@ uint8_t sys_semWait(int id, int pid);
 
 uint8_t sys_semClose(int id);
 
-uint8_t sys_semCOpen(int id);
+uint8_t sys_semOpen(int id);
 
 int sys_newProcess(void* rip, int bg, char*argv[],int argc);
 

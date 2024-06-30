@@ -9,10 +9,12 @@ int64_t global; // shared memory
 char * inc="-1";
 void slowInc(int64_t *p, int64_t inc) {
 	uint64_t aux = *p;
+	prints("aux es", 10);
+	printDec(aux);
 	yield(); // This makes the race condition highly probable
 	aux += inc;
-	//printDec(aux);
 	*p = aux;
+	
 }
 
 uint64_t my_process_inc(uint64_t argc, char *argv[]) {
@@ -57,7 +59,7 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
 static void my_process_wrapper(){
 
 	char* argv[]={"2",inc,"1"};
-	if(strcmp(inc, "-1")){
+	if(strcmp(inc, "-1") == 0){
 		inc = "1";
 	}else{
 		inc = "-1";
