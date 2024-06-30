@@ -11,7 +11,7 @@ void slowInc(int64_t *p, int64_t inc) {
 	uint64_t aux = *p;
 	yield(); // This makes the race condition highly probable
 	aux += inc;
-	printDec(aux);
+	//printDec(aux);
 	*p = aux;
 }
 
@@ -39,7 +39,7 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
 	for (i = 0; i < n; i++) {
 	if (use_sem)
 		sem_wait(SEM_ID, get_pid());
-	prints("\n sali del wait\n", 100);
+	//prints("\n sali del wait\n", 100);
 
 	slowInc(&global, inc);
 
@@ -87,6 +87,7 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
       sem_wait(pids[i], get_pid());
       sem_wait(pids[i + TOTAL_PAIR_PROCESSES], get_pid());
     }
+	wait(3000);
     prints("Final value: ", 100);
     printDec(global);
     printc('\n');

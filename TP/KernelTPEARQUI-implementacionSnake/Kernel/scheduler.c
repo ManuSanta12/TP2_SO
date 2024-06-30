@@ -262,7 +262,7 @@ int changePriority(pid_t pid, int priorityValue){
 int yieldProcess()
 {
     quantumsLeft = 0;
-    forced_schedule();
+    //forced_schedule();
     return 0;
 }
 
