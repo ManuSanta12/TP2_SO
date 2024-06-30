@@ -11,7 +11,7 @@ typedef struct semManagerCDT *semManagerADT;
 
 uint8_t create_sem_manager();
 
-uint8_t sem_init(int id, int value);
+int8_t sem_init(int id, int value);
 
 uint8_t sem_post(int id, int pid);
 

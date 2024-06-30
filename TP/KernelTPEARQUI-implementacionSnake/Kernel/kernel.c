@@ -49,11 +49,11 @@ void *initializeKernelBinary() {
 
 int main() {
 
-  create_sem_manager();
 	load_idt();
 	create_memory(0x2000000 - 0x1000000);
   clearScanCode();
 	createScheduler();
+  create_sem_manager();
   //((EntryPoint)sampleCodeModuleAddress)();
 	new_process(sampleCodeModuleAddress, 0, NULL,0);
   _sti();
